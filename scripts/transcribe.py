@@ -1,5 +1,6 @@
 import whisper
 import os
+import sys
 import argparse
 import subprocess
 
@@ -7,8 +8,10 @@ import subprocess
 def convert_to_wav(file_path):
     """
     Converts any audio/video file to a 16kHz mono WAV using ffmpeg.
-    Returns the path to the converted WAV file.
+    Returns the path to the converted WAV file, or the original path if already WAV.
     """
+    if file_path.lower().endswith(".wav"):
+        return file_path
     wav_path = os.path.splitext(file_path)[0] + ".wav"
     print(f"Converting {file_path} to WAV...")
     subprocess.run(
@@ -27,6 +30,10 @@ def transcribe_audio(file_path, model_size="base"):
         file_path (str): The path to the audio/video file.
         model_size (str): The size of the model to use (e.g., "tiny", "base", "small", "medium", "large").
     """
+    if not os.path.isfile(file_path):
+        print(f"Error: file not found: {file_path}")
+        sys.exit(1)
+
     wav_path = convert_to_wav(file_path)
 
     print(f"Loading model: {model_size}...")

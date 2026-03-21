@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # Sets up the Python venv and installs whisper for the voice-to-specs skill.
 # Run once: bash setup.sh
 
