@@ -79,7 +79,7 @@ Identify domain:
 
 If `mcp__quartz__add_tasks` is available in this session, use the **card path**. Count it as available if it is among your tools or your deferred tools; load a deferred tool with ToolSearch before calling it. If it is in neither list, use the **Markdown path**, without searching for the tool and without mentioning Quartz or cards to the user.
 
-On the card path, call `project_status` before asking for confirmation. The first line of its output is the project name; name it in your question, for example "these 4 briefs become cards on project SAT". This catches a wrong token or repo before anything is written. If `project_status` fails, say so and offer the Markdown path, and do not create cards in this run.
+On the card path, call `project_status` before asking for confirmation. The first line of its output is the project name; name it in your question, for example "these 4 briefs become cards on project SAT". This catches a wrong token or repo before anything is written. If `project_status` fails, say so and offer the Markdown path, and do not create cards in this run. Do not call `add_tasks` to try anyway, even if the user tells you to create the cards: give them the error, which only they can fix, and the Markdown offer.
 
 **Present the proposed segmentation to the user and wait for confirmation before writing any briefs.** The user can merge segments, split segments, reorder them, or rename them. Only proceed once the user has confirmed the segmentation.
 
@@ -98,6 +98,12 @@ The card is the brief. After confirmation, call `add_tasks` with one item per br
 `add_tasks` takes at most 20 items per call and puts each call's cards on top of the column. With more than 20 briefs, send the last 20 first and work backwards, so the column reads in segment order.
 
 Report each card's id and title from the tool's output. Do not write brief files, `STATUS.md` or `CLAUDE.md`, and skip Step 5. The `.txt` transcript from Step 1 stays next to the source file.
+
+**If `add_tasks` returns an error,** the error text names the cards already created, as `(already created: <id> · <title>; ...)`. Cards from earlier successful calls exist too.
+
+1. Do not add those cards again, and do not retry `add_tasks`, not even only for the missing cards, after waiting, or because the user needs them on the board.
+2. Write every brief without a card through the Markdown path, including Step 5 for those briefs only.
+3. Tell the user which briefs became cards, which became files, and the error.
 
 ### Markdown Path
 
