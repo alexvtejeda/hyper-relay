@@ -6,16 +6,19 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV_DIR="$SCRIPT_DIR/venv"
 
-if [ -d "$VENV_DIR" ]; then
-    echo "Venv already exists at $VENV_DIR"
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Creating venv at $VENV_DIR..."
+    python3 -m venv "$VENV_DIR"
+fi
+
+source "$VENV_DIR/bin/activate"
+
+if python -c "import whisper" 2>/dev/null; then
+    echo "openai-whisper already installed."
     exit 0
 fi
 
-echo "Creating venv at $VENV_DIR..."
-python3 -m venv "$VENV_DIR"
-
 echo "Installing openai-whisper..."
-source "$VENV_DIR/bin/activate"
 pip install openai-whisper
 
 echo "Setup complete. Venv at $VENV_DIR"

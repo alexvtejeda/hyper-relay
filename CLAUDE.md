@@ -40,6 +40,29 @@ source ~/.claude/skills/voice-to-specs/scripts/venv/bin/activate && python ~/.cl
 
 One-time setup script that creates the Python venv and installs dependencies.
 
+## Pipeline position
+
+Voice-to-specs is the first stage of this pipeline:
+
+```
+voice-to-specs → brainstorming → writing-plans → subagent execution
+```
+
+The skill deliberately stops at writing briefs. Do not extend it to write specs, plans, or code — those belong to downstream skills.
+
+**Authoritative workflow:** `SKILL.md` (segmentation rules, templates, boundaries, example sessions). This file covers setup and the script interface. `SKILL.md` is untracked but is what Claude Code loads at runtime.
+
+## Related but separate codebase
+
+`whisper-transcriptions/` also contains a standalone Python transcriber (`transcribe.py` + its own `whisperVenv/`). That predates the skill and is **not** the same code path — the skill uses the script at `.claude/skills/voice-to-specs/scripts/transcribe.py`. Don't conflate the two when editing.
+
+## When modifying the skill
+
+- Keep the design spec and plan in sync with `SKILL.md` changes. The spec is marked "Approved (v2)" — meaningful scope changes warrant a new version note.
+- The skill announces itself at start ("I'm using the voice-to-specs skill...") and requires user confirmation of segmentation before writing briefs. Preserve both behaviors.
+- Briefs always land in the **caller's** working directory, never inside this repo. Don't write transcription outputs into `.claude/skills/voice-to-specs/`.
+- Python venvs under `scripts/venv/` and `whisperVenv/` are gitignored by convention — do not commit them.
+
 ## Skill Workflow
 
 See SKILL.md for the full workflow. In summary:
