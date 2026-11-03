@@ -75,17 +75,37 @@ Identify domain:
 - **Frontend:** routes, UI elements, layout, CSS, animations, page behavior
 - **Backend:** API responses, database queries, auth logic, server errors
 
+### Choose Where Briefs Go, Then Confirm
+
+If `mcp__quartz__add_tasks` is available in this session, use the **card path**. Count it as available if it is among your tools or your deferred tools; load a deferred tool with ToolSearch before calling it. If it is in neither list, use the **Markdown path**, without searching for the tool and without mentioning Quartz or cards to the user.
+
+On the card path, call `project_status` before asking for confirmation. The first line of its output is the project name; name it in your question, for example "these 4 briefs become cards on project SAT". This catches a wrong token or repo before anything is written. If `project_status` fails, say so and offer the Markdown path, and do not create cards in this run.
+
 **Present the proposed segmentation to the user and wait for confirmation before writing any briefs.** The user can merge segments, split segments, reorder them, or rename them. Only proceed once the user has confirmed the segmentation.
 
-## Workflow Step 4: Write Briefs
+## Workflow Step 4: Save Briefs
+
+Use the appropriate template below based on the segment type, on both paths.
+
+### Card Path
+
+The card is the brief. After confirmation, call `add_tasks` with one item per brief, in segment order:
+
+- `title`: the brief's title
+- `body`: the brief's template without its `# <Title>` heading
+- `labels`: `["voice"]`
+
+`add_tasks` takes at most 20 items per call and puts each call's cards on top of the column. With more than 20 briefs, send the last 20 first and work backwards, so the column reads in segment order.
+
+Report each card's id and title from the tool's output. Do not write brief files, `STATUS.md` or `CLAUDE.md`, and skip Step 5. The `.txt` transcript from Step 1 stays next to the source file.
+
+### Markdown Path
 
 Create the directory `docs/superpowers/transcriptions/` in the current working directory if it does not already exist.
 
 Name each file using the pattern: `YYYY-MM-DD-<topic-slug>.md`
 
 Use the date of the recording if known, otherwise use today's date.
-
-Use the appropriate template based on the segment type.
 
 ---
 
@@ -201,7 +221,7 @@ ui-tweak | feature-idea | friction
 
 If a field cannot be determined from the transcript, write `Not mentioned in recording` rather than leaving it blank.
 
-## Workflow Step 5: Update Tracking Files
+## Workflow Step 5: Update Tracking Files (Markdown Path)
 
 ### STATUS.md
 
