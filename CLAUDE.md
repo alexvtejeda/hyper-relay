@@ -8,17 +8,30 @@ A standalone Claude Code skill that transcribes audio/video recordings using Ope
 - **Python 3.10+**
 - **ffmpeg** — install with `sudo apt install ffmpeg`
 
-### First-Time Setup
+### Setup
 
-Run the setup script to create the venv and install whisper:
-
-```bash
-bash ~/.claude/skills/voice-to-specs/scripts/setup.sh
-```
-
-This creates a Python venv at `scripts/venv/` with the `openai-whisper` package installed.
+Nothing to run by hand: `scripts/transcribe.sh` runs `scripts/setup.sh` when the venv or whisper is missing. That creates a Python venv at `scripts/venv/` with the `openai-whisper` package installed.
 
 ## How It Works
+
+### scripts/transcribe.sh
+
+The single entry point for transcription, and the only command `SKILL.md` runs. POSIX shell, run by dash; verify with `dash -n`. In order:
+
+1. If `ffmpeg` is not on `PATH`, it exits 1 with one message.
+2. If the venv's Python is not executable or whisper is not in the venv, it runs `setup.sh`. If that fails, it exits 1 with one message.
+3. Otherwise it runs `transcribe.py` with the venv's Python, passing its arguments through. The exit status is `transcribe.py`'s.
+
+The checks are file tests, because `import whisper` takes seconds. The agent reacts only to a non-zero exit.
+
+**Usage:**
+```bash
+sh ~/.claude/skills/voice-to-specs/scripts/transcribe.sh <file_path> --model base
+```
+
+**Model options:** tiny, base, small, medium, large (default: base)
+
+**Tests:** `sh tests/transcribe-sh.test.sh` (expect `0 failed`). It needs no real venv, whisper or ffmpeg.
 
 ### scripts/transcribe.py
 
@@ -29,16 +42,9 @@ Transcription script that:
 4. Saves a `.txt` file alongside the original (same name, `.txt` extension)
 5. Cleans up temporary WAV files
 
-**Usage:**
-```bash
-source ~/.claude/skills/voice-to-specs/scripts/venv/bin/activate && python ~/.claude/skills/voice-to-specs/scripts/transcribe.py <file_path> --model base
-```
-
-**Model options:** tiny, base, small, medium, large (default: base)
-
 ### scripts/setup.sh
 
-One-time setup script that creates the Python venv and installs dependencies.
+Idempotent setup script that creates the Python venv and installs dependencies. `transcribe.sh` calls it when needed.
 
 ## Pipeline position
 
@@ -48,9 +54,9 @@ Voice-to-specs is the first stage of this pipeline:
 voice-to-specs → brainstorming → writing-plans → subagent execution
 ```
 
-The skill deliberately stops at writing briefs. Do not extend it to write specs, plans, or code — those belong to downstream skills.
+The skill deliberately stops at saving briefs, as Quartz cards or Markdown files. Do not extend it to write specs, plans, or code — those belong to downstream skills.
 
-**Authoritative workflow:** `SKILL.md` (segmentation rules, templates, boundaries, example sessions). This file covers setup and the script interface. `SKILL.md` is untracked but is what Claude Code loads at runtime.
+**Authoritative workflow:** `SKILL.md` (segmentation rules, templates, boundaries, example sessions). This file covers setup and the script interface. `SKILL.md` is what Claude Code loads at runtime, so an edit here is live at once, on any branch.
 
 ## Related but separate codebase
 
@@ -60,7 +66,8 @@ The skill deliberately stops at writing briefs. Do not extend it to write specs,
 
 - Keep the design spec and plan in sync with `SKILL.md` changes. The spec is marked "Approved (v2)" — meaningful scope changes warrant a new version note.
 - The skill announces itself at start ("I'm using the voice-to-specs skill...") and requires user confirmation of segmentation before writing briefs. Preserve both behaviors.
-- Briefs always land in the **caller's** working directory, never inside this repo. Don't write transcription outputs into `.claude/skills/voice-to-specs/`.
+- Markdown briefs always land in the **caller's** working directory, never inside this repo. Don't write transcription outputs into `.claude/skills/voice-to-specs/`.
+- Edits to `SKILL.md` are tested with fresh agents against a throwaway Quartz project on an isolated stack, never a real board. Subagents inherit the parent's MCP servers, so use `claude -p --strict-mcp-config --mcp-config <file>`.
 - Python venvs under `scripts/venv/` and `whisperVenv/` are gitignored by convention — do not commit them.
 
 ## Skill Workflow
@@ -71,9 +78,9 @@ See SKILL.md for the full workflow. In summary:
 2. Detect recording type (meeting, testing session, idea dump)
 3. Segment transcript into topics/concerns
 4. User confirms segmentation
-5. Write structured briefs to `docs/superpowers/transcriptions/`
-6. Update STATUS.md and CLAUDE.md tracking files
+5. Save briefs: as cards in Needs brainstorming, labelled `voice`, when `mcp__quartz__add_tasks` is available; otherwise to `docs/superpowers/transcriptions/`
+6. On the Markdown path only, update the STATUS.md and CLAUDE.md tracking files
 
 ## Output Location
 
-Briefs are written to the **current project's** `docs/superpowers/transcriptions/` directory, not inside this skill directory.
+On the card path, the brief is a card on the board of the project the repo's token belongs to, and no brief file is written. On the Markdown path, including any brief that could not become a card, briefs are written to the **current project's** `docs/superpowers/transcriptions/` directory, not inside this skill directory. The `.txt` transcript is written next to the source file on both paths.
