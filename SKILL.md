@@ -1,11 +1,11 @@
 ---
 name: voice-to-specs
-description: Use when the user provides audio/video files to transcribe. Runs Whisper transcription, segments the transcript into structured briefs (meetings, testing sessions, idea dumps), and tracks their status through the spec pipeline.
+description: Use when the user provides audio or video recordings to transcribe, or asks to turn a meeting, testing session or idea dump recording into briefs or board cards.
 ---
 
 # Voice-to-Specs
 
-Transcribe audio/video recordings, segment them into structured briefs, and track their progress through the spec pipeline.
+Transcribe audio/video recordings, segment them into structured briefs, and save each brief as a Quartz card or a tracked Markdown file.
 
 **Announce at start:** "I'm using the voice-to-specs skill to transcribe and segment this recording."
 
@@ -280,6 +280,7 @@ This skill has a defined scope. It does **not**:
 - Write implementation plans (that is the writing-plans skill's job)
 - Execute plans or make code changes (that is the subagent-driven-development skill's job)
 - Start servers or run the application
+- Move or tick cards, or link docs (on the card path it only creates cards)
 - Segment the transcript without user confirmation
 
 Stay within these boundaries even if the user asks to proceed further within this skill.
@@ -291,12 +292,23 @@ Stay within these boundaries even if the user asks to proceed further within thi
 - Skip transcription and work from memory or assumptions
 - Start brainstorming or spec writing within this skill
 - Leave template fields blank (use "Not mentioned in recording")
+- Check the venv, activate it, or probe `ffmpeg` yourself before the Step 1 command
+- Create cards before the user confirms, or after `project_status` failed
+- Add a card again after a failed `add_tasks`
+- Write a brief file, `STATUS.md` or `CLAUDE.md` entry for a brief that became a card
+
+| Excuse | Reality |
+|--------|---------|
+| "I'll retry in a minute" | A failed `add_tasks` is not retried. The briefs without a card become files now. |
+| "I'm adding just the two missing cards" | That is a retry. Those briefs become files. |
+| "The user said to create them anyway" | After a failed `project_status`, give the error and the Markdown offer. Do not call `add_tasks`. |
 
 **Always:**
 - Announce the skill at the start
 - Run Whisper via the Bash tool using the exact command above
 - Present the proposed segmentation and wait for user confirmation
-- Update both STATUS.md and CLAUDE.md after writing briefs
+- Name the project in the confirmation question on the card path
+- Update both STATUS.md and CLAUDE.md after writing brief files
 - Report a summary to the user when the skill completes
 
 ## Example Sessions
@@ -371,4 +383,32 @@ Claude: "Done. Created 3 briefs:
 - 2026-03-19-remember-me-checkbox.md
 
 STATUS.md and CLAUDE.md updated in docs/superpowers/transcriptions/."
+```
+
+### Card Path Example
+
+```
+User: "Transcribe this idea dump: ideas-2026-11-02.m4a"
+
+Claude: "I'm using the voice-to-specs skill to transcribe and segment this recording."
+
+[Runs the Step 1 command]
+[Reads transcript]
+[Calls project_status: first line is "SAT"]
+
+Claude: "I detected this as an idea dump: free-flowing ideas with no agenda.
+
+I found 2 segments:
+1. Offline mode — keep working without a connection
+2. Export to CSV — download a board as a spreadsheet
+
+These 2 briefs become cards on project SAT. Does this segmentation look right?"
+
+User: "Yes."
+
+[Calls add_tasks with both items, labels ["voice"]]
+
+Claude: "Done. Created 2 cards in Needs brainstorming:
+- 8e57e1ba-... · Offline mode
+- 1ccdbb30-... · Export to CSV"
 ```
