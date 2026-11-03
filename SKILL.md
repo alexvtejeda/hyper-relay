@@ -11,22 +11,17 @@ Transcribe audio/video recordings, segment them into structured briefs, and trac
 
 ## Prerequisites
 
-- `ffmpeg` installed on the system (`sudo apt install ffmpeg`)
-- Run setup once if venv doesn't exist: `bash ~/.claude/skills/voice-to-specs/scripts/setup.sh`
+`ffmpeg` and Python 3.10+. The command in Step 1 checks for them and sets up its own venv.
 
 ## Workflow Step 1: Run Whisper Transcription
 
-First, check if the venv exists at `~/.claude/skills/voice-to-specs/scripts/venv/`. If it does not exist, run setup.sh before proceeding:
+Run this one command, with the longest Bash timeout available. Do not check the environment first and do not activate a venv: the script does that.
 
 ```bash
-bash ~/.claude/skills/voice-to-specs/scripts/setup.sh
+sh ~/.claude/skills/voice-to-specs/scripts/transcribe.sh <file_path> --model base
 ```
 
-Then run the transcription command:
-
-```bash
-source ~/.claude/skills/voice-to-specs/scripts/venv/bin/activate && python ~/.claude/skills/voice-to-specs/scripts/transcribe.py <file_path> --model base
-```
+If it exits non-zero, see Error Handling.
 
 The script:
 - Converts any audio/video format to WAV via ffmpeg
@@ -243,10 +238,14 @@ After both files are written, report to the user:
 
 ## Error Handling
 
-- **Venv not set up:** Run `setup.sh` automatically. If setup fails, ask the user to verify Python 3 is installed (`python3 --version`).
-- **Whisper fails:** Check that `ffmpeg` is installed (`ffmpeg -version`). Report the exact error message to the user. Do not install any packages without asking.
-- **Empty or very short transcript:** Warn the user that the transcript appears to be empty or unusually short. Ask if the file is valid and if they want to proceed anyway.
+The Step 1 command decides whether the environment can run. React only to a non-zero exit:
+
 - **File not found:** Tell the user the exact path that was not found and ask them to provide the correct path.
+- **Any other non-zero exit:** Give the user the message exactly and stop. Do not inspect the venv, probe `ffmpeg`, retry or install anything.
+
+After a successful exit:
+
+- **Empty or very short transcript:** Warn the user that the transcript appears to be empty or unusually short. Ask if the file is valid and if they want to proceed anyway.
 
 ## Boundaries
 
