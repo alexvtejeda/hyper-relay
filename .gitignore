@@ -5,3 +5,9 @@
 node_modules/
 inspo
 triage/
+
+# Local Quartz wiring for developing hyper-relay: holds a token, and a root
+# .mcp.json would also be read as the plugin's own MCP servers by installers.
+.env
+.envrc
+.mcp.json
