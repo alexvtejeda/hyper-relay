@@ -509,12 +509,12 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Create: `skills/voice-to-specs/` by `git subtree add` (7 files)
 - Create: `tests/add-card-line/run-tests.sh`
 
-- [ ] **Step 1: Check the source is clean.**
+- [x] **Step 1: Check the source is clean.**
 
 Run: `git -C /home/noob_master/.claude/skills/voice-to-specs status --short`
 Expected: no output (the venv is ignored). Run: `git status --short` in the worktree — Expected: no output (subtree refuses a dirty tree).
 
-- [ ] **Step 2: Add it, not squashed.** If `git subtree` refuses (for example in a worktree), STOP and report; never fall
+- [x] **Step 2: Add it, not squashed.** If `git subtree` refuses (for example in a worktree), STOP and report; never fall
   back to `--squash` or a plain copy, because the history is the point.
 
 ```bash
@@ -524,7 +524,7 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 3: Check the history and the files.**
+- [x] **Step 3: Check the history and the files.**
 
 Run: `git log -1 --format=%P | wc -w` — Expected: `2` (a merge).
 Run: `git rev-list --count HEAD^2` — Expected: `11`.
@@ -543,7 +543,7 @@ skills/voice-to-specs/tests/transcribe-sh.test.sh
 ```
 Run: `sh skills/voice-to-specs/tests/transcribe-sh.test.sh` — Expected: last line `17 passed, 0 failed`.
 
-- [ ] **Step 4: Move the add-card-line suite in.** It finds the script as `../../skills/brainstorming/scripts/add-card-line.sh`
+- [x] **Step 4: Move the add-card-line suite in.** It finds the script as `../../skills/brainstorming/scripts/add-card-line.sh`
   from its own folder, the same layout as in `~/.claude`, so it moves byte for byte.
 
 ```bash
@@ -553,12 +553,12 @@ cmp /home/noob_master/.claude/tests/add-card-line/run-tests.sh tests/add-card-li
 ```
 Expected: `same`.
 
-- [ ] **Step 5: Run it.**
+- [x] **Step 5: Run it.**
 
 Run: `sh tests/add-card-line/run-tests.sh | tail -n 2`
 Expected: `<n> passed, 0 failed` (`dash -n passes` and `script is executable` among the passes).
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add tests/add-card-line/run-tests.sh
