@@ -50,6 +50,6 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 |---|---|---|
 | Manifests and skills | `claude plugin validate .` | Passes. Its one warning is about this `CLAUDE.md` at the plugin root, which is for developing hyper-relay, not for users |
 | add-card-line | `sh tests/add-card-line/run-tests.sh` | `0 failed` |
-| voice-to-specs | `sh skills/voice-to-specs/tests/transcribe-sh.test.sh` | `0 failed` |
+| voice-to-specs | `sh skills/voice-to-specs/tests/transcribe-sh.test.sh` and `sh skills/voice-to-specs/tests/setup-sh.test.sh` | `0 failed` from each |
 | visual-companion | `bash skills/visual-companion/scripts/run-tests.sh` | every case `ok`, exit 0 |
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |

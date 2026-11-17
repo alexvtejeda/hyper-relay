@@ -10,7 +10,7 @@ A standalone Claude Code skill that transcribes audio/video recordings using Ope
 
 ### Setup
 
-Nothing to run by hand: `scripts/transcribe.sh` runs `scripts/setup.sh` when the venv or whisper is missing. That creates a Python venv at `${XDG_DATA_HOME:-~/.local/share}/hyper-relay/voice-to-specs/venv` with the `openai-whisper` package installed, outside the plugin, so that a plugin update does not delete it.
+Nothing to run by hand: `scripts/transcribe.sh` runs `scripts/setup.sh` when the venv or whisper is missing. That creates a Python venv at `${XDG_DATA_HOME:-~/.local/share}/hyper-relay/voice-to-specs/venv` with CPU-only `torch` and the `openai-whisper` package installed, outside the plugin, so that a plugin update does not delete it. Torch comes from PyTorch's CPU index first: whisper alone would pull PyPI's default CUDA build, whose GPU check segfaults under WSL.
 
 ## How It Works
 
@@ -31,7 +31,7 @@ sh scripts/transcribe.sh <file_path> --model base
 
 **Model options:** tiny, base, small, medium, large (default: base)
 
-**Tests:** `sh tests/transcribe-sh.test.sh` (expect `0 failed`). It needs no real venv, whisper or ffmpeg.
+**Tests:** `sh tests/transcribe-sh.test.sh` and `sh tests/setup-sh.test.sh` (expect `0 failed` from each). They need no real venv, whisper or ffmpeg, and download nothing.
 
 ### scripts/transcribe.py
 

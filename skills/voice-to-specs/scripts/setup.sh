@@ -18,6 +18,11 @@ if python -c "import whisper" 2>/dev/null; then
     exit 0
 fi
 
+# CPU-only torch first. Whisper alone pulls PyPI's default CUDA build, whose GPU check
+# (torch.cuda.is_available()) segfaults under WSL, and whose GPU libraries add about 3 GB.
+echo "Installing CPU-only torch..."
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+
 echo "Installing openai-whisper..."
 pip install openai-whisper
 
