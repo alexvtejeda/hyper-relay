@@ -1,6 +1,6 @@
 ---
 name: using-git-worktrees
-description: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback
+description: Use when starting feature work that needs isolation from the current workspace, or before executing an implementation plan. REQUIRED whenever the user says "worktree", "isolate this", "keep my checkout free", "work on something else while this runs", or picks the worktree option at a plan-to-execute handoff. Ensures an isolated workspace exists via native tools (EnterWorktree) or git worktree fallback.
 ---
 
 # Using Git Worktrees
