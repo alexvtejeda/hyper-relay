@@ -575,7 +575,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/{brainstorming/SKILL.md,executing-plans/SKILL.md,finishing-a-development-branch/SKILL.md,subagent-driven-development/SKILL.md,systematic-debugging/SKILL.md,using-hyper-relay/SKILL.md,visual-companion/SKILL.md,visual-companion/scripts/frame-template.html,voice-to-specs/CLAUDE.md,voice-to-specs/SKILL.md,writing-plans/SKILL.md,writing-skills/SKILL.md,writing-skills/testing-skills-with-subagents.md}`
 - Modify: `tests/claude-code/{test-requesting-code-review.sh,test-subagent-driven-development-integration.sh}`, `tests/subagent-driven-dev/{run-test.sh,go-fractals/plan.md,go-fractals/scaffold.sh,svelte-todo/plan.md,svelte-todo/scaffold.sh}`
 
-- [ ] **Step 1: Write `scripts/check-import.sh`** (the whole file):
+- [x] **Step 1: Write `scripts/check-import.sh`** (the whole file):
 
 ```sh
 #!/bin/sh
@@ -773,11 +773,11 @@ fi
 exit "$status"
 ```
 
-- [ ] **Step 2: Syntax-check and make it executable.**
+- [x] **Step 2: Syntax-check and make it executable.**
 
 Run: `dash -n scripts/check-import.sh && chmod +x scripts/check-import.sh && echo ok` — Expected: `ok`.
 
-- [ ] **Step 3: Run it before the rename (red).**
+- [x] **Step 3: Run it before the rename (red).**
 
 Run: `sh scripts/check-import.sh; echo "exit $?"`
 Expected: `exit 1`, with `check-import:` lines for `skills/using-superpowers was not imported from a loose copy`,
@@ -785,7 +785,7 @@ Expected: `exit 1`, with `check-import:` lines for `skills/using-superpowers was
 `finishing-a-development-branch`, `subagent-driven-development`, `systematic-debugging`, `visual-companion`,
 `voice-to-specs`, `writing-plans` and `writing-skills`. No line for the other six. No `match` line.
 
-- [ ] **Step 4: Commit the check.**
+- [x] **Step 4: Commit the check.**
 
 ```bash
 git add scripts/check-import.sh
@@ -793,7 +793,7 @@ git commit -m "test: check-import.sh, piece A's proof that the move changed noth
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 5: The rename rule's mechanical part**, on `skills/` and the kept tests' skill names (D10):
+- [x] **Step 5: The rename rule's mechanical part**, on `skills/` and the kept tests' skill names (D10):
 
 ```bash
 git mv skills/using-superpowers skills/using-hyper-relay
@@ -801,7 +801,7 @@ find skills -type f -exec sed -i -e 's/superpowers:/hyper-relay:/g' -e 's/using-
 sed -i 's/superpowers:/hyper-relay:/g' tests/claude-code/test-requesting-code-review.sh tests/claude-code/test-subagent-driven-development-integration.sh tests/subagent-driven-dev/run-test.sh tests/subagent-driven-dev/go-fractals/plan.md tests/subagent-driven-dev/go-fractals/scaffold.sh tests/subagent-driven-dev/svelte-todo/plan.md tests/subagent-driven-dev/svelte-todo/scaffold.sh
 ```
 
-- [ ] **Step 6: The named lines** (D11, D12). Make each replacement with the Edit tool, exactly.
+- [x] **Step 6: The named lines** (D11, D12). Make each replacement with the Edit tool, exactly.
 
 `skills/brainstorming/SKILL.md`, replace:
 ```text
@@ -863,7 +863,7 @@ with:
 - Markdown briefs always land in the **caller's** working directory, never inside this repo. Don't write transcription outputs into this skill's folder.
 ```
 
-- [ ] **Step 7: Check the diff.**
+- [x] **Step 7: Check the diff.**
 
 Run: `git add skills tests/claude-code tests/subagent-driven-dev && git diff --cached -M --numstat`
 Expected (any order; the `using-hyper-relay` line shows as a rename):
@@ -890,7 +890,7 @@ Expected (any order; the `using-hyper-relay` line shows as a rename):
 1	1	tests/subagent-driven-dev/svelte-todo/scaffold.sh
 ```
 
-- [ ] **Step 8: Run the check after the rename.**
+- [x] **Step 8: Run the check after the rename.**
 
 Run: `sh scripts/check-import.sh; echo "exit $?"`
 Expected: `exit 1` with exactly one `check-import:` line, for `skills/voice-to-specs`, and the diff above it touches
@@ -900,7 +900,7 @@ fix it and re-run.
 
 Run: `sh tests/add-card-line/run-tests.sh | tail -n 1` — Expected: `... 0 failed`.
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 git commit -m "feat: rename to hyper-relay in skills and tests (skill prefix, using-hyper-relay, own paths via CLAUDE_SKILL_DIR)" -m "Plan-Task: docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md#6
