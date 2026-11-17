@@ -1607,3 +1607,38 @@ git -C /home/noob_master/hyper-relay commit -m "docs: piece A switch-over record
 <the committing session's attribution lines>"
 git -C /home/noob_master/hyper-relay push origin main
 ```
+
+## Switch-over record (Task 9)
+
+- **Agent `skills:` lists (§3.4), Claude Code 2.1.326, 2026-11-17:** Option A: a plugin-prefixed name preloads (`hr-probe`
+  replied `# Writing Plans`; the debug log says `[Agent: hr-probe] Preloaded skill 'hyper-relay:writing-plans'`, no skip
+  warning). The agents list `hyper-relay:<skill>`: SAT's two and this repo's `relay-*` two (D21).
+- **Live proofs:**
+  - §4.4 **pass**. A headless `claude -p` session in `/tmp` listed 16 `hyper-relay:` skills; the 7 bare names were still
+    present, as expected before Step 10. `hyper-relay:brainstorming`'s item 1 is **Tick Brain**, and its
+    `add-card-line.sh` line names the installed copy, which is executable. visual-companion's `start-server.sh` also
+    names the installed copy and is executable. voice-to-specs' Step 1 names the installed `transcribe.sh`; that file is
+    mode 644, as it already was in its own repo, and it is run through `sh`. In `~/sat.pentraze.com`, `sat-planner`
+    replied `# Writing Plans`, and the log says `[Agent: sat-planner] Preloaded skill 'hyper-relay:writing-plans'`. The
+    interactive `/skills` view is left to the owner.
+  - §4.5 **pass**, run by the owner with a model of their choice. OpenCode's default model (`gpt-6.2-astra`) needs
+    pay-as-you-go credits the account lacks. Brainstorming, voice-to-specs, writing-plans and using-hyper-relay load from
+    `/home/noob_master/hyper-relay/skills/`; item 1 is **Tick Brain**; both script paths are under that folder and
+    `test -f` passes.
+  - §4.6 **failed, then fixed, then passed.** The first run built the venv in its new place, then segfaulted (exit 139)
+    in `whisper.load_model`. The cause was `torch.cuda.is_available()` in PyPI's default CUDA 13 torch 2.15.0, under WSL
+    (RTX 4060, driver 616.56); with `CUDA_VISIBLE_DEVICES=""` it returns False and does not crash. The old venv had
+    `torch 2.10.0+cpu`, installed outside `setup.sh`. Fixed in `e2deae0` (Step 8): `setup.sh` installs CPU-only torch
+    from PyTorch's CPU index before whisper, and the new `tests/setup-sh.test.sh` covers it (3 failed before the fix,
+    7/7 after). The broken venv was deleted and rebuilt (`torch 2.15.0+cpu`, no NVIDIA packages). The installed copy's
+    `transcribe.sh` then exited 0 and wrote `/tmp/hr-sample.txt`, empty because a tone has no words. A second run went
+    straight to loading the model, in 4 s.
+- **Version stays 0.1.0 (owner, 2026-11-17).** The installed copy's `setup.sh` is still the pre-fix one until the next
+  version. It runs only when the venv is missing, so the fix reaches the plugin with the next bump.
+- **Notes:**
+  - Step 6a prefixed 14 names on the 13 listed lines, not 15; the lines matched the plan exactly.
+  - Step 6d prefixed `brainstorming` only where it names the skill (in backticks or bold), not where it names the
+    activity ("after brainstorming yields a spec", "During brainstorming").
+  - `claude plugin validate .` in the main checkout adds a `PRIVACY_URL_MISSING` plugin-directory warning, caused by
+    the gitignored `.mcp.json` it reads from disk. A git install does not ship that file.
+- **Step 10 (owner):** pending.
