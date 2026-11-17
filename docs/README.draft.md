@@ -2,9 +2,14 @@
 DRAFT for hyper-relay's README.md (spec 2026-11-17-hyper-relay-a-forks-home-design.md, §1.1).
 Piece A's plan replaces the upstream README with this file in its rename commit (spec §2, step 7).
 Marked TO VERIFY: facts the plan confirms before this ships.
+Paths are written for the repo root, where this file ends up (so the image does not show in this draft's own preview).
 -->
 
 # hyper-relay
+
+<p align="center">
+  <img src="assets/hyper-relay.jpg" width="500" alt="Two robots sprint down a floodlit stadium track; the white one hands a glowing baton to the red-and-black one under a HYPER-RELAY banner.">
+</p>
 
 **A relay for coding agents: one idea, handed cleanly from brainstorm to merge.**
 
