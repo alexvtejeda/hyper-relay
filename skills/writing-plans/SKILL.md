@@ -22,6 +22,10 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
+## The spec's plan count
+
+Before writing, compare the number of plans you intend to write with the spec's `**Plans:** <n>` header line. A spec without the line means 1. If they differ, stop and ask the user before writing any plan. Once they approve a different number, update the spec's `**Plans:**` line to it, adding the line for more than one plan and removing it for one, and commit the spec. The hooks upload the changed spec, which updates the card's expected count.
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
@@ -59,6 +63,18 @@ This structure informs the task decomposition. Each task should produce self-con
 
 ---
 ```
+
+## Linking the plan's branch
+
+When the plan or its spec names a Quartz card (a `**Card:**` or `**Cards:**` line in the plan, or one in the spec on its `**Spec:**` line), the plan's first task opens with this required step, with the plan's own path filled in:
+
+> After creating your branch, run `quartz link-branch <this plan's path>`. If it fails, report the failure and carry on.
+
+With no card, there is no step.
+
+## Before a click-through
+
+When a plan has a step that asks the owner to click through a change, usually with the URL that `wt up` printed, that step first runs `quartz review` in the worktree, just before asking. If it fails, report the failure and carry on.
 
 ## Task Structure
 
@@ -99,7 +115,7 @@ Expected: PASS
 
 ```bash
 git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
+git commit -m "feat: add specific feature" -m "Plan-Task: docs/superpowers/plans/<this plan>.md#<N>"
 ```
 ````
 
@@ -114,6 +130,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+- The **final** commit step of each task carries the plan's own path and the task's number as a git trailer: `-m "Plan-Task: docs/superpowers/plans/<this plan>.md#<N>"`. Earlier commits in the same task and tasks with no commit step do not carry it.
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
