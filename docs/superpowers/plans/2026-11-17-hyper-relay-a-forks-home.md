@@ -199,11 +199,11 @@ files only.
   `tests/codex-plugin-sync/test-sync-to-codex-plugin.sh`, `tests/opencode/` (7 files), `docs/README.opencode.md`,
   `docs/windows/polyglot-hooks.md`
 
-- [ ] **Step 1: Link the branch.** After creating your branch, run
+- [x] **Step 1: Link the branch.** After creating your branch, run
   `quartz link-branch docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md` in the worktree. If it fails,
   report the failure and carry on.
 
-- [ ] **Step 2: Ignore `.playwright-mcp/`.** Append to `.gitignore` (after the last line, `.mcp.json`):
+- [x] **Step 2: Ignore `.playwright-mcp/`.** Append to `.gitignore` (after the last line, `.mcp.json`):
 
 ```gitignore
 
@@ -211,7 +211,7 @@ files only.
 .playwright-mcp/
 ```
 
-- [ ] **Step 3: Commit it on its own.**
+- [x] **Step 3: Commit it on its own.**
 
 ```bash
 git add .gitignore
@@ -219,14 +219,14 @@ git commit -m "chore: ignore .playwright-mcp/" -m "Co-Authored-By: Claude Sonnet
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 4: Remove the other harnesses, the hooks and the V1 plugin.**
+- [x] **Step 4: Remove the other harnesses, the hooks and the V1 plugin.**
 
 ```bash
 git rm -r -q .codex-plugin .cursor-plugin .opencode hooks tests/codex-plugin-sync tests/opencode docs/windows
 git rm -q GEMINI.md gemini-extension.json scripts/sync-to-codex-plugin.sh docs/README.opencode.md
 ```
 
-- [ ] **Step 5: `.version-bump.json`** loses the three removed manifests. Its whole content becomes:
+- [x] **Step 5: `.version-bump.json`** loses the three removed manifests. Its whole content becomes:
 
 ```json
 {
@@ -248,7 +248,7 @@ git rm -q GEMINI.md gemini-extension.json scripts/sync-to-codex-plugin.sh docs/R
 }
 ```
 
-- [ ] **Step 6: `package.json`** loses `main`, which named the removed plugin. Its whole content becomes:
+- [x] **Step 6: `package.json`** loses `main`, which named the removed plugin. Its whole content becomes:
 
 ```json
 {
@@ -258,7 +258,7 @@ git rm -q GEMINI.md gemini-extension.json scripts/sync-to-codex-plugin.sh docs/R
 }
 ```
 
-- [ ] **Step 7: Check.**
+- [x] **Step 7: Check.**
 
 Run: `git add .version-bump.json package.json && git diff --cached --name-status | sort`
 Expected: 21 `D` lines (the files listed above) and 2 `M` lines (`.version-bump.json`, `package.json`).
@@ -266,7 +266,7 @@ Expected: 21 `D` lines (the files listed above) and 2 `M` lines (`.version-bump.
 Run: `git grep -n -i -e codex -e cursor -e gemini -e opencode -- . ':!skills' ':!docs' ':!tests' ':!RELEASE-NOTES.md' ':!README.md' ':!CLAUDE.md' ':!.github'`
 Expected: no output.
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git commit -m "chore: strip Codex, Cursor and Gemini support, hooks/ and the OpenCode V1 plugin" -m "Plan-Task: docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md#1
