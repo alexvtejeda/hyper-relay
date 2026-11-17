@@ -1,6 +1,6 @@
 ---
 name: dispatching-parallel-agents
-description: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
+description: Use when facing 2+ independent tasks, investigations, or failures with no shared state or sequential dependency. REQUIRED whenever the user says "in parallel", "at the same time", "dispatch agents", "parallel agents", or "spawn subagents" for work that is NOT driven by an implementation plan — several unrelated failing test files, multiple separate bugs, parallel research questions. For executing an approved plan, use subagent-driven-development instead.
 ---
 
 # Dispatching Parallel Agents
