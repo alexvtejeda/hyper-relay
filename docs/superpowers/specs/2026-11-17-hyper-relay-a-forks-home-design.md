@@ -39,7 +39,8 @@ plain Markdown when Quartz is absent.
 - `.claude-plugin/plugin.json`: name `hyper-relay`, version `0.1.0`, the owner as author, the GitHub repo as
   `repository`, licence MIT. `.claude-plugin/marketplace.json`: marketplace `hyper-relay`, one plugin, source `./`.
 - `LICENSE` keeps obra's copyright line and adds the owner's. `README.md` says what hyper-relay is (the workflow; Quartz
-  is the board), how to install it in both harnesses, and "forked from superpowers v5.1.0", with credit.
+  is the board), how to install it in both harnesses, and "forked from superpowers v5.1.0", with credit. It starts
+  from `docs/README.draft.md` (2026-11-17), whose `TO VERIFY` notes the plan settles.
 - `package.json` keeps only what `scripts/bump-version.sh` needs (its `main`, which named the OpenCode plugin, goes).
 
 ### 1.2 Skills (`skills/`)
