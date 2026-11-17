@@ -325,7 +325,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 Each step makes `skills/<skill>` an exact mirror of `~/.claude/skills/<skill>`: files the owner removed are deleted.
 Six commits; the last carries the trailer. If a numstat below differs, STOP and report (Execution notes).
 
-- [ ] **Step 1: brainstorming.**
+- [x] **Step 1: brainstorming.**
 
 ```bash
 git rm -r -q skills/brainstorming
@@ -353,7 +353,7 @@ git commit -m "import: the owner's brainstorming (Quartz steps, add-card-line.sh
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 2: writing-plans.**
+- [x] **Step 2: writing-plans.**
 
 ```bash
 git rm -r -q skills/writing-plans
@@ -370,7 +370,7 @@ git commit -m "import: the owner's writing-plans (plan count, branch link, revie
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 3: using-superpowers** (still under its upstream name).
+- [x] **Step 3: using-superpowers** (still under its upstream name).
 
 ```bash
 git rm -r -q skills/using-superpowers
@@ -393,7 +393,7 @@ git commit -m "import: the owner's using-superpowers (Claude Code and AGENTS.md 
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 4: subagent-driven-development.**
+- [x] **Step 4: subagent-driven-development.**
 
 ```bash
 git rm -r -q skills/subagent-driven-development
@@ -410,7 +410,7 @@ git commit -m "import: the owner's subagent-driven-development (its description)
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 5: using-git-worktrees.**
+- [x] **Step 5: using-git-worktrees.**
 
 ```bash
 git rm -r -q skills/using-git-worktrees
@@ -427,7 +427,7 @@ git commit -m "import: the owner's using-git-worktrees (its description)" -m "Co
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 6: dispatching-parallel-agents** (D1; the stray `.zip` stays out).
+- [x] **Step 6: dispatching-parallel-agents** (D1; the stray `.zip` stays out).
 
 ```bash
 git rm -r -q skills/dispatching-parallel-agents
@@ -440,12 +440,12 @@ Expected: `1	1	skills/dispatching-parallel-agents/SKILL.md` and nothing else.
 Run: `git diff --no-index --stat /home/noob_master/.claude/skills/dispatching-parallel-agents skills/dispatching-parallel-agents`
 Expected: one line, for `.../dispatching-parallel-agents/.zip` (`Bin 3009 -> 0 bytes`), and `1 file changed`.
 
-- [ ] **Step 7: Check the other eight are untouched.** For each of `executing-plans`, `finishing-a-development-branch`,
+- [x] **Step 7: Check the other eight are untouched.** For each of `executing-plans`, `finishing-a-development-branch`,
   `receiving-code-review`, `requesting-code-review`, `systematic-debugging`, `test-driven-development`,
   `verification-before-completion`, `writing-skills`, run
   `git diff --no-index --stat /home/noob_master/.claude/skills/<skill> skills/<skill>` — Expected: no output for every one.
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git commit -m "import: the owner's dispatching-parallel-agents (its description)" -m "Plan-Task: docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md#3
