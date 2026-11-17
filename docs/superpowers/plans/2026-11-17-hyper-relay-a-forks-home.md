@@ -282,7 +282,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 
 hyper-relay's own spec and this plan stay where they are.
 
-- [ ] **Step 1: Move the ten files.**
+- [x] **Step 1: Move the ten files.**
 
 ```bash
 mkdir -p docs/upstream/plans docs/upstream/specs
@@ -298,7 +298,7 @@ git mv docs/superpowers/specs/2026-03-23-codex-app-compatibility-design.md docs/
 git mv docs/superpowers/specs/2026-04-06-worktree-rototill-design.md docs/upstream/specs/
 ```
 
-- [ ] **Step 2: Check.**
+- [x] **Step 2: Check.**
 
 Run: `git ls-files docs/superpowers`
 Expected exactly:
@@ -308,7 +308,7 @@ docs/superpowers/specs/2026-11-17-hyper-relay-a-forks-home-design.md
 ```
 Run: `git ls-files docs/upstream | wc -l` — Expected: `10`.
 
-- [ ] **Step 3: Commit.**
+- [x] **Step 3: Commit.**
 
 ```bash
 git commit -m "docs: upstream's specs and plans move to docs/upstream/" -m "Plan-Task: docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md#2
