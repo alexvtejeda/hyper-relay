@@ -1222,7 +1222,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/voice-to-specs/tests/transcribe-sh.test.sh`, `skills/voice-to-specs/scripts/transcribe.sh`,
   `skills/voice-to-specs/scripts/setup.sh`, `skills/voice-to-specs/CLAUDE.md`
 
-- [ ] **Step 1: The test first.** In `skills/voice-to-specs/tests/transcribe-sh.test.sh`:
+- [x] **Step 1: The test first.** In `skills/voice-to-specs/tests/transcribe-sh.test.sh`:
 
 Run: `sed -i 's|\$DIR/venv|$VENV|g' skills/voice-to-specs/tests/transcribe-sh.test.sh`
 (9 uses, in the `make-venv.sh` heredoc and in the "no whisper" and "dangling python" cases.)
@@ -1260,13 +1260,13 @@ run x.m4a
 check "no XDG_DATA_HOME: the venv under HOME/.local/share is used" "$PY [x.m4a]" "$CALLS"
 ```
 
-- [ ] **Step 2: Run it (red).**
+- [x] **Step 2: Run it (red).**
 
 Run: `dash -n skills/voice-to-specs/tests/transcribe-sh.test.sh && sh skills/voice-to-specs/tests/transcribe-sh.test.sh | tail -n 4`
 Expected: `FAIL:` lines (for example "healthy: only transcribe.py runs, once, with its arguments": setup runs, because
 `transcribe.sh` still looks beside itself) and a last line with a non-zero `failed` count.
 
-- [ ] **Step 3: The venv path.** In BOTH `skills/voice-to-specs/scripts/transcribe.sh` (line 9) and
+- [x] **Step 3: The venv path.** In BOTH `skills/voice-to-specs/scripts/transcribe.sh` (line 9) and
   `skills/voice-to-specs/scripts/setup.sh` (line 7), replace:
 
 ```sh
@@ -1278,12 +1278,12 @@ VENV_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/hyper-relay/voice-to-specs/venv"
 ```
 (`python3 -m venv` creates the missing parent folders; nothing else changes in either script.)
 
-- [ ] **Step 4: Run it (green).**
+- [x] **Step 4: Run it (green).**
 
 Run: `dash -n skills/voice-to-specs/scripts/transcribe.sh && bash -n skills/voice-to-specs/scripts/setup.sh && sh skills/voice-to-specs/tests/transcribe-sh.test.sh | tail -n 1`
 Expected: `18 passed, 0 failed`.
 
-- [ ] **Step 5: The docs follow.** In `skills/voice-to-specs/CLAUDE.md`, replace:
+- [x] **Step 5: The docs follow.** In `skills/voice-to-specs/CLAUDE.md`, replace:
 
 ```text
 Nothing to run by hand: `scripts/transcribe.sh` runs `scripts/setup.sh` when the venv or whisper is missing. That creates a Python venv at `scripts/venv/` with the `openai-whisper` package installed.
@@ -1301,12 +1301,12 @@ with:
 - The venv lives outside the repo (see Setup). `scripts/.gitignore` still ignores a stray `scripts/venv/`, and `whisperVenv/` is gitignored by convention — do not commit either.
 ```
 
-- [ ] **Step 6: The proof (§4.1).**
+- [x] **Step 6: The proof (§4.1).**
 
 Run: `sh scripts/check-import.sh; echo "exit $?"`
 Expected: `16 skills match their loose copies` and `exit 0`.
 
-- [ ] **Step 7: The full gates, once (§4.2, §4.3).**
+- [x] **Step 7: The full gates, once (§4.2, §4.3).**
 
 | Run | Expected |
 |---|---|
@@ -1325,7 +1325,7 @@ Upstream's live suites are NOT run here (report this): `tests/claude-code`, `tes
 `tests/skill-triggering` and `tests/subagent-driven-dev` each start real `claude -p` sessions (`--plugin-dir`), which
 spend the owner's usage and which the executor may not start. The owner may run them later from a worktree.
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add skills/voice-to-specs/tests/transcribe-sh.test.sh skills/voice-to-specs/scripts/transcribe.sh skills/voice-to-specs/scripts/setup.sh skills/voice-to-specs/CLAUDE.md
@@ -1334,7 +1334,7 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 9: In review.** Run `quartz review` in the worktree. If it fails, report the failure and carry on. Then
+- [x] **Step 9: In review.** Run `quartz review` in the worktree. If it fails, report the failure and carry on. Then
   report (gate results with counts, every deviation, the suites not run and why) and stop: Task 9 is not yours.
 
 ### Task 9: Switch-over (spec §3, §4.4–4.6). The orchestrator runs it with the owner; NOT the executor
