@@ -1,6 +1,6 @@
 ---
 name: subagent-driven-development
-description: Use when executing implementation plans with independent tasks in the current session
+description: Use when executing an implementation plan whose tasks are largely independent, in the current session. REQUIRED whenever the user asks to "use subagents", "dispatch agents", "spawn agents", "fan out", "run the tasks in parallel", or picks the subagent option at a plan-to-execute handoff. Dispatches a fresh subagent per task with two-stage review. For independent work NOT driven by a plan, use dispatching-parallel-agents instead.
 ---
 
 # Subagent-Driven Development
