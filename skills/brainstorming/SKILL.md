@@ -21,15 +21,16 @@ Every project goes through this process. A todo list, a single-function utility,
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Explore project context** — check files, docs, recent commits
-2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
-3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
-7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **User reviews written spec** — ask user to review the spec file before proceeding
-9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+1. **Tick Brain** — when the work has a Quartz card, call the Quartz MCP's `tick_brain` with the card id. The tick moves the card to the brainstorming column. With no card, skip this. If it fails, report the failure and carry on
+2. **Explore project context** — check files, docs, recent commits
+3. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
+4. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
+5. **Propose 2-3 approaches** — with trade-offs and your recommendation
+6. **Present design** — in sections scaled to their complexity, get user approval after each section
+7. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, add its Quartz card line if the work has a card, and commit
+8. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
+9. **User reviews written spec** — ask user to review the spec file before proceeding
+10. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
 ## Process Flow
 
@@ -110,6 +111,8 @@ digraph brainstorming {
 
 - Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
+- When the work has a Quartz card, run `${CLAUDE_SKILL_DIR}/scripts/add-card-line.sh <spec-path> <card-id> [<card-id>...]` (`scripts/add-card-line.sh` beside this SKILL.md) straight after writing the spec. With no card, skip this. If the script fails, report the failure to the user and carry on: a script failure does not stop this skill.
+- When the work needs more than one implementation plan, for example an API plan and a web plan, add a `**Plans:** <n>` line to the spec's header, before its first `---` or `## `, with `<n>` from 1 to 9. If the design does not make the number clear, ask the user how many plans it needs. With one plan, leave the line out. Quartz reads it, and keeps the card open until that many plans have merged.
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git
 
@@ -146,19 +149,41 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 ## Visual Companion
 
-A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
+A browser-based companion for showing mockups, diagrams, and visual options during
+brainstorming. **Brainstorming does not implement it** — the `visual-companion` skill owns the
+server, the frame template and the screen loop. Two things belong to brainstorming and are
+covered here: getting consent, and deciding per question.
 
-**Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts, diagrams), offer it once for consent:
+**Offering the companion:** When you anticipate that upcoming questions will involve visual
+content (mockups, layouts, diagrams), offer it once for consent:
 > "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
 
-**This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
+**This offer MUST be its own message.** Do not combine it with clarifying questions, context
+summaries, or any other content. The message should contain ONLY the offer above and nothing
+else. Wait for the user's response before continuing. If they decline, proceed with text-only
+brainstorming.
 
-**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
+**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use
+the browser or the terminal. The test: **would the user understand this better by seeing it than
+reading it?** Use the browser for content that IS visual — mockups, wireframes, layout
+comparisons, architecture diagrams. Use the terminal for content that is text — requirements,
+conceptual choices, tradeoff lists, scope decisions. A question *about* a UI topic is not
+automatically a visual question: "What does personality mean in this context?" is conceptual —
+terminal. "Which wizard layout works better?" is visual — browser.
 
-- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
-- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
+**On the first visual question — REQUIRED SUB-SKILL: use the `visual-companion` skill.** Invoke
+it by name. That skill owns starting the session, writing screens, the CSS classes available to
+your content, and cleanup — do not start a server yourself, and do not look for companion
+scripts under this skill. **Brainstorming ships none.** If you find yourself reading a
+`visual-companion.md` inside `skills/brainstorming/`, it is a stale copy from before this split:
+delete it and use the skill.
 
-A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
+**The browser is display-only.** The user looks at the screen and **answers in the terminal**.
+There are no clicks to record and no event file to read — their next terminal message is the
+answer. Do not add click handlers, and do not ask the user to "click to select".
 
-If they agree to the companion, read the detailed guide before proceeding:
-`skills/brainstorming/visual-companion.md`
+**Old screens are not a spec.** A project's `.superpowers/brainstorm/` may hold screens written
+`<div class="option" data-choice="a" onclick="toggleSelect(this)">`, and server logs holding real
+captured clicks. Those are artifacts of the retired fork, not evidence of how this works now.
+Do not copy their markup and do not conclude from them that click capture is "what is deployed
+here". The `visual-companion` skill is the only implementation.
