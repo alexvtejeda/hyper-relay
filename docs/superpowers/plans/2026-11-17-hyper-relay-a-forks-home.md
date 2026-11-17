@@ -915,7 +915,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
   `LICENSE`, `CLAUDE.md` (`AGENTS.md` is a symlink to it and stays one)
 - Move: `docs/README.draft.md` → `README.md` (replacing upstream's)
 
-- [ ] **Step 1: `.claude-plugin/plugin.json`**, the whole file:
+- [x] **Step 1: `.claude-plugin/plugin.json`**, the whole file:
 
 ```json
 {
@@ -940,7 +940,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 }
 ```
 
-- [ ] **Step 2: `.claude-plugin/marketplace.json`**, the whole file (no entry `version`, D15):
+- [x] **Step 2: `.claude-plugin/marketplace.json`**, the whole file (no entry `version`, D15):
 
 ```json
 {
@@ -964,7 +964,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 }
 ```
 
-- [ ] **Step 3: `package.json`**, the whole file (D14):
+- [x] **Step 3: `package.json`**, the whole file (D14):
 
 ```json
 {
@@ -973,7 +973,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 }
 ```
 
-- [ ] **Step 4: `.version-bump.json`**, the whole file:
+- [x] **Step 4: `.version-bump.json`**, the whole file:
 
 ```json
 {
@@ -994,7 +994,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 }
 ```
 
-- [ ] **Step 5: `LICENSE`**: obra's line stays, the owner's is added below it. Replace line 3
+- [x] **Step 5: `LICENSE`**: obra's line stays, the owner's is added below it. Replace line 3
   `Copyright (c) 2025 Jesse Vincent` with these two lines; the rest of the file is unchanged:
 
 ```text
@@ -1002,7 +1002,7 @@ Copyright (c) 2025 Jesse Vincent
 Copyright (c) 2026 Alex (https://github.com/alexvtejeda)
 ```
 
-- [ ] **Step 6: `README.md`** from the draft:
+- [x] **Step 6: `README.md`** from the draft:
 
 Run: `git mv -f docs/README.draft.md README.md`
 
@@ -1133,7 +1133,7 @@ this one's `upstream`, and fixes from it are ported by hand.
 MIT. See [LICENSE](LICENSE), which keeps the original superpowers copyright notice.
 ````
 
-- [ ] **Step 7: `CLAUDE.md`**, the whole file (it replaces upstream's contributor guidelines; `AGENTS.md` links to it):
+- [x] **Step 7: `CLAUDE.md`**, the whole file (it replaces upstream's contributor guidelines; `AGENTS.md` links to it):
 
 ````markdown
 # hyper-relay: developing the plugin
@@ -1193,7 +1193,7 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |
 ````
 
-- [ ] **Step 8: Validate.**
+- [x] **Step 8: Validate.**
 
 Run: `claude plugin validate .`
 Expected: `Validation passed` or `Validation passed with warnings`, where the only warning is about `CLAUDE.md` at the
@@ -1202,7 +1202,7 @@ README `Advice` block. A warning about a skill's frontmatter: report it, do not 
 
 Run: `test -L AGENTS.md && readlink AGENTS.md` — Expected: `CLAUDE.md`.
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 git add .claude-plugin/plugin.json .claude-plugin/marketplace.json package.json .version-bump.json LICENSE README.md CLAUDE.md
