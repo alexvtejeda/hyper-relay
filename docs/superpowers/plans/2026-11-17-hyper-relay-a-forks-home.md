@@ -459,12 +459,12 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Create: `skills/visual-companion/{SKILL.md,scripts/frame-template.html,scripts/helper.js,scripts/run-tests.sh,scripts/server.cjs,scripts/start-server.sh,scripts/stop-server.sh,scripts/test-injection.cjs,scripts/test-session.cjs}`
 - Delete: `tests/brainstorm-server/` (5 files)
 
-- [ ] **Step 1: Check the two loose copies still agree.**
+- [x] **Step 1: Check the two loose copies still agree.**
 
 Run: `git diff --no-index --stat /home/noob_master/.claude/skills/visual-companion /home/noob_master/.config/opencode/skills/visual-companion`
 Expected: no output.
 
-- [ ] **Step 2: Add it.**
+- [x] **Step 2: Add it.**
 
 ```bash
 mkdir -p skills/visual-companion
@@ -475,19 +475,19 @@ git diff --cached --name-only | wc -l
 Expected: `9`.
 Run: `git diff --no-index --stat /home/noob_master/.claude/skills/visual-companion skills/visual-companion` — Expected: no output.
 
-- [ ] **Step 3: Run its tests.**
+- [x] **Step 3: Run its tests.**
 
 Run: `bash skills/visual-companion/scripts/run-tests.sh; echo "exit $?"`
 Expected: `== test-injection.cjs` and `== test-session.cjs` headers, `ok` lines (five in test-session), no `FAIL`, `exit 0`.
 
-- [ ] **Step 4: Commit the skill.**
+- [x] **Step 4: Commit the skill.**
 
 ```bash
 git commit -m "feat: add visual-companion, the owner's browser companion" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 5: Drop `tests/brainstorm-server`** (D9: it tests the WebSocket server Task 3 removed).
+- [x] **Step 5: Drop `tests/brainstorm-server`** (D9: it tests the WebSocket server Task 3 removed).
 
 ```bash
 git rm -r -q tests/brainstorm-server
@@ -495,7 +495,7 @@ git diff --cached --name-only
 ```
 Expected: the five files `tests/brainstorm-server/{package-lock.json,package.json,server.test.js,windows-lifecycle.test.sh,ws-protocol.test.js}`.
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git commit -m "test: drop tests/brainstorm-server, superseded by visual-companion's run-tests.sh" -m "Plan-Task: docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md#4
