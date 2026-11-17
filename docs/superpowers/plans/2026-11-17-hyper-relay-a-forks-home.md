@@ -1348,10 +1348,10 @@ the main checkout `/home/noob_master/hyper-relay` or outside the repo.
 `/home/noob_master/hyper-relay/.claude/agents/{relay-planner,relay-executor}.md`, the memories in Step 6,
 `/home/noob_master/CLAUDE.md`, the home repo's index. In the repo: this plan (Step 11).
 
-- [ ] **Step 1: Re-check on main.** `sh /home/noob_master/hyper-relay/scripts/check-import.sh` → `16 skills match
+- [x] **Step 1: Re-check on main.** `sh /home/noob_master/hyper-relay/scripts/check-import.sh` → `16 skills match
   their loose copies`. `git -C /home/noob_master/hyper-relay status --short` → nothing but ignored local files.
 
-- [ ] **Step 2: GitHub (§3.1).**
+- [x] **Step 2: GitHub (§3.1).**
 
 ```bash
 gh repo create alexvtejeda/hyper-relay --private --description "Workflow skills for Claude Code and OpenCode, forked from superpowers v5.1.0"
@@ -1365,7 +1365,7 @@ GIT_TERMINAL_PROMPT=0 git ls-remote https://github.com/alexvtejeda/hyper-relay.g
 Expected: `"visibility":"PRIVATE"`, default branch `main`; `ls-remote` prints a SHA without prompting (the credential
 helper works non-interactively). Push only `main` and `v0.1.0`, not upstream's tags.
 
-- [ ] **Step 3: Claude Code (§3.2).** In a shell (or in a session: `/plugin marketplace add alexvtejeda/hyper-relay`,
+- [x] **Step 3: Claude Code (§3.2).** In a shell (or in a session: `/plugin marketplace add alexvtejeda/hyper-relay`,
   `/plugin install hyper-relay@hyper-relay`):
 
 ```bash
@@ -1378,7 +1378,7 @@ test -x /home/noob_master/.claude/plugins/cache/hyper-relay/hyper-relay/0.1.0/sk
 Expected: `hyper-relay@hyper-relay`, version `0.1.0`, enabled; the cache folder has no `.mcp.json`, `.env`, `.envrc`,
 `.claude/` or `.worktrees/`; `executable`. (Auto-update stays off unless the owner turns it on, D20.)
 
-- [ ] **Step 4: OpenCode (§3.3).** `~/.config/opencode/opencode.json` becomes exactly:
+- [x] **Step 4: OpenCode (§3.3).** `~/.config/opencode/opencode.json` becomes exactly:
 
 ```json
 {
@@ -1406,7 +1406,7 @@ Expected: `hyper-relay@hyper-relay`, version `0.1.0`, enabled; the cache folder 
 }
 ```
 
-- [ ] **Step 5: Does a `skills:` list take a plugin-prefixed name? (§3.4)** Write the temporary probe
+- [x] **Step 5: Does a `skills:` list take a plugin-prefixed name? (§3.4)** Write the temporary probe
   `/home/noob_master/.claude/agents/hr-probe.md`:
 
 ```markdown
@@ -1429,7 +1429,7 @@ Then read the newest file in `~/.claude/debug/` for lines naming `hyper-relay:wr
 
 Delete `/home/noob_master/.claude/agents/hr-probe.md`. Record the outcome (Step 11).
 
-- [ ] **Step 6: Point everything at the new names (§3.4).**
+- [x] **Step 6: Point everything at the new names (§3.4).**
 
 **6a. `~/.claude/CLAUDE.md`.** Prefix the seven backticked skill names:
 
@@ -1535,7 +1535,7 @@ three `D` lines. Commit WITHOUT a pathspec (a pathspec would re-add the files fr
 `git -C /home/noob_master commit -m "chore: stop tracking add-card-line and voice-to-specs, which live in hyper-relay now" -m "<the committing session's attribution lines>"`.
 The owner's uncommitted `.gitignore` change stays unstaged.
 
-- [ ] **Step 7: Live proofs (§4.4–4.6).**
+- [x] **Step 7: Live proofs (§4.4–4.6).**
 
 **Claude Code (§4.4)**, in a new session in `/tmp`:
 1. `/skills` (or `/plugin`, then the hyper-relay plugin's skills) lists 16 `hyper-relay:` skills, each once. The loose
@@ -1568,15 +1568,15 @@ under `$XDG_DATA_HOME` if the owner sets it) and installs whisper (minutes: this
 then the transcription exits 0 and writes `/tmp/hr-sample.txt` (a tone has no words, so it may be empty: the point is
 the pipeline). A second run starts transcribing at once. A real short recording works too.
 
-- [ ] **Step 8: Anything failed?** Fix it on a branch through the usual plan → merge → push, bump nothing until the
+- [x] **Step 8: Anything failed?** Fix it on a branch through the usual plan → merge → push, bump nothing until the
   owner says, and repeat the failed proof. Rolling back before Step 10: `claude plugin uninstall hyper-relay@hyper-relay`
   and remove the `skills` entry from `opencode.json`.
 
-- [ ] **Step 9: Optional, owner's call:** run upstream's live suites from a worktree (never the main checkout, which
+- [x] **Step 9: Optional, owner's call:** run upstream's live suites from a worktree (never the main checkout, which
   holds `.mcp.json`), for example `tests/skill-triggering/run-all.sh`. They spend usage and were written for
   upstream's session primer, which A8 drops.
 
-- [ ] **Step 10 (§3.5): THE OWNER ALONE deletes the loose copies**, only after Steps 1–7 pass:
+- [x] **Step 10 (§3.5): THE OWNER ALONE deletes the loose copies**, only after Steps 1–7 pass:
 
 ```bash
 rm -rf /home/noob_master/.claude/skills/brainstorming /home/noob_master/.claude/skills/dispatching-parallel-agents /home/noob_master/.claude/skills/executing-plans /home/noob_master/.claude/skills/finishing-a-development-branch /home/noob_master/.claude/skills/receiving-code-review /home/noob_master/.claude/skills/requesting-code-review /home/noob_master/.claude/skills/subagent-driven-development /home/noob_master/.claude/skills/systematic-debugging /home/noob_master/.claude/skills/test-driven-development /home/noob_master/.claude/skills/using-git-worktrees /home/noob_master/.claude/skills/using-superpowers /home/noob_master/.claude/skills/verification-before-completion /home/noob_master/.claude/skills/writing-plans /home/noob_master/.claude/skills/writing-skills /home/noob_master/.claude/skills/visual-companion /home/noob_master/.claude/skills/voice-to-specs
@@ -1588,7 +1588,7 @@ and its old venv. Afterwards: `/skills` in a new Claude Code session shows no ba
 ones, D25); "use the writing-plans skill" loads `hyper-relay:writing-plans` (D24); OpenCode still lists hyper-relay's
 skills; `scripts/check-import.sh` now exits 2 (expected).
 
-- [ ] **Step 11: Record and commit.** Append to this plan, on `main`, keeping the bullet that happened and filling the
+- [x] **Step 11: Record and commit.** Append to this plan, on `main`, keeping the bullet that happened and filling the
   date and results:
 
 ```markdown
