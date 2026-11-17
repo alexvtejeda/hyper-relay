@@ -1,20 +1,20 @@
 {
-  "name": "superpowers",
-  "description": "Core skills library for Claude Code: TDD, debugging, collaboration patterns, and proven techniques",
-  "version": "5.1.0",
+  "name": "hyper-relay",
+  "description": "Workflow skills for Claude Code and OpenCode: brainstorm, spec, plan, execute, review and merge, each leg handing a written artefact to the next. Forked from superpowers v5.1.0.",
+  "version": "0.1.0",
   "author": {
-    "name": "Jesse Vincent",
-    "email": "jesse@fsck.com"
+    "name": "Alex",
+    "url": "https://github.com/alexvtejeda"
   },
-  "homepage": "https://github.com/obra/superpowers",
-  "repository": "https://github.com/obra/superpowers",
+  "homepage": "https://github.com/alexvtejeda/hyper-relay",
+  "repository": "https://github.com/alexvtejeda/hyper-relay",
   "license": "MIT",
   "keywords": [
     "skills",
+    "workflow",
+    "planning",
     "tdd",
     "debugging",
-    "collaboration",
-    "best-practices",
-    "workflows"
+    "quartz"
   ]
 }
