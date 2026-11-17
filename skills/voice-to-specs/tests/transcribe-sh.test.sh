@@ -1,7 +1,7 @@
 #!/bin/sh
 # Tests scripts/transcribe.sh in a sandbox: a copy of the script next to a stub setup.sh
 # and a stub venv, with a PATH that has ffmpeg only when a case wants it. It needs no
-# real venv, whisper or ffmpeg, and never touches the real scripts/venv.
+# real venv, whisper or ffmpeg, and never touches the real venv: XDG_DATA_HOME points into the sandbox.
 # Run: sh tests/transcribe-sh.test.sh    Expect: "0 failed"
 set -u
 
@@ -26,7 +26,9 @@ new_box() {
     unset STUB_EXIT STUB_SETUP
     BOX=$(mktemp -d "$ROOT/box.XXXXXX")
     DIR="$BOX/my skill/scripts"
-    export BOX DIR
+    XDG_DATA_HOME="$BOX/data"
+    VENV="$XDG_DATA_HOME/hyper-relay/voice-to-specs/venv"
+    export BOX DIR XDG_DATA_HOME VENV
     mkdir -p "$DIR" "$BOX/path" "$BOX/ffmpeg"
     cp "$SCRIPT" "$DIR/transcribe.sh"
     : >"$BOX/calls"
@@ -44,11 +46,11 @@ echo >>"$BOX/calls"
 exit "${STUB_EXIT:-0}"
 EOF
     cat >"$BOX/make-venv.sh" <<'EOF'
-rm -rf "$DIR/venv"
-mkdir -p "$DIR/venv/bin" "$DIR/venv/lib/python3.13/site-packages/whisper"
-: >"$DIR/venv/lib/python3.13/site-packages/whisper/__init__.py"
-cp "$BOX/python-stub" "$DIR/venv/bin/python"
-chmod +x "$DIR/venv/bin/python"
+rm -rf "$VENV"
+mkdir -p "$VENV/bin" "$VENV/lib/python3.13/site-packages/whisper"
+: >"$VENV/lib/python3.13/site-packages/whisper/__init__.py"
+cp "$BOX/python-stub" "$VENV/bin/python"
+chmod +x "$VENV/bin/python"
 EOF
     cat >"$DIR/setup.sh" <<'EOF'
 echo setup >>"$BOX/calls"
@@ -101,15 +103,15 @@ check "no venv: setup runs, then transcribe.py" "setup$NL$PY [x.m4a]" "$CALLS"
 # Venv without whisper: setup, then transcribe.
 new_box
 make_venv
-rm -rf "$DIR/venv/lib/python3.13/site-packages/whisper"
+rm -rf "$VENV/lib/python3.13/site-packages/whisper"
 run x.m4a
 check "no whisper: setup runs, then transcribe.py" "setup$NL$PY [x.m4a]" "$CALLS"
 
 # Dangling venv python (the system Python moved): setup, then transcribe.
 new_box
 make_venv
-rm "$DIR/venv/bin/python"
-ln -s /nonexistent/python "$DIR/venv/bin/python"
+rm "$VENV/bin/python"
+ln -s /nonexistent/python "$VENV/bin/python"
 run x.m4a
 check "dangling python: setup runs, then transcribe.py" "setup$NL$PY [x.m4a]" "$CALLS"
 
@@ -139,6 +141,16 @@ check "setup fails: transcribe.py does not run" "setup" "$CALLS"
 check "setup fails: one line on stderr" 1 "$ERR_LINES"
 check "setup fails: the message says what to check" \
     "voice-to-specs: setup.sh failed, see the output above. It needs Python 3.10+ (python3 --version)." "$ERR"
+
+# No XDG_DATA_HOME: the venv is under $HOME/.local/share.
+new_box
+unset XDG_DATA_HOME
+HOME="$BOX/home"
+VENV="$HOME/.local/share/hyper-relay/voice-to-specs/venv"
+export HOME VENV
+make_venv
+run x.m4a
+check "no XDG_DATA_HOME: the venv under HOME/.local/share is used" "$PY [x.m4a]" "$CALLS"
 
 printf '%d passed, %d failed\n' "$passed" "$failed"
 [ "$failed" -eq 0 ]

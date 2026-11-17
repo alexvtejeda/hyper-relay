@@ -6,7 +6,7 @@
 set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-VENV_DIR="$SCRIPT_DIR/venv"
+VENV_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/hyper-relay/voice-to-specs/venv"
 
 # File tests only: `import whisper` loads torch and takes seconds.
 whisper_installed() {

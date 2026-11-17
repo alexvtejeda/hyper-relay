@@ -10,7 +10,7 @@ A standalone Claude Code skill that transcribes audio/video recordings using Ope
 
 ### Setup
 
-Nothing to run by hand: `scripts/transcribe.sh` runs `scripts/setup.sh` when the venv or whisper is missing. That creates a Python venv at `scripts/venv/` with the `openai-whisper` package installed.
+Nothing to run by hand: `scripts/transcribe.sh` runs `scripts/setup.sh` when the venv or whisper is missing. That creates a Python venv at `${XDG_DATA_HOME:-~/.local/share}/hyper-relay/voice-to-specs/venv` with the `openai-whisper` package installed, outside the plugin, so that a plugin update does not delete it.
 
 ## How It Works
 
@@ -68,7 +68,7 @@ The skill deliberately stops at saving briefs, as Quartz cards or Markdown files
 - The skill announces itself at start ("I'm using the voice-to-specs skill...") and requires user confirmation of segmentation before writing briefs. Preserve both behaviors.
 - Markdown briefs always land in the **caller's** working directory, never inside this repo. Don't write transcription outputs into this skill's folder.
 - Edits to `SKILL.md` are tested with fresh agents against a throwaway Quartz project on an isolated stack, never a real board. Subagents inherit the parent's MCP servers, so use `claude -p --strict-mcp-config --mcp-config <file>`.
-- Python venvs under `scripts/venv/` and `whisperVenv/` are gitignored by convention — do not commit them.
+- The venv lives outside the repo (see Setup). `scripts/.gitignore` still ignores a stray `scripts/venv/`, and `whisperVenv/` is gitignored by convention — do not commit either.
 
 ## Skill Workflow
 

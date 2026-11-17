@@ -4,7 +4,7 @@ set -e
 # Run once: bash setup.sh
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENV_DIR="$SCRIPT_DIR/venv"
+VENV_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/hyper-relay/voice-to-specs/venv"
 
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating venv at $VENV_DIR..."
