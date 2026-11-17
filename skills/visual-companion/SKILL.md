@@ -80,11 +80,11 @@ timestamps. Propose a kebab-case name from the topic and ask before launching:
 > (`step02-address-bar` and `cert-print-layout` also fit.)"
 
 Then start it. Use the **absolute** script path — your cwd is the user's project, not this
-skill's directory:
+skill's directory (the script is `scripts/start-server.sh` beside this SKILL.md):
 
 ```bash
 # Named session — the directory and port are stable across restarts
-~/.claude/skills/visual-companion/scripts/start-server.sh \
+${CLAUDE_SKILL_DIR}/scripts/start-server.sh \
   --project-dir /path/to/project --session certificate-1c-redesign
 
 # Returns: {"type":"server-started","port":52341,"host":"127.0.0.1",

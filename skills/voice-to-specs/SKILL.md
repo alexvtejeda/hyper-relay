@@ -15,10 +15,10 @@ Transcribe audio/video recordings, segment them into structured briefs, and save
 
 ## Workflow Step 1: Run Whisper Transcription
 
-Run this one command, with the longest Bash timeout available. Do not check the environment first and do not activate a venv: the script does that.
+Run this one command, with the longest Bash timeout available. Do not check the environment first and do not activate a venv: the script does that. The script is `scripts/transcribe.sh` beside this SKILL.md.
 
 ```bash
-sh ~/.claude/skills/voice-to-specs/scripts/transcribe.sh <file_path> --model base
+sh ${CLAUDE_SKILL_DIR}/scripts/transcribe.sh <file_path> --model base
 ```
 
 If it exits non-zero, see Error Handling.

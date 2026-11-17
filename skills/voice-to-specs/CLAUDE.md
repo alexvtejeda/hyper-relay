@@ -26,7 +26,7 @@ The checks are file tests, because `import whisper` takes seconds. The agent rea
 
 **Usage:**
 ```bash
-sh ~/.claude/skills/voice-to-specs/scripts/transcribe.sh <file_path> --model base
+sh scripts/transcribe.sh <file_path> --model base
 ```
 
 **Model options:** tiny, base, small, medium, large (default: base)
@@ -56,17 +56,17 @@ voice-to-specs → brainstorming → writing-plans → subagent execution
 
 The skill deliberately stops at saving briefs, as Quartz cards or Markdown files. Do not extend it to write specs, plans, or code — those belong to downstream skills.
 
-**Authoritative workflow:** `SKILL.md` (segmentation rules, templates, boundaries, example sessions). This file covers setup and the script interface. `SKILL.md` is what Claude Code loads at runtime, so an edit here is live at once, on any branch.
+**Authoritative workflow:** `SKILL.md` (segmentation rules, templates, boundaries, example sessions). This file covers setup and the script interface. `SKILL.md` is what Claude Code and OpenCode load at runtime: an edit reaches Claude Code when the hyper-relay plugin updates, and OpenCode when it merges to the main checkout.
 
 ## Related but separate codebase
 
-`whisper-transcriptions/` also contains a standalone Python transcriber (`transcribe.py` + its own `whisperVenv/`). That predates the skill and is **not** the same code path — the skill uses the script at `.claude/skills/voice-to-specs/scripts/transcribe.py`. Don't conflate the two when editing.
+`whisper-transcriptions/` also contains a standalone Python transcriber (`transcribe.py` + its own `whisperVenv/`). That predates the skill and is **not** the same code path — the skill uses `scripts/transcribe.py` in this folder. Don't conflate the two when editing.
 
 ## When modifying the skill
 
 - Keep the design spec and plan in sync with `SKILL.md` changes. The spec is marked "Approved (v2)" — meaningful scope changes warrant a new version note.
 - The skill announces itself at start ("I'm using the voice-to-specs skill...") and requires user confirmation of segmentation before writing briefs. Preserve both behaviors.
-- Markdown briefs always land in the **caller's** working directory, never inside this repo. Don't write transcription outputs into `.claude/skills/voice-to-specs/`.
+- Markdown briefs always land in the **caller's** working directory, never inside this repo. Don't write transcription outputs into this skill's folder.
 - Edits to `SKILL.md` are tested with fresh agents against a throwaway Quartz project on an isolated stack, never a real board. Subagents inherit the parent's MCP servers, so use `claude -p --strict-mcp-config --mcp-config <file>`.
 - Python venvs under `scripts/venv/` and `whisperVenv/` are gitignored by convention — do not commit them.
 
