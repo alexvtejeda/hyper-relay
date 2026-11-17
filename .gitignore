@@ -14,3 +14,7 @@ triage/
 
 # Playwright MCP output (screenshots, logs) from browser checks.
 .playwright-mcp/
+
+# Plans that carry another project's internals stay local now that this repo is public;
+# Quartz gets them through `quartz link-doc`.
+docs/superpowers/plans/2026-11-17-hyper-relay-b-generated-agents.md

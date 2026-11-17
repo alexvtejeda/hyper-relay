@@ -74,8 +74,7 @@ the board is half the point: it is what lets a long-running, multi-agent pipelin
 
 Skills appear as `hyper-relay:<skill>`, for example `hyper-relay:brainstorming`.
 
-- **The repo is private,** so Claude Code clones it with your own git credentials. For background updates to work too,
-  give git a credential helper: `gh auth login`, then `gh auth setup-git`.
+- **The repo is public,** so installing and updating need no GitHub credentials.
 - **Updates follow the version.** `plugin.json` pins it, so an installed copy changes only when a release raises it.
   Claude Code checks a marketplace that is not Anthropic's in the background only if you turn on auto-update for it
   (`/plugin`, then **Marketplaces**); otherwise run `claude plugin update hyper-relay@hyper-relay`.
