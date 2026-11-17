@@ -75,9 +75,9 @@ the board is half the point: it is what lets a long-running, multi-agent pipelin
 Skills appear as `hyper-relay:<skill>`, for example `hyper-relay:brainstorming`.
 
 - **The repo is public,** so installing and updating need no GitHub credentials.
-- **Updates follow the version.** `plugin.json` pins it, so an installed copy changes only when a release raises it.
-  Claude Code checks a marketplace that is not Anthropic's in the background only if you turn on auto-update for it
-  (`/plugin`, then **Marketplaces**); otherwise run `claude plugin update hyper-relay@hyper-relay`.
+- **Updates follow the version.** `plugin.json` pins it, so `claude plugin update hyper-relay@hyper-relay` brings a new
+  copy only when a release raises it. Claude Code checks a marketplace that is not Anthropic's in the background only
+  if you turn on auto-update for it (`/plugin`, then **Marketplaces**).
 - **Install from GitHub, not from a local clone.** A local-directory marketplace loads files in place, gitignored ones
   included, so a developer's local `.mcp.json` would load as the plugin's own MCP servers.
 
@@ -99,16 +99,18 @@ entry take precedence over same-named skills OpenCode finds elsewhere (it also r
 
 It needs Python 3.10+ and ffmpeg. The first transcription runs its `scripts/setup.sh`, which builds a Python venv with
 whisper under `${XDG_DATA_HOME:-~/.local/share}/hyper-relay/voice-to-specs/`, outside the plugin, so updates never
-delete it.
+delete it. Whisper runs on the CPU: `setup.sh` installs CPU-only torch first, because PyPI's default CUDA build crashes
+under WSL.
 
 ## Roadmap
 
 | Piece | What | Status |
 |---|---|---|
 | A | **The fork's home:** the skills as a versioned plugin for Claude Code and OpenCode, with no behaviour change | 0.1.0 |
-| B | **Per-repo config and generic role agents:** a planner, an executor and a reviewer that read one small config file per repo (how to start a test stack, how to merge, which checks to run, which model each role uses) | planned |
+| B | **Role agents generated per project:** hyper-relay ships planner, executor and reviewer templates; each repo keeps one small facts file (`.hyper-relay/agents.md`: its checks, its test stack and logins, its gotchas, a model per role), and a generator writes the repo's own agents from the two. A session-start notice says when they are out of date, and a guide adapts them for OpenCode | planning |
 | C | **Our own executing-plans:** executes in the worktree it is given (or on a branch, per repo), commits per task with `Plan-Task` trailers, runs the full checks once, and stops before merging | planned |
 | D | **The orchestrator:** dispatches the legs, verifies every hand-back, stacks dependent plans, checks for migration and shared-file conflicts, and hands you the stack to click through | planned |
+| – | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | planned |
 
 ## Credits
 
