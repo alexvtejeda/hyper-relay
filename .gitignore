@@ -11,3 +11,6 @@ triage/
 .env
 .envrc
 .mcp.json
+
+# Playwright MCP output (screenshots, logs) from browser checks.
+.playwright-mcp/
