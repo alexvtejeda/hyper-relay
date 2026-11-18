@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Use when you have a spec or requirements for a multi-step task, before touching code
+description: Use when dispatched as a planner to write an implementation plan from an approved spec (the planner agents preload it). An orchestrator with an approved spec uses orchestrating instead, which dispatches the planner.
 ---
 
 # Writing Plans
@@ -13,7 +13,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** A plan names neither where it runs nor a path to run it in: no worktree path, no `cd` prefix. The orchestrator sets up a branch or a worktree at the handoff (`hyper-relay:executing-plans`' `dispatching.md`), and the dispatch prompt tells the executor where it is.
+**Context:** A plan names neither where it runs nor a path to run it in: no worktree path, no `cd` prefix. The orchestrator sets up a branch or a worktree at the handoff (`hyper-relay:orchestrating`'s `dispatching.md`), and the dispatch prompt tells the executor where it is.
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
@@ -24,7 +24,7 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 ## The spec's plan count
 
-Before writing, compare the number of plans you intend to write with the spec's `**Plans:** <n>` header line. A spec without the line means 1. If they differ, stop and ask the user before writing any plan. Once they approve a different number, update the spec's `**Plans:**` line to it, adding the line for more than one plan and removing it for one, and commit the spec as "Committing the plan" below says. The hooks upload the changed spec, which updates the card's expected count.
+Before writing, compare the number of plans you intend to write with the spec's `**Plans:** <n>` header line. A spec without the line means 1. If they differ, stop before writing any plan and report the mismatch to the orchestrator: the number you would write, and why. It asks the owner, updates the spec's `**Plans:**` line itself (`hyper-relay:orchestrating`'s `planning.md`), and dispatches you again. Never edit the spec: you write plans only.
 
 ## File Structure
 
@@ -66,7 +66,12 @@ This structure informs the task decomposition. Each task should produce self-con
 
 ## No Quartz steps in a plan
 
-A plan carries no `quartz link-branch` step and no `quartz review` step: the orchestrator runs both, at dispatch and after verifying the executor's report (`hyper-relay:executing-plans`' `dispatching.md`).
+A plan carries no `quartz link-branch` step and no `quartz review` step: the orchestrator runs both, at dispatch and after verifying the executor's report (`hyper-relay:orchestrating`'s `dispatching.md`).
+
+## Spec coverage and the acceptance task
+
+- After the header, a **Spec coverage** table maps each `## ` section of the spec to the task numbers that implement it. With sibling plans, each plan has a **Contract** section, identical in each.
+- The plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the orchestrator: live sessions, reinstalls, edits outside the repo), with its command or action and the result that counts as PASS.
 
 ## Task Structure
 
@@ -142,12 +147,10 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Committing the plan
 
-Commit a plan, or a spec you updated, only while the repo's main checkout is on `main`: there, `git branch --show-current` prints `main` and `git rev-parse -q --verify MERGE_HEAD` prints nothing. Stage each file by its path and commit just those: `git add <path>`, then `git commit -m "<message>" -- <path> [<path>...]`. If the commit prints a `quartz:` line, do what it says.
+Commit a plan only while the repo's main checkout is on `main`: there, `git branch --show-current` prints `main` and `git rev-parse -q --verify MERGE_HEAD` prints nothing. Stage each file by its path and commit just those: `git add <path>`, then `git commit -m "<message>" -- <path> [<path>...]`. If the commit prints a `quartz:` line, do what it says.
 
-When the main checkout is on another branch, a plan is running there (a branch run). Do not commit, and do not edit a file that is already committed:
-- a new plan, or a spec you created during the run: run `quartz link-doc <path>` (it puts an uncommitted doc on its cards; skip it without Quartz), and report that it is held back. The orchestrator commits it after that branch merges (`dispatching.md`, step 9);
-- a committed spec whose `**Plans:**` line must change: report the change; it is made after the merge.
+When the main checkout is on another branch, a plan is running there (a branch run). Do not commit, and do not edit a file that is already committed. Run `quartz link-doc <path>` on your new plan (it puts an uncommitted doc on its cards; skip it without Quartz), and report that it is held back. The orchestrator commits it after that branch merges (`hyper-relay:orchestrating`'s `reviewing.md`, §5).
 
 ## After saving the plan
 
-Commit it (above), report its path and task count, and stop. Do not offer ways to execute it and do not start executing: once the owner approves the plan, the orchestrator runs the handoff in `hyper-relay:executing-plans`' `dispatching.md`.
+Commit it (above), report its path and task count to the orchestrator, and stop. Do not offer ways to execute it and do not start executing: the orchestrator checks the plan, stops for the owner, and runs the handoff (`hyper-relay:orchestrating`'s `planning.md` and `dispatching.md`).
