@@ -16,8 +16,8 @@ It is a hard fork of [obra/superpowers](https://github.com/obra/superpowers) (v5
 working: an orchestrating session that you talk to, role agents that do the legwork, and a board that knows where
 everything stands.
 
-> **Status: 0.1.0.** This release moves the skills into a versioned plugin with **no behaviour change**. Later releases
-> add the role agents, per-repo configuration and the orchestrator (see [Roadmap](#roadmap)).
+> **Status: 0.1.0.** The skills, the role agents, per-repo configuration and the orchestrator are in. Still to come:
+> several plans at once, a disposable stack per worktree and the docs' own folder (see [Roadmap](#roadmap)).
 
 ## The relay
 
@@ -31,10 +31,14 @@ everything stands.
 |---|---|---|
 | Capture | `voice-to-specs` | Briefs or board cards from a recording. It stops there and never writes specs, plans or code. |
 | Design | `brainstorming` (+ `visual-companion` for mockups) | An approved design, written as a spec in `docs/superpowers/specs/` |
-| Plan | `writing-plans` | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with full code, tests and a binding contract between plans |
+| Plan | `writing-plans`, run by a planner agent | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with full code, tests and a binding contract between plans |
 | Execute | `executing-plans`, `using-git-worktrees`, `test-driven-development` | Commits, one per task, on a branch or in a worktree |
-| Review | `verification-before-completion`, `requesting-code-review`, `receiving-code-review` | Evidence that it works: tests, then a click-through of the running app |
+| Review | the acceptance reviewer agent, `requesting-code-review` (one review per branch), `receiving-code-review`, `verification-before-completion` | Evidence that it works: the plan's acceptance steps, one code review of the whole branch, then your click-through |
 | Finish | `finishing-a-development-branch` | A merge, on your call |
+
+`orchestrating` runs the legs from an approved spec to the merge: it dispatches the planner, the executor and the
+reviewers, checks what each hands back, and stops for you at four points (the design, the spec, the plan and the
+merge).
 
 Also in the box: `systematic-debugging` (root cause before any fix), `dispatching-parallel-agents`, `writing-skills`,
 `using-hyper-relay` (how to find and use the skills) and `agents` (generates each repo's planner, executor and reviewer
@@ -110,7 +114,7 @@ under WSL.
 | A | **The fork's home:** the skills as a versioned plugin for Claude Code and OpenCode, with no behaviour change | 0.1.0 |
 | B | **Role agents generated per repo:** a planner, an executor and a reviewer built from hyper-relay's templates and one small committed facts file per repo (`.hyper-relay/agents.md`), with a session-start notice when they fall out of date | on `main` |
 | C | **Our own executing-plans:** executes in the worktree it is given (or on a branch, per repo), commits per task with `Plan-Task` trailers, runs the full checks once, and stops before merging | on `main` |
-| D1 | **The orchestrator, one spec at a time:** a new `orchestrating` skill runs the relay from an approved spec to the merge. It dispatches the planner, the executor and the reviewers, checks every hand-back, runs an acceptance check and one code review per branch, and stops for you at four points | in progress |
+| D1 | **The orchestrator, one spec at a time:** a new `orchestrating` skill runs the relay from an approved spec to the merge. It dispatches the planner, the executor and the reviewers, checks every hand-back, runs an acceptance check and one code review per branch, and stops for you at four points | on `main` |
 | D2 | **Several plans at once:** runs a spec's plans side by side, checks them for migration and shared-file conflicts before dispatch, stacks a dependent plan on an unmerged branch, and hands you one preview stack to click through | planned, after E |
 | E | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | brainstorming |
 | F | **`docs/hyper-relay/`:** specs and plans move out of `docs/superpowers/`, once Quartz accepts the new path | planned |

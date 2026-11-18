@@ -6,7 +6,7 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 
 ## Layout
 
-- `skills/<name>/`: the 16 skills. Claude Code names them `hyper-relay:<name>`; OpenCode uses the bare name.
+- `skills/<name>/`: the 17 skills. Claude Code names them `hyper-relay:<name>`; OpenCode uses the bare name.
 - `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`: the plugin, and the one-plugin marketplace that
   installs it (source `./`).
 - `templates/agents/` and `templates/hooks/planner-guard.py`: the role templates and the planner's guard.
