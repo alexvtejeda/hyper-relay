@@ -110,8 +110,10 @@ under WSL.
 | A | **The fork's home:** the skills as a versioned plugin for Claude Code and OpenCode, with no behaviour change | 0.1.0 |
 | B | **Role agents generated per repo:** a planner, an executor and a reviewer built from hyper-relay's templates and one small committed facts file per repo (`.hyper-relay/agents.md`), with a session-start notice when they fall out of date | on `main` |
 | C | **Our own executing-plans:** executes in the worktree it is given (or on a branch, per repo), commits per task with `Plan-Task` trailers, runs the full checks once, and stops before merging | on `main` |
-| D | **The orchestrator:** dispatches the legs, verifies every hand-back, stacks dependent plans, checks for migration and shared-file conflicts, and hands you the stack to click through | planned |
-| – | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | planned |
+| D1 | **The orchestrator, one spec at a time:** a new `orchestrating` skill runs the relay from an approved spec to the merge. It dispatches the planner, the executor and the reviewers, checks every hand-back, runs an acceptance check and one code review per branch, and stops for you at four points | in progress |
+| D2 | **Several plans at once:** runs a spec's plans side by side, checks them for migration and shared-file conflicts before dispatch, stacks a dependent plan on an unmerged branch, and hands you one preview stack to click through | planned, after E |
+| E | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | brainstorming |
+| F | **`docs/hyper-relay/`:** specs and plans move out of `docs/superpowers/`, once Quartz accepts the new path | planned |
 
 ## Credits
 
