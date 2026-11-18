@@ -29,6 +29,7 @@ repo uses Quartz, what "configured properly" means there, and what happens when 
 | D3.6 | Resuming partway through review (finding 1) | **Card status notes, else ask.** With Quartz, the orchestrator posts a status note on the plan's cards after each review leg; a resumed orchestrator reads it. Without Quartz, or with no note but fix commits on the branch, it asks the owner, naming the fix commits (§5). |
 | D3.7 | Layout | **A new `skills/orchestrating/quartz.md`** holds the check, the setup, the ticks and the Quartz duties (moved from `SKILL.md`, which keeps a pointer). `brainstorming` points at it, because it runs before any other leg. |
 | D3.8 | A guard for D1's gates (finding 3) | **`tests/orchestrating/run-tests.sh`,** which also guards finding 7: `quartz install-git-hook` is named only in `quartz.md`. |
+| D3.9 | Two setup details (owner, at stop 3) | **Setup also excludes `.mcp.json` and `.envrc`** in `.git/info/exclude` when git does not track them, so they never show as `??` in a branch run's clean-tree checks (the planner's P3). **And setup prompts the owner for the token** that `.envrc` loads: when the token check still fails after setup writes its files, the closing message opens by asking the owner to create the token in Quartz's project settings and put it in `.env` as `QUARTZ_TOKEN=<token>`, in their editor, never in the chat (§2.2). |
 
 ## 1. What changes where
 
@@ -90,10 +91,13 @@ work has a card; the spec and the plan carry its card line (a plan through its `
     create the file when there is none.
   - `.envrc`: when it has no `QUARTZ_TOKEN` line, append `watch_file .env` and
     `export QUARTZ_TOKEN=$(grep '^QUARTZ_TOKEN=' .env 2>/dev/null | cut -d= -f2)`.
-  - `.env` ignored: `git check-ignore -q .env` succeeds, or add a `.env` line to `.git/info/exclude`.
+  - `.env` ignored: `git check-ignore -q .env` succeeds, or add a `.env` line to `.git/info/exclude`. The same for
+    `.mcp.json` and `.envrc` when git does not track them (D3.9).
   - `quartz install-git-hook`.
-  - Then one message: run `direnv allow`, then restart the session from a shell in the repo, so the MCP server and its
-    token load (in Claude Code, `claude --continue` keeps the conversation); without direnv, export `QUARTZ_TOKEN`
+  - Then one message. When the token check (below) fails, it opens with the prompt for the token (D3.9): create it in
+    the project's settings in Quartz's web app, and put it in `<main checkout>/.env` as `QUARTZ_TOKEN=<token>`, in an
+    editor, never in the chat; `.envrc` loads it from there. Then: run `direnv allow`, then restart the session from
+    a shell in the repo, so the MCP server and its token load (in Claude Code, `claude --continue` keeps the conversation); without direnv, export `QUARTZ_TOKEN`
     before starting the session. `.mcp.json` and `.envrc` hold no secret and stay untracked: committing them is the
     owner's call.
   - Carry on meanwhile. The relay never waits for the restart; the next check (§1) finishes the setup.
