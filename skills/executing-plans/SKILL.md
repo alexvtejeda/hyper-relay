@@ -1,70 +1,92 @@
 ---
 name: executing-plans
-description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
+description: Use when an approved implementation plan is to be executed. The executor dispatched to run one plan follows this file; an orchestrator handing a plan off at the plan-to-execute handoff reads dispatching.md beside it instead, and never executes the plan itself.
 ---
 
 # Executing Plans
 
-## Overview
+**Handing a plan off, as the orchestrator?** Read `${CLAUDE_SKILL_DIR}/dispatching.md` (`dispatching.md` beside this
+SKILL.md) and follow it instead of this file. You never execute a plan yourself.
 
-Load plan, review critically, execute all tasks, report when complete.
+This file is for the **executor**: the agent dispatched, in a fresh context, to run ONE approved plan. You run every
+task that is yours, in order, yourself; then you report and stop. There is no partner to ask: the orchestrator reads
+your report. Your agent file (`<project>-executor`, when the repo has one) adds what is particular to the repo: its
+setup, its full gates, its constraints and its acceptance steps.
 
-**Announce at start:** "I'm using the executing-plans skill to implement this plan."
+**Announce at start:** "I'm using the executing-plans skill to execute this plan."
 
-**Note:** Tell your human partner that hyper-relay works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use hyper-relay:subagent-driven-development instead of this skill.
+## The dispatch prompt gives
 
-## The Process
+- the plan's path (absolute when the plan is not committed on `main`), and which of its tasks are yours;
+- the **mode**: `branch` (a new branch in the repo's main checkout) or `worktree` (the branch's own worktree);
+- the checkout's path and the branch;
+- the Claude-Session URL for your commit trailers;
+- anything unusual, for example `main` having moved since the plan was written.
 
-### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+## The process
 
-### Step 2: Execute Tasks
+1. **Check where you are.** In the checkout the prompt names, `git rev-parse --show-toplevel` must print that
+   checkout and `git branch --show-current` the branch. If not, stop and report: never switch branches. Work only
+   there: start every shell command with `cd <checkout> && ` (your shell may not keep its directory between
+   calls); the plan's paths are relative to the checkout's top. Read `CLAUDE.md` at the top. The plan's Execution
+   notes are binding.
+2. **No review gate.** The plan is approved: do not re-plan it or ask about it. A step that is unclear or impossible
+   means stop and report, never guess.
+3. **Each task, in order:**
+   - Follow its steps exactly, transcribing the plan's code.
+   - Run only that task's checks.
+   - Commit at its end, staging named files only (never `git add -A` / `git add .`). The task's final commit carries
+     `Plan-Task: <plan path>#<N>` and the attribution lines your instructions give (in Claude Code, a
+     `Co-Authored-By:` line and `Claude-Session:` with the URL from the dispatch prompt), all in ONE final
+     paragraph, so git reads them all as trailers:
 
-For each task:
-1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. Mark as completed
+     ```bash
+     git commit -m "<subject>" -m "Plan-Task: <plan path>#<N>
+     Co-Authored-By: <the line your instructions give>
+     Claude-Session: <the URL the dispatch prompt gives>"
+     ```
 
-### Step 3: Complete Development
+   - Report every `quartz:` line a commit prints, verbatim. Never tick the plan: its hooks or the orchestrator do.
+4. **When the code is not what the plan expects** (an expected line differs, a file moved): adapt as little as
+   possible, and record it as a deviation with the reason. A step that fails twice the same way: stop and report.
+5. **Full gates, once,** after your last task: the ones the plan's Execution notes name, and your agent's own
+   ("Full gates").
+6. **Acceptance:** follow your agent's acceptance steps for your mode, under "In a worktree" or "On a branch", when
+   it has them. Then copy the plan's acceptance checklist (its last task) into your report.
+7. **Report, then stop.** The orchestrator verifies every line of it:
+   - tasks done (n/N), each with its commit hash;
+   - each gate, with its pass/fail counts;
+   - every deviation from the plan, and why;
+   - every `quartz:` line, verbatim;
+   - the acceptance output: URLs, logins, anything left running;
+   - anything left for the owner: a task that is theirs, a step you stopped at.
 
-After all tasks complete and verified:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use hyper-relay:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+## Never, in either mode
 
-## When to Stop and Ask for Help
+- Switch branches, stash, reset, rebase, merge, push or tag. Tick the plan. Invoke
+  `hyper-relay:finishing-a-development-branch`: the owner decides the merge.
+- Start a live `claude -p` or `opencode run` session, install or uninstall a plugin, or add a marketplace.
+- Call a real third-party API or use real credentials: tests use fakes.
+- Touch anything outside your checkout: `~/.claude/`, `~/.config/opencode/`, other repos, other worktrees. A task
+  marked as the owner's or the orchestrator's is not yours, even when it gives commands.
+- Wait with a self-matching `pgrep`, or `pkill -f` a pattern that appears in your own command line. Stop a server
+  you started by its PID.
 
-**STOP executing immediately when:**
-- Hit a blocker (missing dependency, test fails, instruction unclear)
-- Plan has critical gaps preventing starting
-- You don't understand an instruction
-- Verification fails repeatedly
+Read files in targeted ranges, and pipe long output through `tail` or `grep`: the owner rations usage.
 
-**Ask for clarification rather than guessing.**
+## Branch mode adds
 
-## When to Revisit Earlier Steps
+You share the repo's main checkout with the orchestrator, who keeps working while you run.
 
-**Return to Review (Step 1) when:**
-- Partner updates the plan based on your feedback
-- Fundamental approach needs rethinking
-
-**Don't force through blockers** - stop and ask.
-
-## Remember
-- Review plan critically first
-- Follow plan steps exactly
-- Don't skip verifications
-- Reference skills when plan says to
-- Stop when blocked, don't guess
-- Never start implementation on main/master branch without explicit user consent
+- Untracked files under `docs/superpowers/` that you did not create are the orchestrator's held-back specs and plans:
+  never stage, edit, move or delete them. A "the tree is clean" check ignores them.
+- If a git command fails on `index.lock` ("Unable to create '…/index.lock': File exists"), wait a second and retry
+  once.
+- A commit may print that a task "ticks at the next drain", because the main checkout is on your branch. That is
+  expected: report it like any `quartz:` line.
 
 ## Integration
 
-**Required workflow skills:**
-- **hyper-relay:using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing)
-- **hyper-relay:writing-plans** - Creates the plan this skill executes
-- **hyper-relay:finishing-a-development-branch** - Complete development after all tasks
+- `hyper-relay:writing-plans` writes the plan; `dispatching.md` hands it to you.
+- `hyper-relay:test-driven-development`: when a task writes a test first, watch it fail before you make it pass.
+- `hyper-relay:finishing-a-development-branch` belongs to the owner and the orchestrator, after the click-through.
