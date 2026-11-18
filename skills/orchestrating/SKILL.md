@@ -34,8 +34,12 @@ before, and `quartz.md` at the start of every leg (Quartz duties, below):
 |---|---|---|
 | 1. Design | The design, section by section (`brainstorming`) | the spec |
 | 2. Spec | The written spec (`brainstorming`) | the planner leg: approval is the go-ahead, no second ask |
-| 3. Plan ready | The hand-back check's result, the planner's deviations, the decisions the owner must make, the plan-review offer, the handoff question (`planning.md` §3) | execution, a plan review, or plan changes |
-| 4. Ready to merge | Gate and acceptance results, fixes made, Critical findings fixed or dropped, proposed cards (`reviewing.md` §4) | the click-through and the merge |
+| 3. Plan ready | Its questions first: the decisions the owner must make, the plan-review offer, the handoff question. Then the hand-back check's result and the planner's deviations (`planning.md` §3) | execution, a plan review, or plan changes |
+| 4. Ready to merge | Its questions first: the proposed cards, the steps that are the owner's, where to click through. Then gate and acceptance results, fixes made, Critical findings fixed or dropped (`reviewing.md` §4) | the click-through and the merge |
+
+A stop that asks anything opens with its questions, numbered, before any report: every question, and every decision
+the owner must make. The report follows, short: one line per item, and nothing the board shows. No question comes
+after the report.
 
 A stop ends the message: the next leg never starts in the message that reaches a stop. Between stop 3 and stop 4 the
 loop runs on its own, except for a gap in the spec or plan and a second failed fix round, which go to the owner
@@ -48,11 +52,26 @@ column is a cross-check.
 
 | State | Leg |
 |---|---|
-| A spec that no plan's `**Spec:**` line names | The planner leg, once the owner has approved the spec: their asking to pick it up is that approval. Never brainstorm it again. |
+| A spec that no plan's `**Spec:**` line names | **Offer** the planner leg: name the spec and ask whether to plan it; the owner's yes is the approval. When the owner asked to pick up that spec, the request is the yes. Never brainstorm it again. |
 | A plan with no branch of its name, and no `Plan-Task:` commits for it on `main` | Stop 3 (the owner has not approved it yet) or the handoff, by what the owner says |
 | A plan's branch with some of its tasks committed, and no executor report in this session | **Ask the owner** whether its executor is still running elsewhere. Two executors on one branch collide. |
-| A plan's branch with all its executor tasks committed | `dispatching.md` §7 (verify), then `reviewing.md` |
+| A plan's branch with all its executor tasks committed | By its review status (below) |
 | The branch merged, with an `after merge` step of the plan's acceptance task left (that task is not ticked) | `reviewing.md` §5 |
+
+**A branch with all its executor tasks committed** goes by its review status. In a repo that uses Quartz, with its MCP
+loaded (`quartz.md` §1 and §2), that is the current status note on the plan's cards (`get_task`), counted only when it
+names this plan's path (`reviewing.md` §2 and §3 post it). Otherwise the last row applies.
+
+| Review status | Leg |
+|---|---|
+| None, and no fix commits on the branch | `dispatching.md` §7 (verify), then `reviewing.md` §1 |
+| "acceptance done" | `reviewing.md` §3 |
+| "code review done" | Stop 4 (`reviewing.md` §4) |
+| The repo does not use Quartz or its MCP is not loaded, or no status but fix commits | **Ask the owner** which review legs ran, naming the fix commits. Rerun nothing on your own. |
+
+A fix commit is a commit on `main..<branch>` with no `Plan-Task:` trailer, after the branch's last `Plan-Task:`
+commit: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>` lists the branch's commits, newest
+first, and the fix commits are those above the newest one with a trailer.
 
 The branch name comes from the plan's file name (`dispatching.md` §3). To read the state:
 `git grep -l -F '<spec file name>' -- docs/superpowers/plans` finds the spec's plans; `git branch --list <branch>`
