@@ -67,10 +67,11 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 
 | What | Command | Expect |
 |---|---|---|
-| Manifests and skills | `claude plugin validate .` | Passes. Its one warning is about this `CLAUDE.md` at the plugin root, which is for developing hyper-relay, not for users |
+| Manifests and skills | `claude plugin validate .` | Passes, with three warnings: this `CLAUDE.md` at the plugin root (for developing hyper-relay, not for users), `ICON_MISSING`, and, in this checkout only, `PRIVACY_URL_MISSING`, which comes from the gitignored `.mcp.json` (Quartz's MCP server) |
 | add-card-line | `sh tests/add-card-line/run-tests.sh` | `0 failed` |
 | voice-to-specs | `sh skills/voice-to-specs/tests/transcribe-sh.test.sh` and `sh skills/voice-to-specs/tests/setup-sh.test.sh` | `0 failed` from each |
 | Role agents | `sh tests/hyper-relay-agents/run-tests.sh` and `sh tests/hyper-relay-agents/guard-test.sh` | `0 failed` from each |
 | visual-companion | `bash skills/visual-companion/scripts/run-tests.sh` | every case `ok`, exit 0 |
 | wt | `sh tests/wt/run-tests.sh` | `0 failed` |
+| Relay skills | `sh tests/orchestrating/run-tests.sh` | `0 failed` |
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |
