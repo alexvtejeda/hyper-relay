@@ -1249,7 +1249,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `templates/agents/planner.md`, `templates/agents/reviewer-commands.md`, `templates/agents/reviewer-browser.md`
 - Test (unchanged, run): `tests/hyper-relay-agents/run-tests.sh`
 
-- [ ] **Step 1: The planner's plan format.** In `templates/agents/planner.md`, replace:
+- [x] **Step 1: The planner's plan format.** In `templates/agents/planner.md`, replace:
 ```text
   **Execution notes**, tasks with FULL code, and a **Spec ambiguities / deviations** table. Mirror the newest plans
   in `docs/superpowers/plans/` for format.
@@ -1262,7 +1262,7 @@ with:
   implement it; with sibling plans, a **Contract** section, identical in each.
 ```
 
-- [ ] **Step 2: The planner's acceptance bullet.** Replace:
+- [x] **Step 2: The planner's acceptance bullet.** Replace:
 ```text
 - A plan ends with its acceptance task. The checklist gives, for each step, the command or action and the result
   that counts as PASS, so the reviewer or the owner can run it as written.
@@ -1275,7 +1275,7 @@ with:
   result that counts as PASS, so it can be run as written.
 ```
 
-- [ ] **Step 3: The planner's Committing (E9).** Replace:
+- [x] **Step 3: The planner's Committing (E9).** Replace:
 ```text
 4. If the commit prints a `quartz:` warning: `quartz link-doc <plan path>`.
 ```
@@ -1287,7 +1287,7 @@ with:
 5. If the commit prints a `quartz:` warning: `quartz link-doc <plan path>`.
 ```
 
-- [ ] **Step 4: The commands reviewer.** In `templates/agents/reviewer-commands.md`, replace:
+- [x] **Step 4: The commands reviewer.** In `templates/agents/reviewer-commands.md`, replace:
 ```text
   Performs the acceptance check for ONE {{project}} plan ({{root}}) on its branch: runs the plan's acceptance
   checklist as written (commands, test suites, and any live session or screen it names) and reports PASS / FAIL /
@@ -1316,7 +1316,7 @@ with:
    `CLAUDE.md`.
 ```
 
-- [ ] **Step 5: The browser reviewer.** In `templates/agents/reviewer-browser.md`, replace:
+- [x] **Step 5: The browser reviewer.** In `templates/agents/reviewer-browser.md`, replace:
 ```text
   Performs the owner's click-through (acceptance by clicking) for ONE {{project}} plan ({{root}}) on an
   already-running stack, with the Playwright MCP browser, and reports PASS / FAIL / NEEDS-HUMAN per checklist step
@@ -1346,7 +1346,7 @@ with:
    `CLAUDE.md`.
 ```
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1354,7 +1354,7 @@ with:
 | `git grep -c -F 'reviewer`' -- templates/agents` | `templates/agents/planner.md:1`, `templates/agents/reviewer-browser.md:2`, `templates/agents/reviewer-commands.md:2` |
 | `git grep -n -e 'index.lock' -e 'Spec coverage' -- templates/agents/planner.md` | two lines |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add templates/agents/planner.md templates/agents/reviewer-commands.md templates/agents/reviewer-browser.md
