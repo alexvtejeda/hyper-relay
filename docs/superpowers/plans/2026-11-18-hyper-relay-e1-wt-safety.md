@@ -407,35 +407,35 @@ per Bash call; they make no commit with a `Plan-Task:` trailer, so the orchestra
 Step 13 is done (commit just the plan: `docs: plan progress, task 3 of 3`). No step starts a live session or real
 Docker: the suite runs on its fake `docker`.
 
-- [ ] **Step 1 (`reviewer`): The suite, with the three new cases (spec §4.1, §2).**
+- [x] **Step 1 (`reviewer`): The suite, with the three new cases (spec §4.1, §2).**
 
 | Run | PASS |
 |---|---|
 | `sh tests/wt/run-tests.sh \| tail -n 1` | `130 passed, 0 failed` |
 | `sh tests/wt/run-tests.sh \| grep -F 'base file'` | twelve lines, each starting `ok`: four for `an untracked base file …`, four for `a base file outside the repo …`, four for `a symlinked base file …` |
 
-- [ ] **Step 2 (`reviewer`): Syntax and mode.**
+- [x] **Step 2 (`reviewer`): Syntax and mode.**
 
 | Run | PASS |
 |---|---|
 | `dash -n bin/wt`, then `dash -n tests/wt/run-tests.sh` | silent, exit 0 |
 | `git ls-files -s bin/wt` | a line starting `100755` |
 
-- [ ] **Step 3 (`reviewer`): `bin/wt` adds only the two checks (spec §1, §4.2; E1.4; D4).**
+- [x] **Step 3 (`reviewer`): `bin/wt` adds only the two checks (spec §1, §4.2; E1.4; D4).**
 
 | Run | PASS |
 |---|---|
 | `git diff --numstat main...HEAD -- bin/wt` | `3	0	bin/wt` |
 | `git diff main...HEAD -- bin/wt` | one hunk, in `write_base_env`, adding exactly `    git -C "$ROOT" ls-files --error-unmatch -- "$ENV_BASE" >/dev/null 2>&1 \|\|`, `        die "WT_ENV_BASE must be a file git tracks: $ENV_BASE"` and `    [ ! -L "$ROOT/$ENV_BASE" ] \|\| die "WT_ENV_BASE must not be a symlink: $ENV_BASE"`, in that order, straight after the `WT_ENV_BASE file not found` line; nothing removed |
 
-- [ ] **Step 4 (`reviewer`): The three test cases (spec §2; D1, D12).**
+- [x] **Step 4 (`reviewer`): The three test cases (spec §2; D1, D12).**
 
 | Run | PASS |
 |---|---|
 | `git diff --numstat main...HEAD -- tests/wt/run-tests.sh` | `30	0	tests/wt/run-tests.sh` |
 | `git diff main...HEAD -- tests/wt/run-tests.sh` | one hunk in the `--- refusals` section, after `an unknown placeholder builds nothing` and before the existing-`.env` case: three `new_case app feat/one` cases, one with an untracked `$WT/.env.local` and `WT_ENV_BASE=.env.local`, one with `$CASE_DIR/outside.env` and `WT_ENV_BASE=../outside.env`, and one that commits `$WT/link.env`, a symlink to `../outside.env`, with `WT_ENV_BASE=link.env`. Each asserts exit 1, an empty fake docker log and no `$WT/.env`; the first two look for `git tracks: <path>` in the output, the third for `must not be a symlink: link.env` |
 
-- [ ] **Step 5 (`reviewer`): Each row of spec §3's table is in `docs/wt.md`.**
+- [x] **Step 5 (`reviewer`): Each row of spec §3's table is in `docs/wt.md`.**
 
 | Run | PASS |
 |---|---|
@@ -448,7 +448,7 @@ Docker: the suite runs on its fake `docker`.
 | `git grep -n -F 'names a file git does not track' -- docs/wt.md` | one line, 163: a row of "When something fails" that also names a symlink, saying `wt` stops before writing `.env` and names the file |
 | `git grep -n -F 'is no sandbox' -- docs/wt.md` | one line, 182: the last bullet of the Safety list |
 
-- [ ] **Step 6 (`reviewer`): The two claims E's review flagged are gone (spec §4.2).**
+- [x] **Step 6 (`reviewer`): The two claims E's review flagged are gone (spec §4.2).**
 
 | Run | PASS |
 |---|---|
@@ -456,14 +456,14 @@ Docker: the suite runs on its fake `docker`.
 | `git grep -n -F 'comes from the base file' -- docs/wt.md` | nothing |
 | `git grep -n -A 2 -F 'comes from a file git tracks' -- docs/wt.md` | lines 174–176: one Safety bullet whose first two lines say `wt up` refuses any other base file, and any symlink, and whose last line says a stack `holds no real secrets` |
 
-- [ ] **Step 7 (`reviewer`): Nothing else in `docs/wt.md` changed (spec §3).**
+- [x] **Step 7 (`reviewer`): Nothing else in `docs/wt.md` changed (spec §3).**
 
 | Run | PASS |
 |---|---|
 | `git diff --numstat main...HEAD -- docs/wt.md` | `19	7	docs/wt.md` |
 | `git diff main...HEAD -- docs/wt.md` | every hunk is one of the eight edits of Task 2 Step 1, (a)–(h); no other line differs |
 
-- [ ] **Step 8 (`reviewer`): Only three files differ, and no other project is named (spec §4.2).**
+- [x] **Step 8 (`reviewer`): Only three files differ, and no other project is named (spec §4.2).**
 
 | Run | PASS |
 |---|---|
@@ -471,16 +471,16 @@ Docker: the suite runs on its fake `docker`.
 | `git grep -n -i -w -E 'sat\|quartz' -- bin/wt tests/wt docs/wt.md` | nothing |
 | `git log --format=%B main..HEAD \| grep -c -i -w -E 'sat\|quartz'` | `0` |
 
-- [ ] **Step 9 (`reviewer`): The manifests.**
+- [x] **Step 9 (`reviewer`): The manifests.**
 
 | Run | PASS |
 |---|---|
 | `claude plugin validate .` | passes; its only warnings are the root `CLAUDE.md` one and, if it appears, `ICON_MISSING` |
 
-- [ ] **Step 10 (`owner`): Read what users will read.** `git -C /home/noob_master/hyper-relay diff main...hyper-relay-e1-wt-safety -- docs/wt.md`. PASS: the owner
+- [x] **Step 10 (`owner`): Read what users will read.** `git -C /home/noob_master/hyper-relay diff main...hyper-relay-e1-wt-safety -- docs/wt.md`. PASS: the owner
   agrees each note is true of `wt` and says no more than spec §3 asks.
 
-- [ ] **Step 11 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
+- [x] **Step 11 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly.**
 
 | Run | PASS |
@@ -489,7 +489,7 @@ Docker: the suite runs on its fake `docker`.
 
 On exit 1 it names the conflicted files: tell the owner before merging.
 
-- [ ] **Step 12 (`after merge`): Push, then the owner reinstalls (spec §4.3).** Precondition: the owner has merged
+- [x] **Step 12 (`after merge`): Push, then the owner reinstalls (spec §4.3).** Precondition: the owner has merged
   `hyper-relay-e1-wt-safety` into `main`, and the main checkout is on `main`. The version stays 0.1.0.
 
 ```bash
@@ -506,7 +506,7 @@ Then the owner, in a Claude Code session: `/plugin install hyper-relay@hyper-rel
 
 If either of the first two fails, stop and tell the owner; do not delete or uninstall anything.
 
-- [ ] **Step 13 (`after merge`): The owner's projects still pass both checks (spec §4.3; D6).**
+- [x] **Step 13 (`after merge`): The owner's projects still pass both checks (spec §4.3; D6).**
 
 | Run | PASS |
 |---|---|
