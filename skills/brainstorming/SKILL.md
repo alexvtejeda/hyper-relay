@@ -10,12 +10,16 @@ Help turn ideas into fully formed designs and specs through natural collaborativ
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
 <HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity, except an off-ramp case (below).
 </HARD-GATE>
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
-Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+Every project goes through this process, except an off-ramp case (below). A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+
+## The Off-Ramp (Experiment)
+
+A request may skip the relay (no design, spec or plan) only when it is one of: a typo; a one-line config change; a rename; a single obvious bugfix; a question that changes no files. For any of them except the question, say which case it matches and ask, in a message of its own: "This looks like an off-ramp case (*a one-line config change*). I'd do it directly, with no spec or plan. OK?" Skip the relay only on a yes. When the owner already said to just do it, that is the yes. Anything not on the list, or any doubt, goes through the relay without asking. If the work turns out bigger than one change, stop and take it through the relay.
 
 ## Checklist
 
@@ -30,7 +34,7 @@ You MUST create a task for each of these items and complete them in order:
 7. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, add its Quartz card line if the work has a card, and commit it while the main checkout is on `main` (during a branch run, `quartz link-doc` it instead; see Documentation)
 8. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 9. **User reviews written spec** — ask user to review the spec file before proceeding
-10. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+10. **Hand over to the relay** — invoke `hyper-relay:orchestrating`: its planner leg dispatches a planner, which writes the plan. Do not write the plan, and do not invoke `writing-plans`.
 
 ## Process Flow
 
@@ -46,7 +50,7 @@ digraph brainstorming {
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
+    "Invoke orchestrating skill" [shape=doublecircle];
 
     "Explore project context" -> "Visual questions ahead?";
     "Visual questions ahead?" -> "Offer Visual Companion\n(own message, no other content)" [label="yes"];
@@ -60,11 +64,11 @@ digraph brainstorming {
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+    "User reviews spec?" -> "Invoke orchestrating skill" [label="approved"];
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**The terminal state is invoking `hyper-relay:orchestrating`.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is `orchestrating`, whose planner leg writes the plan.
 
 ## The Process
 
@@ -114,7 +118,7 @@ digraph brainstorming {
 - When the work has a Quartz card, run `${CLAUDE_SKILL_DIR}/scripts/add-card-line.sh <spec-path> <card-id> [<card-id>...]` (`scripts/add-card-line.sh` beside this SKILL.md) straight after writing the spec. With no card, skip this. If the script fails, report the failure to the user and carry on: a script failure does not stop this skill.
 - When the work needs more than one implementation plan, for example an API plan and a web plan, add a `**Plans:** <n>` line to the spec's header, before its first `---` or `## `, with `<n>` from 1 to 9. If the design does not make the number clear, ask the user how many plans it needs. With one plan, leave the line out. Quartz reads it, and keeps the card open until that many plans have merged.
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git, only while the repo's main checkout is on `main` (`git branch --show-current` there prints `main`), staging it by its path. When the main checkout is on another branch, a plan is running there: do not commit. Run `quartz link-doc <spec-path>` instead (it puts an uncommitted doc on its cards; skip it without Quartz), and leave the commit for after that branch merges (`hyper-relay:executing-plans`' `dispatching.md`, step 9).
+- Commit the design document to git, only while the repo's main checkout is on `main` (`git branch --show-current` there prints `main`), staging it by its path. When the main checkout is on another branch, a plan is running there: do not commit. Run `quartz link-doc <spec-path>` instead (it puts an uncommitted doc on its cards; skip it without Quartz), and leave the commit for after that branch merges (`hyper-relay:orchestrating`'s `reviewing.md`, §5).
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
@@ -135,8 +139,8 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+- Once the user approves the written spec, invoke `hyper-relay:orchestrating`: its planner leg dispatches a planner, which writes the plan. The approval is the go-ahead; do not ask again.
+- Do not write the plan yourself, and do not invoke `writing-plans`. Do NOT invoke any other skill: `orchestrating` is the next step.
 
 ## Key Principles
 

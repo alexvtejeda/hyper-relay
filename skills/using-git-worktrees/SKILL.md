@@ -1,6 +1,6 @@
 ---
 name: using-git-worktrees
-description: Use when starting feature work of your own that needs isolation from the current workspace. REQUIRED whenever the user says "worktree", "isolate this", "keep my checkout free" or "work on something else while this runs" about such work. Not for running an implementation plan, whose executor's worktree is set up (and never entered) by executing-plans' dispatching.md. Ensures an isolated workspace exists via native tools (EnterWorktree) or git worktree fallback.
+description: Use when starting feature work of your own that needs isolation from the current workspace. REQUIRED whenever the user says "worktree", "isolate this", "keep my checkout free" or "work on something else while this runs" about such work. Not for running an implementation plan, whose executor's worktree is set up (and never entered) by orchestrating's dispatching.md. Ensures an isolated workspace exists via native tools (EnterWorktree) or git worktree fallback.
 ---
 
 # Using Git Worktrees

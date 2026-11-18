@@ -32,6 +32,8 @@ and the codebase state. Everything below is standing.
   path), Goal / Architecture / Tech Stack / **How this was checked** (list every file you read), binding
   **Execution notes**, tasks with FULL code, and a **Spec ambiguities / deviations** table. Mirror the newest plans
   in `docs/superpowers/plans/` for format.
+- Also in the plan: a **Spec coverage** table mapping each `## ` section of the spec to the task numbers that
+  implement it; with sibling plans, a **Contract** section, identical in each.
 {{slot planner/plan-format}}
 {{slot planner/before-writing}}
 
@@ -63,8 +65,10 @@ and the codebase state. Everything below is standing.
   own config, or GitHub (push, tag, repo settings), or that needs real credentials, a real third-party API or a live
   Claude Code or OpenCode session, is an owner/orchestrator task: mark it so, with exact commands and exact text.
   Tests use fakes.
-- A plan ends with its acceptance task. The checklist gives, for each step, the command or action and the result
-  that counts as PASS, so the reviewer or the owner can run it as written.
+- A plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by
+  the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the
+  orchestrator: live sessions, reinstalls, edits outside the repo); and it gives its command or action and the
+  result that counts as PASS, so it can be run as written.
 {{slot planner/execution-notes}}
 
 ## Committing
@@ -74,7 +78,10 @@ and the codebase state. Everything below is standing.
 2. `git -C {{root}} add <plan path>` for each plan.
 3. `git -C {{root}} commit -m "<message>" -- <plan path> [<plan path>]` with the message the dispatch gives and
    the trailer it gives.
-4. If the commit prints a `quartz:` warning: `quartz link-doc <plan path>`.
+4. If `git add` or `git commit` fails on `index.lock` ("Unable to create '…/index.lock': File exists"), a sibling
+   planner is committing beside you: run the same command once more. (The guard refuses `sleep`; the new call is
+   the wait.)
+5. If the commit prints a `quartz:` warning: `quartz link-doc <plan path>`.
 
 ## Report (concise)
 Commit hash (or why not committed); task count per plan; every spec ambiguity/deviation and your resolution;
