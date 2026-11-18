@@ -554,7 +554,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/agents/SKILL.md`
 
-- [ ] **Step 1: The command table.** Replace:
+- [x] **Step 1: The command table.** Replace:
 ```text
 | `hyper-relay-agents` | Writes the four files, one line each: `written`, `unchanged`, or `refused` with the reason. Exit 1 if any is refused or the facts file has a problem; then nothing is half-written. |
 ```
@@ -563,7 +563,7 @@ with:
 | `hyper-relay-agents` | Writes the four files, one line each: `written`, `unchanged`, or `refused` with the reason. When it wrote an agent, a last line says to start a new session. Exit 1 if any is refused or the facts file has a problem; then nothing is half-written. |
 ```
 
-- [ ] **Step 2: The example and the header table.** Replace:
+- [x] **Step 2: The example and the header table.** Replace:
 ```text
 project: myapp
 reviewer: browser
@@ -587,7 +587,7 @@ with:
 | `execute` | `branch` (an executor runs a plan on a new branch in the main checkout) or `worktree` (in its own worktree). The handoff in `hyper-relay:executing-plans`' `dispatching.md` offers it as this repo's default; without it, the handoff asks. The generator only checks the value. |
 ```
 
-- [ ] **Step 3: Empty headings.** Replace:
+- [x] **Step 3: Empty headings.** Replace:
 ```text
 a section is left out, and so is a heading left with nothing under it.
 ```
@@ -596,7 +596,7 @@ with:
 a section is left out, and so is a `## ` or `### ` heading left with nothing under it.
 ```
 
-- [ ] **Step 4: The slot table.** Replace:
+- [x] **Step 4: The slot table.** Replace:
 ```text
 | `executor/setup` | executor, "Where" | an install step a worktree needs |
 ```
@@ -615,7 +615,7 @@ with:
 | `executor/acceptance-branch` | executor, "Acceptance", "On a branch" | restart the owner's normal dev server on the branch, report its URLs |
 ```
 
-- [ ] **Step 5: The restart line (C12).** Replace:
+- [x] **Step 5: The restart line (C12).** Replace:
 ```text
 Run `hyper-relay-agents` and tell the owner what changed, file by file. If it printed `Created .claude/agents/`, say
 that the session must be restarted before any of these agents is dispatched: Claude Code watches only agent folders
@@ -629,12 +629,12 @@ still dispatches the definitions it loaded, even for a file it has just rewritte
 only from a session started after this run.
 ```
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 Run: `git grep -n -e "executor/acceptance" -e "Created .claude/agents" -e "Restart Claude Code" -- skills/agents`
 Expected: exactly two lines, the `executor/acceptance-worktree` and `executor/acceptance-branch` rows.
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/agents/SKILL.md
