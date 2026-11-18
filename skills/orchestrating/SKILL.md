@@ -20,11 +20,13 @@ leg. You dispatch it, check what it hands back, and stop for the owner where thi
 | Handoff and executor | `dispatching.md` | a verified hand-back (no stop) |
 | Review, click-through, merge | `reviewing.md` | stop 4, then the merge |
 
-The three leg files are beside this SKILL.md. Read each one when the loop reaches its leg, not before:
+The three leg files and `quartz.md` are beside this SKILL.md. Read each leg file when the loop reaches its leg, not
+before, and `quartz.md` at the start of every leg (Quartz duties, below):
 
 - `${CLAUDE_SKILL_DIR}/planning.md` (`planning.md` beside this SKILL.md);
 - `${CLAUDE_SKILL_DIR}/dispatching.md` (`dispatching.md` beside this SKILL.md);
-- `${CLAUDE_SKILL_DIR}/reviewing.md` (`reviewing.md` beside this SKILL.md).
+- `${CLAUDE_SKILL_DIR}/reviewing.md` (`reviewing.md` beside this SKILL.md);
+- `${CLAUDE_SKILL_DIR}/quartz.md` (`quartz.md` beside this SKILL.md).
 
 ## The stops
 
@@ -62,23 +64,8 @@ hold-back rules bind you, in every leg.
 
 ## Quartz duties
 
-Each falls back to plain Markdown and git without Quartz.
-
-- Every spec and plan carries its card line in its header, above its first `---` or `## `:
-  ``**Card:** <title> (`<uuid>`)``, or `**Cards:**` with several, comma-separated. Card ids are full UUIDs only.
-  Write the line with brainstorming's script, `${CLAUDE_SKILL_DIR}/../brainstorming/scripts/add-card-line.sh` (`../brainstorming/scripts/add-card-line.sh` from this SKILL.md).
-  A plan with no card line inherits its spec's cards through its `**Spec:**` line.
-- A spec or plan is committed only while the main checkout is on `main`. During a branch run, `quartz link-doc <path>`
-  puts it on its cards, and it is committed after the merge (`reviewing.md` §5).
-- `quartz link-branch` at dispatch and `quartz review` after verifying the hand-back (`dispatching.md` §4 and §7).
-- Plan tasks tick themselves: a task's final commit carries its `Plan-Task:` trailer, and a hook ticks the task. Tick
-  by hand only when a `quartz:` line says to, or when a task has no commit: tick its checkboxes on `main` and commit
-  just the plan, with the message `docs: plan progress, task N of M`.
-- In a repo new to Quartz, run `quartz install-git-hook` once.
-- A `quartz:` line printed by a commit is the only Quartz output to act on: do what it says.
-- **Don't report what the board shows:** never list done tasks, tick counts or per-task commits. Report failures, gate
-  results, deviations and the decisions the owner must make.
-- The proposed cards the owner keeps are added through the Quartz MCP (`reviewing.md` §4).
+Read `quartz.md` beside this file (`${CLAUDE_SKILL_DIR}/quartz.md`) at the start of every leg. Every Quartz step runs
+only when its §1 says the repo uses Quartz.
 
 ## Fallbacks
 
