@@ -1,0 +1,552 @@
+#!/bin/sh
+# hyper-relay-agents: generates a repo's role agents from hyper-relay's templates and the repo's
+# committed facts file, .hyper-relay/agents.md. POSIX shell, run by dash. Design: hyper-relay's
+# docs/superpowers/specs/2026-11-17-hyper-relay-b-generated-agents-design.md
+#
+#   hyper-relay-agents                 write .claude/agents/<project>-{planner,executor,reviewer}.md
+#                                      and .claude/hooks/hyper-relay-planner-guard.py
+#   hyper-relay-agents --force         the same, and overwrite a hand-edited or hand-written one
+#   hyper-relay-agents --check         write nothing; one line per file that is not current
+#   hyper-relay-agents --check --hook  the plugin's SessionStart check: silent when current, always exit 0
+#
+# Run it anywhere in a repo's checkout: it reads that checkout's facts file and writes into that
+# checkout. The templates are the ones beside this script (../templates), so a hyper-relay
+# worktree's copy uses that worktree's templates.
+#
+# No `set -e`: every step checks its own status, so that --hook can always exit 0.
+set -u
+LC_ALL=C
+export LC_ALL
+
+SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+SELF="$SELF_DIR/$(basename -- "$0")"
+PLUGIN=$(dirname -- "$SELF_DIR")
+TEMPLATES="$PLUGIN/templates"
+ITEMS="planner executor reviewer guard"
+USAGE="usage: hyper-relay-agents [--force] | hyper-relay-agents --check [--hook]"
+FORCE=0
+CHECK=0
+HOOK=0
+BAD=
+REFUSED=0
+PROJECT=
+REVIEWER=
+WORK=
+
+trap '[ -z "$WORK" ] || rm -rf "$WORK"' EXIT
+trap 'exit 1' INT TERM
+
+die() {
+    printf 'hyper-relay-agents: %s\n' "$*" >&2
+    exit 1
+}
+
+problem() {
+    printf '%s\n' "$*" >> "$WORK/problems"
+}
+
+# The SessionStart hook's one line, as JSON: systemMessage shows it to the owner, and
+# additionalContext puts it in the session's context, for the orchestrator.
+hook_say() { # text
+    esc=$(printf '%s' "$1" | tr -d '\000-\037' | sed 's/\\/\\\\/g; s/"/\\"/g')
+    printf '{"systemMessage":"%s","hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
+        "$esc" "$esc"
+}
+
+rel_of() { # item
+    case $1 in
+        guard) printf '%s' ".claude/hooks/hyper-relay-planner-guard.py" ;;
+        *) printf '%s' ".claude/agents/$PROJECT-$1.md" ;;
+    esac
+}
+
+name_of() { # item
+    case $1 in
+        guard) printf '%s' "hyper-relay-planner-guard" ;;
+        *) printf '%s' "$PROJECT-$1" ;;
+    esac
+}
+
+tpl_of() { # item
+    case $1 in
+        guard) printf '%s' "$TEMPLATES/hooks/planner-guard.py" ;;
+        reviewer) printf '%s' "$TEMPLATES/agents/reviewer-$REVIEWER.md" ;;
+        *) printf '%s' "$TEMPLATES/agents/$1.md" ;;
+    esac
+}
+
+model_of() { # item
+    case $1 in
+        planner) printf '%s' "$M_PLANNER" ;;
+        executor) printf '%s' "$M_EXECUTOR" ;;
+        *) printf '%s' "$M_REVIEWER" ;;
+    esac
+}
+
+sec_file() { # role/slot
+    printf '%s/sections/%s' "$WORK" "$(printf '%s' "$1" | sed 's|/|__|')"
+}
+
+hash_of() { # file
+    sha256sum < "$1" | cut -d' ' -f1
+}
+
+# Splits the facts file into $WORK/header (key=value lines), $WORK/sections.list (section names,
+# in order) and one $WORK/sections/<role>__<slot> file per section body. Problems go to
+# $WORK/problems.
+parse_facts() {
+    : > "$WORK/header"
+    : > "$WORK/sections.list"
+    awk -v work="$WORK" '
+        function problem(msg) { print msg >> (work "/problems") }
+        function end_section() { if (file != "") close(file); file = "" }
+        { sub(/\r$/, "") }
+        state == "" {
+            if ($0 == "---") { state = "header"; next }
+            problem(".hyper-relay/agents.md must start with a --- line, then the header")
+            state = "notes"
+            next
+        }
+        state == "header" {
+            if ($0 == "---") { state = "notes"; next }
+            if ($0 ~ /^[ \t]*$/) next
+            i = index($0, ":")
+            if (i == 0) { problem("header line \"" $0 "\" is not key: value"); next }
+            key = substr($0, 1, i - 1)
+            val = substr($0, i + 1)
+            gsub(/^[ \t]+|[ \t]+$/, "", key)
+            gsub(/^[ \t]+|[ \t]+$/, "", val)
+            if (key in seen) { problem("header key " key " is given twice"); next }
+            seen[key] = 1
+            print key "=" val > (work "/header")
+            next
+        }
+        substr($0, 1, 3) == "## " {
+            end_section()
+            name = substr($0, 4)
+            gsub(/^[ \t]+|[ \t]+$/, "", name)
+            if (name !~ /^[a-z]+\/[a-z][a-z-]*$/) {
+                problem("section \"## " name "\" is not ## <role>/<slot>")
+                state = "skip"
+                next
+            }
+            if (name in have) { problem("section ## " name " is given twice"); state = "skip"; next }
+            have[name] = 1
+            print name > (work "/sections.list")
+            fname = name
+            sub(/\//, "__", fname)
+            file = work "/sections/" fname
+            printf "" > file
+            state = "section"
+            blanks = 0
+            started = 0
+            next
+        }
+        state == "section" {
+            if ($0 ~ /^[ \t]*$/) { if (started) blanks++; next }
+            for (; blanks > 0; blanks--) print "" > file
+            print > file
+            started = 1
+            next
+        }
+        END {
+            end_section()
+            if (state == "") problem(".hyper-relay/agents.md is empty")
+            if (state == "header") problem("the header has no closing --- line")
+        }
+    ' "$FACTS" || die "cannot read $FACTS"
+}
+
+check_model() { # key value
+    if ! printf '%s\n' "$2" | grep -Eq '^[A-Za-z0-9][]A-Za-z0-9._[-]*$'; then
+        problem "$1 \"$2\" is not a model name (for example opus, sonnet, haiku or a full model id)"
+    fi
+    return 0
+}
+
+# Checks the header, the reviewer kind, the templates, required slots and sections that match
+# no slot. Lists every problem, then stops before anything is written.
+validate() {
+    M_PLANNER=opus
+    M_EXECUTOR=sonnet
+    M_REVIEWER=sonnet
+    have_project=0
+    have_reviewer=0
+    while IFS= read -r line; do
+        key=${line%%=*}
+        val=${line#*=}
+        case $key in
+            project) PROJECT=$val; have_project=1 ;;
+            reviewer) REVIEWER=$val; have_reviewer=1 ;;
+            model.planner) M_PLANNER=$val; check_model "$key" "$val" ;;
+            model.executor) M_EXECUTOR=$val; check_model "$key" "$val" ;;
+            model.reviewer) M_REVIEWER=$val; check_model "$key" "$val" ;;
+            *) problem "unknown header key $key (the keys are project, reviewer, model.planner, model.executor and model.reviewer)" ;;
+        esac
+    done < "$WORK/header"
+    if [ "$have_project" = 0 ]; then
+        problem "the header needs project: <name>"
+    elif ! printf '%s\n' "$PROJECT" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
+        problem "project \"$PROJECT\" must be lowercase letters, digits and -"
+    fi
+    case $REVIEWER in
+        browser|commands) ;;
+        *)
+            if [ "$have_reviewer" = 0 ]; then
+                problem "the header needs reviewer: browser or reviewer: commands"
+            else
+                problem "reviewer must be browser or commands, not \"$REVIEWER\""
+            fi
+            REVIEWER=
+            ;;
+    esac
+
+    # The slots of the templates this repo uses, one "<role>/<name> <1 if required, else 0>" per line.
+    : > "$WORK/slots"
+    for item in planner executor reviewer; do
+        if [ "$item" = reviewer ] && [ -z "$REVIEWER" ]; then
+            continue
+        fi
+        tpl=$(tpl_of "$item")
+        [ -f "$tpl" ] || die "template missing: $tpl"
+        awk '/^[{][{]slot!? [a-z]+\/[a-z][a-z-]*[}][}]$/ {
+                req = (substr($0, 7, 1) == "!") ? 1 : 0
+                n = $0
+                sub(/^[{][{]slot!? /, "", n)
+                sub(/[}][}]$/, "", n)
+                print n, req
+            }' "$tpl" >> "$WORK/slots" || die "cannot read $tpl"
+    done
+    [ -f "$(tpl_of guard)" ] || die "template missing: $(tpl_of guard)"
+
+    while IFS= read -r name; do
+        if [ "${name%%/*}" = reviewer ] && [ -z "$REVIEWER" ]; then
+            continue
+        fi
+        if ! cut -d' ' -f1 "$WORK/slots" | grep -Fxq "$name"; then
+            problem "section ## $name matches no slot in the templates; is it a typo? (the hyper-relay:agents skill lists the slots)"
+        elif [ ! -s "$(sec_file "$name")" ]; then
+            problem "section ## $name is empty"
+        fi
+    done < "$WORK/sections.list"
+    while read -r name req; do
+        if [ "$req" = 1 ] && [ ! -e "$(sec_file "$name")" ]; then
+            problem "section ## $name is required: the ${name%%/*} template cannot do without it"
+        fi
+    done < "$WORK/slots"
+
+    if [ -s "$WORK/problems" ]; then
+        sed 's/^/hyper-relay-agents: /' "$WORK/problems" >&2
+        count=$(awk 'END { print NR }' "$WORK/problems")
+        if [ "$count" = 1 ]; then
+            die "1 problem in .hyper-relay/agents.md; nothing was written"
+        fi
+        die "$count problems in .hyper-relay/agents.md; nothing was written"
+    fi
+    return 0
+}
+
+# Renders one agent into $WORK/out/<item>.body (no marker) and $WORK/out/<item>.full (with it).
+render_agent() { # item
+    tpl=$(tpl_of "$1")
+    HR_PROJECT=$PROJECT HR_ROOT=$MAIN HR_MODEL=$(model_of "$1") awk -v work="$WORK" -v tpl="$tpl" '
+        function repl(s, from, to,    out, i) {
+            out = ""
+            while ((i = index(s, from)) > 0) {
+                out = out substr(s, 1, i - 1) to
+                s = substr(s, i + length(from))
+            }
+            return out s
+        }
+        { sub(/\r$/, "") }
+        /^[{][{]slot!? [a-z]+\/[a-z][a-z-]*[}][}]$/ {
+            n = $0
+            sub(/^[{][{]slot!? /, "", n)
+            sub(/[}][}]$/, "", n)
+            sub(/\//, "__", n)
+            f = work "/sections/" n
+            while ((getline line < f) > 0) print line
+            close(f)
+            next
+        }
+        {
+            line = repl($0, "{{project}}", ENVIRON["HR_PROJECT"])
+            line = repl(line, "{{root}}", ENVIRON["HR_ROOT"])
+            line = repl(line, "{{model}}", ENVIRON["HR_MODEL"])
+            if (index(line, "{{") > 0) {
+                print tpl ":" FNR ": unknown placeholder" > "/dev/stderr"
+                bad = 1
+            }
+            print line
+        }
+        END { exit bad }
+    ' "$tpl" > "$WORK/out/$1.raw" || die "$tpl has an unknown placeholder"
+
+    # A "## " heading left with nothing under it (its only slot was missing) is dropped.
+    awk '
+        /^## / { held = $0; blanks = 0; holding = 1; next }
+        holding && /^[ \t]*$/ { blanks++; next }
+        holding {
+            print held
+            for (i = 0; i < blanks; i++) print ""
+            holding = 0
+        }
+        { print }
+    ' "$WORK/out/$1.raw" > "$WORK/out/$1.body" || die "cannot render the $1 agent"
+
+    sum=$(hash_of "$WORK/out/$1.body")
+    MARKER="<!-- generated by hyper-relay-agents $VERSION from .hyper-relay/agents.md; edit that file and rerun. sha256 $sum -->" \
+        awk '{ print } $0 == "---" && ++n == 2 { print ENVIRON["MARKER"] } END { exit (n < 2) }' \
+        "$WORK/out/$1.body" > "$WORK/out/$1.full" || die "$tpl has no front matter (two --- lines)"
+    return 0
+}
+
+# The guard is copied as is, with the marker as a comment on its second line.
+render_guard() {
+    tpl=$(tpl_of guard)
+    awk '{ print }' "$tpl" > "$WORK/out/guard.body" || die "cannot read $tpl"
+    sum=$(hash_of "$WORK/out/guard.body")
+    MARKER="# generated by hyper-relay-agents $VERSION from .hyper-relay/agents.md; edit that file and rerun. sha256 $sum" \
+        awk '{ print } NR == 1 { print ENVIRON["MARKER"] }' "$WORK/out/guard.body" > "$WORK/out/guard.full" ||
+        die "cannot render the guard"
+    return 0
+}
+
+# Finds the checkout, reads and checks the facts, and renders all four files into $WORK/out.
+prepare() {
+    TOP=$(git rev-parse --show-toplevel 2>/dev/null) || die "not inside a git repository"
+    [ -n "$TOP" ] || die "not inside a git checkout"
+    common=$(cd "$TOP" && git rev-parse --git-common-dir 2>/dev/null) || die "cannot find the main checkout of $TOP"
+    MAIN=$(cd "$TOP" && CDPATH= cd -- "$common" && pwd -P) || die "cannot find the main checkout of $TOP"
+    MAIN=$(dirname -- "$MAIN")
+    FACTS="$TOP/.hyper-relay/agents.md"
+    [ -f "$FACTS" ] || die "no .hyper-relay/agents.md in $TOP; the hyper-relay:agents skill drafts one"
+    VERSION=$(sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+        "$PLUGIN/.claude-plugin/plugin.json" 2>/dev/null | head -n 1)
+    [ -n "$VERSION" ] || die "cannot read the version from $PLUGIN/.claude-plugin/plugin.json"
+    command -v sha256sum >/dev/null 2>&1 || die "sha256sum is missing"
+    mkdir -p "$WORK/out" "$WORK/sections" || die "cannot create $WORK"
+    : > "$WORK/problems"
+    parse_facts
+    validate
+    for item in planner executor reviewer; do
+        render_agent "$item"
+    done
+    render_guard
+    return 0
+}
+
+# Sets MARK_LINE (0 when there is no marker), MARK_VERSION and MARK_HASH for a file on disk.
+read_marker() { # file
+    MARK_LINE=0
+    MARK_VERSION=
+    MARK_HASH=
+    found=$(awk '
+        /^(<!-- |# )generated by hyper-relay-agents [^ ]+ from .* sha256 [0-9a-f]+( -->)?$/ {
+            v = $0
+            sub(/^(<!-- |# )generated by hyper-relay-agents /, "", v)
+            sub(/ .*/, "", v)
+            h = $0
+            sub(/ -->$/, "", h)
+            sub(/.* sha256 /, "", h)
+            print NR " " v " " h
+            exit
+        }' "$1")
+    [ -n "$found" ] || return 0
+    read -r MARK_LINE MARK_VERSION MARK_HASH <<EOF
+$found
+EOF
+    return 0
+}
+
+# Sets STATE for a file on disk against its new body: missing, unmarked (no marker), edited
+# (its content no longer matches its marker's hash), current or stale. Leaves the file without
+# its marker in $WORK/disk.body.
+classify() { # dest new-body
+    STATE=missing
+    [ -e "$1" ] || return 0
+    read_marker "$1"
+    STATE=unmarked
+    [ "$MARK_LINE" != 0 ] || return 0
+    awk -v n="$MARK_LINE" 'NR != n' "$1" > "$WORK/disk.body" || die "cannot read $1"
+    STATE=edited
+    [ "$(hash_of "$WORK/disk.body")" = "$MARK_HASH" ] || return 0
+    STATE=current
+    cmp -s "$WORK/disk.body" "$2" || STATE=stale
+    return 0
+}
+
+# Where a hand edit to an agent probably belongs: the facts sections whose slots sit under the
+# template heading above the first changed line.
+suggest() { # item
+    first=$(awk 'NR == FNR { a[FNR] = $0; n = FNR; next }
+        !(FNR in a) || a[FNR] != $0 { print FNR; found = 1; exit }
+        END { if (!found) print n + 1 }' "$WORK/out/$1.body" "$WORK/disk.body")
+    heading=$(awk -v l="$first" 'NR > l + 0 { exit } /^## / { h = $0 } END { print h }' "$WORK/disk.body")
+    if [ -z "$heading" ]; then
+        printf '%s' "the change is above the first ## heading: a model belongs in the facts header (model.$1), anything else is a template change in hyper-relay"
+        return 0
+    fi
+    slots=$(H=$heading awk '
+        /^## / { cur = $0; next }
+        cur == ENVIRON["H"] && /^[{][{]slot/ {
+            n = $0
+            sub(/^[{][{]slot!? /, "", n)
+            sub(/[}][}]$/, "", n)
+            printf "%s## %s", sep, n
+            sep = " or "
+        }' "$(tpl_of "$1")")
+    if [ -n "$slots" ]; then
+        printf '%s' "a change under \"$heading\" probably belongs in .hyper-relay/agents.md, section $slots"
+    else
+        printf '%s' "no facts section sits under \"$heading\", so a change there is a template change in hyper-relay"
+    fi
+    return 0
+}
+
+put() { # item dest
+    if ! { cp "$WORK/out/$1.full" "$2.new.$$" && mv -f "$2.new.$$" "$2"; }; then
+        rm -f "$2.new.$$"
+        die "cannot write $2"
+    fi
+    if [ "$1" = guard ]; then
+        chmod 755 "$2" || die "cannot make $2 executable"
+    fi
+    return 0
+}
+
+write_all() {
+    made_dir=0
+    [ -d "$TOP/.claude/agents" ] || made_dir=1
+    mkdir -p "$TOP/.claude/agents" "$TOP/.claude/hooks" || die "cannot create .claude/agents and .claude/hooks in $TOP"
+    for item in $ITEMS; do
+        rel=$(rel_of "$item")
+        dest="$TOP/$rel"
+        classify "$dest" "$WORK/out/$item.body"
+        case $STATE in
+            missing|stale)
+                put "$item" "$dest"
+                printf 'written %s\n' "$rel"
+                ;;
+            current)
+                if [ "$item" = guard ]; then
+                    chmod 755 "$dest" || die "cannot make $dest executable"
+                fi
+                printf 'unchanged %s\n' "$rel"
+                ;;
+            *)
+                if [ "$FORCE" = 1 ]; then
+                    put "$item" "$dest"
+                    if [ "$STATE" = unmarked ]; then
+                        printf 'written %s (--force: replaced a hand-written file)\n' "$rel"
+                    else
+                        printf 'written %s (--force: replaced a hand-edited file)\n' "$rel"
+                    fi
+                elif [ "$STATE" = unmarked ]; then
+                    printf 'refused %s: no hyper-relay-agents marker, so it was written by hand. Move any lesson in it into .hyper-relay/agents.md or a hyper-relay template, then rerun with --force.\n' "$rel"
+                    REFUSED=1
+                elif [ "$item" = guard ]; then
+                    printf "refused %s: edited by hand; the guard comes from hyper-relay's templates/hooks/planner-guard.py, so a change belongs there. Rerun with --force to restore it.\n" "$rel"
+                    REFUSED=1
+                else
+                    printf 'refused %s: edited by hand; %s. Move it there, then rerun with --force.\n' "$rel" "$(suggest "$item")"
+                    REFUSED=1
+                fi
+                ;;
+        esac
+    done
+    if [ "$made_dir" = 1 ]; then
+        printf '%s\n' "Created .claude/agents/. Restart Claude Code before dispatching these agents: a running session only watches agents folders that existed when it started."
+    fi
+    return 0
+}
+
+# One line per file that is not current; returns 1 when there is any.
+check_all() {
+    : > "$WORK/stale"
+    for item in $ITEMS; do
+        classify "$TOP/$(rel_of "$item")" "$WORK/out/$item.body"
+        name=$(name_of "$item")
+        case $STATE in
+            current) continue ;;
+            missing) line="$name: missing" ;;
+            unmarked) line="$name: written by hand (no marker)" ;;
+            edited) line="$name: edited by hand" ;;
+            *)
+                line="$name: out of date"
+                if [ "$MARK_VERSION" != "$VERSION" ]; then
+                    line="$line (hyper-relay $MARK_VERSION → $VERSION)"
+                fi
+                ;;
+        esac
+        printf '%s\n' "$line"
+        printf '%s\n' "$name" >> "$WORK/stale"
+    done
+    [ ! -s "$WORK/stale" ]
+}
+
+# The SessionStart check. Runs --check in a child process, so that nothing it does can stop
+# this one from exiting 0, and turns its result into at most one line.
+hook_main() {
+    if [ -n "$BAD" ] || [ "$CHECK" = 0 ] || [ "$FORCE" = 1 ]; then
+        hook_say "hyper-relay: agents check failed: --hook goes with --check alone"
+        return 0
+    fi
+    if [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "$CLAUDE_PROJECT_DIR" ]; then
+        cd "$CLAUDE_PROJECT_DIR" || return 0
+    fi
+    top=$(git rev-parse --show-toplevel 2>/dev/null) || return 0
+    if [ -z "$top" ] || [ ! -f "$top/.hyper-relay/agents.md" ]; then
+        return 0
+    fi
+    if [ -z "$WORK" ]; then
+        hook_say "hyper-relay: agents check failed: cannot create a temporary folder"
+        return 0
+    fi
+    sh "$SELF" --check > "$WORK/hook.out" 2> "$WORK/hook.err"
+    rc=$?
+    if [ "$rc" = 0 ]; then
+        return 0
+    fi
+    if [ ! -s "$WORK/hook.err" ] && [ -s "$WORK/hook.out" ]; then
+        names=$(awk '{ sub(/: .*/, ""); printf "%s%s", sep, $0; sep = ", " }' "$WORK/hook.out")
+        if [ "$(awk 'END { print NR }' "$WORK/hook.out")" = 1 ]; then
+            verb=is
+        else
+            verb=are
+        fi
+        hook_say "hyper-relay: $names $verb out of date; run hyper-relay-agents (see the hyper-relay:agents skill)."
+        return 0
+    fi
+    reason=$(sed -n '1{s/^hyper-relay-agents: //;p;}' "$WORK/hook.err")
+    hook_say "hyper-relay: agents check failed: ${reason:-exit $rc}"
+    return 0
+}
+
+for arg in "$@"; do
+    case $arg in
+        --force) FORCE=1 ;;
+        --check) CHECK=1 ;;
+        --hook) HOOK=1 ;;
+        *) BAD=$arg ;;
+    esac
+done
+
+WORK=$(mktemp -d 2>/dev/null) || WORK=
+
+if [ "$HOOK" = 1 ]; then
+    hook_main
+    exit 0
+fi
+[ -n "$WORK" ] || die "cannot create a temporary folder"
+[ -z "$BAD" ] || die "unknown option $BAD; $USAGE"
+if [ "$FORCE" = 1 ] && [ "$CHECK" = 1 ]; then
+    die "--force and --check do not go together; $USAGE"
+fi
+prepare
+if [ "$CHECK" = 1 ]; then
+    check_all
+    exit $?
+fi
+write_all
+exit "$REFUSED"
