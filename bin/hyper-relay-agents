@@ -29,6 +29,7 @@ CHECK=0
 HOOK=0
 BAD=
 REFUSED=0
+WROTE_AGENT=0
 PROJECT=
 REVIEWER=
 WORK=
@@ -181,7 +182,13 @@ validate() {
             model.planner) M_PLANNER=$val; check_model "$key" "$val" ;;
             model.executor) M_EXECUTOR=$val; check_model "$key" "$val" ;;
             model.reviewer) M_REVIEWER=$val; check_model "$key" "$val" ;;
-            *) problem "unknown header key $key (the keys are project, reviewer, model.planner, model.executor and model.reviewer)" ;;
+            execute)
+                case $val in
+                    branch|worktree) ;;
+                    *) problem "execute must be branch or worktree, not \"$val\"" ;;
+                esac
+                ;;
+            *) problem "unknown header key $key (the keys are project, reviewer, execute, model.planner, model.executor and model.reviewer)" ;;
         esac
     done < "$WORK/header"
     if [ "$have_project" = 0 ]; then
@@ -282,16 +289,26 @@ render_agent() { # item
         END { exit bad }
     ' "$tpl" > "$WORK/out/$1.raw" || die "$tpl has an unknown placeholder"
 
-    # A "## " heading left with nothing under it (its only slot was missing) is dropped.
+    # A "## " or "### " heading left with nothing under it (its slots were missing) is dropped,
+    # with the blank lines after it. A "## " heading whose "### " headings were all dropped goes too.
     awk '
-        /^## / { held = $0; blanks = 0; holding = 1; next }
-        holding && /^[ \t]*$/ { blanks++; next }
-        holding {
-            print held
-            for (i = 0; i < blanks; i++) print ""
-            holding = 0
+        /^## / { h2 = $0; b2 = 0; hold2 = 1; hold3 = 0; next }
+        /^### / { h3 = $0; b3 = 0; hold3 = 1; next }
+        hold3 && /^[ \t]*$/ { b3++; next }
+        hold2 && /^[ \t]*$/ { b2++; next }
+        {
+            if (hold2) {
+                print h2
+                for (i = 0; i < b2; i++) print ""
+                hold2 = 0
+            }
+            if (hold3) {
+                print h3
+                for (i = 0; i < b3; i++) print ""
+                hold3 = 0
+            }
+            print
         }
-        { print }
     ' "$WORK/out/$1.raw" > "$WORK/out/$1.body" || die "cannot render the $1 agent"
 
     sum=$(hash_of "$WORK/out/$1.body")
@@ -411,13 +428,13 @@ put() { # item dest
     fi
     if [ "$1" = guard ]; then
         chmod 755 "$2" || die "cannot make $2 executable"
+    else
+        WROTE_AGENT=1
     fi
     return 0
 }
 
 write_all() {
-    made_dir=0
-    [ -d "$TOP/.claude/agents" ] || made_dir=1
     mkdir -p "$TOP/.claude/agents" "$TOP/.claude/hooks" || die "cannot create .claude/agents and .claude/hooks in $TOP"
     for item in $ITEMS; do
         rel=$(rel_of "$item")
@@ -455,8 +472,9 @@ write_all() {
                 ;;
         esac
     done
-    if [ "$made_dir" = 1 ]; then
-        printf '%s\n' "Created .claude/agents/. Restart Claude Code before dispatching these agents: a running session only watches agents folders that existed when it started."
+    # A running session keeps the agent definitions it loaded, even for a file rewritten here.
+    if [ "$WROTE_AGENT" = 1 ]; then
+        printf '%s\n' "Start a new session to use them: a running session keeps the agent definitions it loaded."
     fi
     return 0
 }
