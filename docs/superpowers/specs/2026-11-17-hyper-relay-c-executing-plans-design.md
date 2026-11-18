@@ -37,6 +37,7 @@ plans that carry worktree plumbing.
 | C9 | Defaults | **hyper-relay: `execute: branch`** (no app stack). **SAT: `execute: worktree`** (Branch would run its migrations against the owner's real dev database; `wt` exists for exactly this). |
 | C10 | Quartz's two manual steps | **The orchestrator runs both**: `quartz link-branch` at dispatch, `quartz review` after verifying the hand-back. Plans stop carrying them. |
 | C11 | The commit invariant | **A spec or plan is committed only when the main checkout is on `main`.** B's planner already checks this before committing; C adds it to `brainstorming` and `writing-plans`. A branch run is detected from git state, so the rule holds after a `/clear` or in a new session. |
+| C12 | Regenerated agents in a running session (added 2026-11-17, after B's Task 7) | A running session keeps the agent definitions it loaded (§8), so after regenerating, the session still dispatches the old agents. **The generator and the `agents` skill say so** (§5.3): start a new session to use them. |
 
 ## 1. What changes where
 
@@ -50,7 +51,8 @@ plans that carry worktree plumbing.
 | `skills/using-git-worktrees/SKILL.md` | No longer triggered by the handoff (§4.4). |
 | `skills/dispatching-parallel-agents/SKILL.md`, `requesting-code-review/SKILL.md`, `voice-to-specs/SKILL.md`, `writing-skills/render-graphs.js` | Their `subagent-driven-development` mentions (§4.1). |
 | `templates/agents/executor.md`, `templates/agents/planner.md` | Shrink and re-point (§5.1, §5.2). |
-| `bin/hyper-relay-agents`, `tests/hyper-relay-agents/run-tests.sh` | The `execute` key, the two acceptance slots, `###` headings (§5.3). |
+| `bin/hyper-relay-agents`, `tests/hyper-relay-agents/run-tests.sh` | The `execute` key, the two acceptance slots, `###` headings, the restart line (§5.3). |
+| `skills/agents/SKILL.md` | The restart line (§5.3). |
 | `.hyper-relay/agents.md` | `execute: branch` (§5.4). |
 | `README.md`, `CLAUDE.md`, `docs/testing.md` | Say what the repo now does (§4.1, §6). |
 | Owner's `~/.claude/CLAUDE.md`, SAT's `.hyper-relay/agents.md`, both repos' generated agents | The last task, with the owner (§7.2). |
@@ -235,6 +237,10 @@ The general rules (Where, Token budget, Constraints, Committing, Report) move in
   facts file still using the old name gets B's "matches no slot" error.
 - A `### ` heading left with no content is dropped like a `## ` one (B's D6), so an executor without branch facts has
   no empty `### On a branch`, and `## Acceptance` disappears when both are missing.
+- **The restart line.** When a run writes at least one agent (`written`, with or without `--force`), its output ends
+  with one line: "Start a new session to use them: a running session keeps the agent definitions it loaded." A run
+  that writes only the guard, or nothing, does not print it. `skills/agents/SKILL.md`'s "Run the generator" step
+  says the same (§8). It replaces B's assumption that an existing `.claude/agents/` folder needs no restart.
 - `tests/hyper-relay-agents/run-tests.sh` gains cases for each of these (§7.1).
 
 ### 5.4 Facts files
@@ -258,8 +264,9 @@ documented; if it waits instead, the hold-back rules are trivially kept, but the
   count is 16.
 - `tests/hyper-relay-agents/run-tests.sh`: `execute: branch` and `execute: worktree` accepted; another value refused;
   `executor/acceptance` refused as matching no slot; each acceptance slot rendered under its `###` heading; an absent
-  one leaves no heading; both absent leave no `## Acceptance`; hyper-relay's own facts file renders, and `--check` is
-  silent after generation. `tests/hyper-relay-agents/guard-test.sh` and `tests/add-card-line/run-tests.sh` unchanged
+  one leaves no heading; both absent leave no `## Acceptance`; the restart line follows a run that writes an agent and
+  is absent from a run that writes nothing; hyper-relay's own facts file renders, and `--check` is silent after
+  generation. `tests/hyper-relay-agents/guard-test.sh` and `tests/add-card-line/run-tests.sh` unchanged
   and passing.
 - `git grep -n subagent-driven` finds only the records listed in §4.1.
 - `dash -n` on every `#!/bin/sh` script touched.
@@ -292,6 +299,10 @@ documented; if it waits instead, the hold-back rules are trivially kept, but the
   when the main checkout is on another branch, prints "main is on <branch>; task <N> ticks at the next drain", and
   `quartz hook flush` (Stop/SubagentStop) drains it later. `quartz link-doc` uploads a doc that is not committed (B's
   gitignored plan, 2026-11-17).
+- **A running Claude Code session keeps the agent definitions it loaded** (observed 2026-11-17, B's Task 7 Step 5):
+  `relay-planner.md` was regenerated at 22:11 to call `.claude/hooks/hyper-relay-planner-guard.py` (prefix
+  `planner guard:`); a `relay-planner` dispatched afterwards from the same session was refused with
+  `sat-planner guard:`, the prefix of the hand-written definition's guard, `~/.claude/hooks/sat-planner-guard.py`.
 - **B's planner template**, Committing step 1: `git -C {{root}} branch --show-current` must print `main` and
   `MERGE_HEAD` must not exist, or the planner does not commit.
 - **git:** `git switch` carries untracked files across unless the target branch tracks the same path;
