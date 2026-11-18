@@ -1209,7 +1209,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
   `docs/testing.md`
 - Rewrite: `tests/explicit-skill-requests/run-all.sh`
 
-- [ ] **Step 1: Delete.**
+- [x] **Step 1: Delete.**
 
 ```bash
 git rm -q tests/subagent-driven-dev/run-test.sh tests/subagent-driven-dev/go-fractals/design.md tests/subagent-driven-dev/go-fractals/plan.md tests/subagent-driven-dev/go-fractals/scaffold.sh tests/subagent-driven-dev/svelte-todo/design.md tests/subagent-driven-dev/svelte-todo/plan.md tests/subagent-driven-dev/svelte-todo/scaffold.sh
@@ -1218,7 +1218,7 @@ git rm -q tests/explicit-skill-requests/prompts/action-oriented.txt tests/explic
 git rm -q tests/explicit-skill-requests/run-claude-describes-sdd.sh tests/explicit-skill-requests/run-extended-multiturn-test.sh tests/explicit-skill-requests/run-haiku-test.sh tests/explicit-skill-requests/run-multiturn-test.sh
 ```
 
-- [ ] **Step 2: `tests/claude-code/run-skill-tests.sh`.** Replace:
+- [x] **Step 2: `tests/claude-code/run-skill-tests.sh`.** Replace:
 ```text
             echo "Tests:"
             echo "  test-subagent-driven-development.sh  Test skill loading and requirements"
@@ -1269,7 +1269,7 @@ with:
 for test in ${tests[@]+"${tests[@]}"}; do
 ```
 
-- [ ] **Step 3: `tests/explicit-skill-requests/run-all.sh`.** Write it with exactly:
+- [x] **Step 3: `tests/explicit-skill-requests/run-all.sh`.** Write it with exactly:
 
 ```bash
 #!/usr/bin/env bash
@@ -1322,7 +1322,7 @@ if [ "$FAILED" -gt 0 ]; then
 fi
 ```
 
-- [ ] **Step 4: `tests/explicit-skill-requests/run-test.sh`.** Replace:
+- [x] **Step 4: `tests/explicit-skill-requests/run-test.sh`.** Replace:
 ```text
     echo "Example: $0 subagent-driven-development ./prompts/subagent-driven-development-please.txt"
 ```
@@ -1331,7 +1331,7 @@ with:
     echo "Example: $0 systematic-debugging ./prompts/use-systematic-debugging.txt"
 ```
 
-- [ ] **Step 5: `tests/claude-code/README.md`.** First check the range, then delete it:
+- [x] **Step 5: `tests/claude-code/README.md`.** First check the range, then delete it:
 
 Run: `sed -n '83p;85p;117p;118p' tests/claude-code/README.md`
 Expected, exactly four lines: `### Fast Tests (run by default)`, `#### test-subagent-driven-development.sh`, an empty
@@ -1365,7 +1365,7 @@ with:
 test-requesting-code-review.sh
 ```
 
-- [ ] **Step 6: `docs/testing.md`.** First check, then delete its first 136 lines (the subagent-driven-development
+- [x] **Step 6: `docs/testing.md`.** First check, then delete its first 136 lines (the subagent-driven-development
   introduction, structure, run instructions and its whole integration-test section):
 
 Run: `sed -n '137p' docs/testing.md`
@@ -1424,7 +1424,7 @@ cd tests/claude-code
 ### Usage
 ````
 
-- [ ] **Step 7: Check.**
+- [x] **Step 7: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1434,7 +1434,7 @@ cd tests/claude-code
 | `git ls-files -s tests/explicit-skill-requests/run-all.sh tests/explicit-skill-requests/run-test.sh tests/claude-code/run-skill-tests.sh` | all three `100755`, as before (if the rewrite lost the bit, `git update-index --chmod=+x tests/explicit-skill-requests/run-all.sh`) |
 | `sed -n '1p' docs/testing.md` | `# Testing Superpowers Skills` |
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add tests/claude-code/run-skill-tests.sh tests/claude-code/README.md tests/explicit-skill-requests/run-all.sh tests/explicit-skill-requests/run-test.sh docs/testing.md
