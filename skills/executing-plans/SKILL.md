@@ -1,12 +1,12 @@
 ---
 name: executing-plans
-description: Use when an approved implementation plan is to be executed. The executor dispatched to run one plan follows this file; an orchestrator handing a plan off at the plan-to-execute handoff reads dispatching.md beside it instead, and never executes the plan itself.
+description: Use when an approved implementation plan is to be executed. The executor dispatched to run one plan follows this file; an orchestrator handing a plan off uses orchestrating instead, and never executes the plan itself.
 ---
 
 # Executing Plans
 
-**Handing a plan off, as the orchestrator?** Read `${CLAUDE_SKILL_DIR}/dispatching.md` (`dispatching.md` beside this
-SKILL.md) and follow it instead of this file. You never execute a plan yourself.
+**Handing a plan off, as the orchestrator?** Invoke `hyper-relay:orchestrating` and follow it instead of this file.
+You never execute a plan yourself.
 
 This file is for the **executor**: the agent dispatched, in a fresh context, to run ONE approved plan. You run every
 task that is yours, in order, yourself; then you report and stop. There is no partner to ask: the orchestrator reads
@@ -87,6 +87,7 @@ You share the repo's main checkout with the orchestrator, who keeps working whil
 
 ## Integration
 
-- `hyper-relay:writing-plans` writes the plan; `dispatching.md` hands it to you.
+- `hyper-relay:orchestrating` hands you the plan (its `dispatching.md`) and owns the review and the merge.
+- `hyper-relay:writing-plans` is the planner's: a planner wrote the plan you run.
 - `hyper-relay:test-driven-development`: when a task writes a test first, watch it fail before you make it pass.
 - `hyper-relay:finishing-a-development-branch` belongs to the owner and the orchestrator, after the click-through.
