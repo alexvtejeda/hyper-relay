@@ -118,6 +118,36 @@ assert_contains "an unknown placeholder is named" "{wbe}" "$OUT"
 assert_not_contains "an unknown placeholder builds nothing" "up --build" "$(cat "$FAKE_LOG")"
 
 new_case app feat/one
+printf 'REAL=secret\n' > "$WT/.env.local"
+conf "WT_ENV_BASE=.env.local"
+run_wt "$WT" up
+assert_eq "an untracked base file is refused: exit" 1 "$RC"
+assert_contains "an untracked base file is named" "git tracks: .env.local" "$OUT"
+assert_eq "an untracked base file never reaches docker" "" "$(cat "$FAKE_LOG")"
+assert_eq "an untracked base file writes no .env" 1 "$([ -e "$WT/.env" ]; echo $?)"
+
+new_case app feat/one
+printf 'REAL=secret\n' > "$CASE_DIR/outside.env"
+conf "WT_ENV_BASE=../outside.env"
+run_wt "$WT" up
+assert_eq "a base file outside the repo is refused: exit" 1 "$RC"
+assert_contains "a base file outside the repo is named" "git tracks: ../outside.env" "$OUT"
+assert_eq "a base file outside the repo never reaches docker" "" "$(cat "$FAKE_LOG")"
+assert_eq "a base file outside the repo writes no .env" 1 "$([ -e "$WT/.env" ]; echo $?)"
+
+new_case app feat/one
+printf 'REAL=secret\n' > "$CASE_DIR/outside.env"
+ln -s ../outside.env "$WT/link.env"
+git -C "$WT" add link.env
+git -C "$WT" commit -qm link
+conf "WT_ENV_BASE=link.env"
+run_wt "$WT" up
+assert_eq "a symlinked base file is refused: exit" 1 "$RC"
+assert_contains "a symlinked base file is named" "must not be a symlink: link.env" "$OUT"
+assert_eq "a symlinked base file never reaches docker" "" "$(cat "$FAKE_LOG")"
+assert_eq "a symlinked base file writes no .env" 1 "$([ -e "$WT/.env" ]; echo $?)"
+
+new_case app feat/one
 conf "$APP_CONF"
 printf 'REAL=secret\n' > "$WT/.env"
 run_wt "$WT" up
