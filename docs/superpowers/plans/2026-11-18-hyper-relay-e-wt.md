@@ -95,22 +95,22 @@ refuses `readlink`); Task 4 Step 14 checks both.
 | # | The spec says | Decision |
 |---|---|---|
 | D1 | §3: the renamed fixtures' "project name `app`" and "project name `pinned`" | `run-tests.sh`'s `new_case` uses its first argument only as the fixture's base name (`FAKE_CONFIG="$FIXTURES/$1.json"`); the project directory is always `$CASE_DIR/myproj`, so every stack name stays `myproj-wt-…` and no assertion quotes a project name. The suite therefore passes `new_case app …` and `new_case pinned-net …` (the fixture file names). The image prefixes become `app-` and `pinned-`, as the spec says, and give the image names the renamed assertions quote (`app-api:wt-feat-add-thing`, `app-api:wt-feat-one`). The "real project name" that `wt down` must refuse becomes `app`, and its unknown stack `app-wt-missing` (still a valid stack name, still with no state). |
-| D2 | §3, §7: 23 lines of `run-tests.sh` name the projects | 23 by `git grep -i -w`, but the variable `QUARTZ_CONF` (its definition and 11 uses) names Quartz too, and `-w` misses it because `_` is a word character. It becomes `APP_CONF`, so 35 lines change. Task 3 and Task 4 add a gate without `-w` (`git grep -i quartz`). The section headers `--- up on Quartz` and `--- SAT shape` become `--- up on app` and `--- pinned-net shape`, and the check `SAT shape succeeds` becomes `pinned-net shape succeeds`: names only. The count stays 118. **Owner: confirm.** |
+| D2 | §3, §7: 23 lines of `run-tests.sh` name the projects | 23 by `git grep -i -w`, but the variable `QUARTZ_CONF` (its definition and 11 uses) names Quartz too, and `-w` misses it because `_` is a word character. It becomes `APP_CONF`, so 35 lines change. Task 3 and Task 4 add a gate without `-w` (`git grep -i quartz`). The section headers `--- up on Quartz` and `--- SAT shape` become `--- up on app` and `--- pinned-net shape`, and the check `SAT shape succeeds` becomes `pinned-net shape succeeds`: names only. The count stays 118. **Owner: confirmed 2026-11-18.** |
 | D3 | §2: "If the suite asserts either text, its assertion changes with it" | It asserts neither: the only related check, `up needs .wt.conf: message`, looks for `.wt.conf`, which the new error still contains. No assertion changes for §2. The new header stays two lines, so the tool stays 444 lines and the error stays on line 64. |
 | D4 | §4: "Docker Compose 2.24 or later (`!override`)" | 2.24.4 or later, per Docker's docs (header). `docs/wt.md` and the README say 2.24.4. |
-| D5 | §5: `CLAUDE.md`'s Layout names `bin/wt`, `tests/wt/` and `docs/wt.md`, and its Checks table gains a `wt` row | Done, and one more bullet under "How a change reaches the owner", beside the OpenCode one: the owner's `wt` is a symlink to this main checkout's `bin/wt`, so a branch run changes the `wt` the owner's shell runs (E2's consequence). **Owner: confirm, or drop Task 3 Step 2's second replacement.** |
+| D5 | §5: `CLAUDE.md`'s Layout names `bin/wt`, `tests/wt/` and `docs/wt.md`, and its Checks table gains a `wt` row | Done, and one more bullet under "How a change reaches the owner", beside the OpenCode one: the owner's `wt` is a symlink to this main checkout's `bin/wt`, so a branch run changes the `wt` the owner's shell runs (E2's consequence). **Owner: confirmed 2026-11-18.** |
 | D6 | §6.3 step 3: one home-repo commit, with the home `CLAUDE.md`'s two `wt` rows | The home `CLAUDE.md` is untracked (`git -C ~ status` shows `?? CLAUDE.md`). The commit holds only the two `git rm` paths; the two rows go by an edit that is not committed. The home `.gitignore` carries an uncommitted change of the owner's; the path-limited commit leaves it alone. |
-| D7 | §6.3 step 4: one line under the Quartz-repo spec's title | Exact text in Task 4 Step 16: one blockquote line, with a blank line after it so it stays its own paragraph. |
+| D7 | §6.3 step 4: one line under the Quartz-repo spec's title | Exact text in Task 4 Step 16: one blockquote line, with a blank line after it so it stays its own paragraph. **Owner: confirmed 2026-11-18.** |
 | D8 | §6.3 step 2: `sh tests/wt/run-tests.sh` passes from `~/hyper-relay` | It runs with `WT_BIN=$HOME/.local/bin/wt`, so it also proves the symlink works. Before the merge, reviewer Step 2 does the same through a symlink in its evidence folder. |
 | D9 | §6.2: README's link to `docs/wt.md` resolves | `docs/wt.md` also links back to the README's `### wt` section (`../README.md#wt`); Task 4 Step 8 checks both. |
 | D10 | §6.1: `git grep … -- bin/wt tests/wt docs/wt.md` finds nothing | `git grep` reads tracked files only, so Tasks 1 and 2 check with `git grep --untracked` before their commits; Task 3 and Task 4 run it as written. |
 | D11 | §6.3 step 2: `wt ls` exits 0 "from SAT's main checkout" | This plan is public, so it does not print SAT's path; the orchestrator runs the command there. |
 | D12 | §6.3 step 1: the owner reinstalls with `/plugin install hyper-relay@hyper-relay` | As written (in a session). `CLAUDE.md` says the shell's `claude plugin install` also refreshes the copy; D1's spec (§11) says it does not. Either way Step 13 checks the cache, not the message. |
-| D13 | E5: E runs after D1 merges, or in a worktree beside D1's run | The plan names no mode. Its README anchors are the E roadmap row and the end of the Install section; its `CLAUDE.md` anchors the Layout's `.hyper-relay/agents.md` and tests bullets, the OpenCode bullet and the Checks table's visual-companion row. D1's committed plan (`f10be85`, Task 9) edits README's status blockquote, the relay table's Plan, Review and Finish rows with a new line under the table, and the D1 row, and `CLAUDE.md`'s skill count: none of E's lines, and not the D2 row that sits between the D1 and E rows, so the two branches should merge cleanly in either order. Task 4 Step 12 checks the merge before it happens. |
+| D13 | E5: E runs after D1 merges, or in a worktree beside D1's run | The plan names no mode. Its README anchors are the E roadmap row and the end of the Install section; its `CLAUDE.md` anchors the Layout's `.hyper-relay/agents.md` and tests bullets, the OpenCode bullet and the Checks table's visual-companion row. D1's committed plan (`f10be85`, Task 9) edits README's status blockquote, the relay table's Plan, Review and Finish rows with a new line under the table, and the D1 row, and `CLAUDE.md`'s skill count: none of E's lines, and not the D2 row that sits between the D1 and E rows, so the two branches should merge cleanly in either order. Task 4 Step 12 checks the merge before it happens. **Owner: decided 2026-11-18:** E runs in a worktree, beside D1's branch run in the main checkout. |
 | D14 | Card line | Included, from the spec. |
 | D15 | §4: "one generic example" `.wt.conf` | Written fresh, with keys no project here uses (`PUBLIC_API_URL`, `ALLOWED_ORIGIN`) and a `WT_NEW_SETUP` of `npm ci`. It quotes no project's file. |
 | D16 | §4's list for `docs/wt.md` | Covered in full. It also says `wt` needs Linux (`ss` is iproute2's) and which compose file names `wt` looks for, and carries a failures table taken from the Quartz-repo spec's "Failure handling", re-checked against the tool (a failed `WT_SETUP` starts nothing, unlike a failed build or seed, which leaves the stack up). |
-| D17 | §5: README says the repo ships `wt` (the E row, the `### wt` subsection) | D1's plan (`f10be85`, Task 9 Step 1) rewrites README's status blockquote to list "a disposable stack per worktree" as still to come. This plan leaves that line alone (D1 edits it), so once both are on `main` it is stale. Task 4 Step 18 fixes it on `main`, after both have merged. **Owner: confirm the new wording.** |
+| D17 | §5: README says the repo ships `wt` (the E row, the `### wt` subsection) | D1's plan (`f10be85`, Task 9 Step 1) rewrites README's status blockquote to list "a disposable stack per worktree" as still to come. This plan leaves that line alone (D1 edits it), so once both are on `main` it is stale. Task 4 Step 18 fixes it on `main`, after both have merged. **Owner: confirmed 2026-11-18.** |
 
 ## Spec coverage
 
@@ -600,7 +600,7 @@ with:
   generator, its hook and the guard. `tests/wt/` tests `wt`, with a fake `docker` and `ss`.
 ```
 
-(b) How a change reaches the owner (D5; drop this replacement if the owner did not confirm D5). Replace:
+(b) How a change reaches the owner (D5). Replace:
 ```text
 - **OpenCode** reads `skills/` in this main checkout, so it sees a change as soon as it merges, and during a branch
   run it sees that branch's skills.
@@ -824,8 +824,8 @@ with:
 | `readlink -e ~/.local/bin/wt` | `/home/noob_master/hyper-relay/bin/wt` (the symlink resolves) |
 | `git -C ~ status --short -- .gitignore CLAUDE.md` | the same as the baseline: the owner's `.gitignore` change untouched, `CLAUDE.md` still untracked |
 
-- [ ] **Step 16 (`after merge`): The Quartz-repo spec points at hyper-relay (D7).** Show the owner the line below
-  first; edit and commit only once the owner agrees. Quartz's own rules apply.
+- [ ] **Step 16 (`after merge`): The Quartz-repo spec points at hyper-relay (D7).** The owner confirmed the line
+  below on 2026-11-18. Quartz's own rules apply.
 
 | Run | PASS |
 |---|---|
