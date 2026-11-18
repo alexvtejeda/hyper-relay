@@ -1,0 +1,12 @@
+{"name":"x","services":{
+"api":{"image":"pinned-api:local","build":{"context":"./api"},"ports":[{"mode":"ingress","target":8080,"published":"8080","protocol":"tcp"}]},
+"db":{"image":"postgres:16","ports":[{"mode":"ingress","target":5432,"published":"5433","protocol":"tcp"}]},
+"mailer-worker":{"image":"pinned-mailer-worker:local","build":{"context":"./mailer-worker"}},
+"mailhog":{"image":"mailhog/mailhog","ports":[{"mode":"ingress","target":1025,"published":"1025","protocol":"tcp"},{"mode":"ingress","target":8025,"published":"8025","protocol":"tcp"}]},
+"migrate":{"image":"pinned-api:local","build":{"context":"./api"}},
+"redis":{"image":"redis:7","ports":[{"mode":"ingress","target":6379,"published":"6380","protocol":"tcp"}]},
+"scheduler":{"image":"pinned-api:local","build":{"context":"./api"}},
+"seed":{"image":"pinned-api:local","build":{"context":"./api"},"profiles":["seed"]},
+"seed-builtin":{"image":"pinned-api:local","build":{"context":"./api"},"profiles":["seed"]},
+"web":{"image":"pinned-web:local","build":{"context":"./web"},"ports":[{"mode":"ingress","target":3000,"published":"3000","protocol":"tcp"}],"networks":{"default":{"ipv4_address":"172.30.0.10"}}}
+},"networks":{"default":{"name":"x_default","ipam":{"config":[{"subnet":"172.30.0.0/24"}]}}}}
