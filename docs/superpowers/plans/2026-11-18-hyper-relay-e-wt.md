@@ -543,7 +543,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `README.md`, `CLAUDE.md`
 
-- [ ] **Step 1: `README.md`.** Two edits, on lines D1's plan does not edit.
+- [x] **Step 1: `README.md`.** Two edits, on lines D1's plan does not edit.
 
 (a) The Install section gains a `### wt` subsection, after `### voice-to-specs`. Replace:
 ```text
@@ -581,7 +581,7 @@ with:
 Each repo adds a short `.wt.conf` | on `main` |
 ```
 
-- [ ] **Step 2: `CLAUDE.md`.** Three edits, none on line 9 (the skill count, which D1's plan edits).
+- [x] **Step 2: `CLAUDE.md`.** Three edits, none on line 9 (the skill count, which D1's plan edits).
 
 (a) Layout. Replace:
 ```text
@@ -623,7 +623,7 @@ with:
 | wt | `sh tests/wt/run-tests.sh` | `0 failed` |
 ```
 
-- [ ] **Step 3: Check the docs.**
+- [x] **Step 3: Check the docs.**
 
 | Run | Expected |
 |---|---|
@@ -633,7 +633,7 @@ with:
 | `git grep -n -F 'sh tests/wt/run-tests.sh' -- CLAUDE.md` | one line: the Checks row |
 | `git diff -- README.md CLAUDE.md \| grep '^+' \| grep -c -i -w -E 'sat\|quartz'` | `0` |
 
-- [ ] **Step 4: The full gates, once.**
+- [x] **Step 4: The full gates, once.**
 
 | Run | Expected |
 |---|---|
@@ -649,7 +649,7 @@ with:
 
 Upstream's live suites are not run (report this): they start real `claude -p` sessions.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add README.md CLAUDE.md
