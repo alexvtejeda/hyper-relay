@@ -32,7 +32,7 @@ everything stands.
 | Capture | `voice-to-specs` | Briefs or board cards from a recording. It stops there and never writes specs, plans or code. |
 | Design | `brainstorming` (+ `visual-companion` for mockups) | An approved design, written as a spec in `docs/superpowers/specs/` |
 | Plan | `writing-plans` | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with full code, tests and a binding contract between plans |
-| Execute | `executing-plans`, `subagent-driven-development`, `using-git-worktrees`, `test-driven-development` | Commits, one per task, in their own worktree |
+| Execute | `executing-plans`, `using-git-worktrees`, `test-driven-development` | Commits, one per task, on a branch or in a worktree |
 | Review | `verification-before-completion`, `requesting-code-review`, `receiving-code-review` | Evidence that it works: tests, then a click-through of the running app |
 | Finish | `finishing-a-development-branch` | A merge, on your call |
 
@@ -109,7 +109,7 @@ under WSL.
 |---|---|---|
 | A | **The fork's home:** the skills as a versioned plugin for Claude Code and OpenCode, with no behaviour change | 0.1.0 |
 | B | **Role agents generated per repo:** a planner, an executor and a reviewer built from hyper-relay's templates and one small committed facts file per repo (`.hyper-relay/agents.md`), with a session-start notice when they fall out of date | on `main` |
-| C | **Our own executing-plans:** executes in the worktree it is given (or on a branch, per repo), commits per task with `Plan-Task` trailers, runs the full checks once, and stops before merging | planned |
+| C | **Our own executing-plans:** executes in the worktree it is given (or on a branch, per repo), commits per task with `Plan-Task` trailers, runs the full checks once, and stops before merging | on `main` |
 | D | **The orchestrator:** dispatches the legs, verifies every hand-back, stacks dependent plans, checks for migration and shared-file conflicts, and hands you the stack to click through | planned |
 | – | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | planned |
 

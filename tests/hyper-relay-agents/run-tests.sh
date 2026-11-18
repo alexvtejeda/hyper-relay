@@ -3,7 +3,7 @@
 # writes, refusing hand edits, --force, --check and the SessionStart check (--check --hook).
 # Each case runs a copy of the plugin (bin, templates, and the manifest at version 1.0.0), so a
 # test can change a template or the version, against a fresh git repo whose path has a space.
-# Usage: sh tests/hyper-relay-agents/run-tests.sh      Expect: "124 passed, 0 failed"
+# Usage: sh tests/hyper-relay-agents/run-tests.sh      Expect: "153 passed, 0 failed"
 set -u
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
@@ -18,6 +18,7 @@ PASSED=0
 FAILED=0
 AG=.claude/agents
 GD=.claude/hooks/hyper-relay-planner-guard.py
+RESTART='Start a new session to use them: a running session keeps the agent definitions it loaded.'
 
 ok() { PASSED=$((PASSED + 1)); printf 'ok   %s\n' "$1"; }
 bad() { FAILED=$((FAILED + 1)); printf 'FAIL %s\n       %s\n' "$1" "$2"; }
@@ -89,6 +90,16 @@ facts_sed() {
     printf '%s' "$FACTS_OK" | sed "$1" > "$R/.hyper-relay/agents.md"
 }
 
+# facts_header <line>: the current repo's facts become FACTS_OK with one more header line, after project.
+facts_header() {
+    printf '%s' "$FACTS_OK" | awk -v l="$1" '{ print } $0 == "project: demo" { print l }' > "$R/.hyper-relay/agents.md"
+}
+
+# last_line: the last line of OUT.
+last_line() {
+    printf '%s\n' "$OUT" | tail -n 1
+}
+
 # gen <dir> [args...]: runs the generator in <dir>. Sets OUT (stdout and stderr) and RC.
 gen() {
     gen_dir=$1
@@ -116,6 +127,7 @@ facts_sed 's/^model.executor: haiku$/colour: red/'
 gen "$R"
 assert_eq "unknown header key: exit 1" 1 "$RC"
 assert_contains "unknown header key: named" "unknown header key colour" "$OUT"
+assert_contains "unknown header key: the keys are listed, execute among them" "(the keys are project, reviewer, execute, model.planner, model.executor and model.reviewer)" "$OUT"
 assert_eq "unknown header key: nothing written" no "$(exists "$R/.claude")"
 
 new_repo
@@ -173,7 +185,8 @@ assert_contains "first run: planner written" "written $AG/demo-planner.md" "$OUT
 assert_contains "first run: executor written" "written $AG/demo-executor.md" "$OUT"
 assert_contains "first run: reviewer written" "written $AG/demo-reviewer.md" "$OUT"
 assert_contains "first run: guard written" "written $GD" "$OUT"
-assert_contains "first run: it created .claude/agents/, so: restart" "Restart Claude Code" "$OUT"
+assert_eq "first run: wrote agents, so the restart line ends the output" "$RESTART" "$(last_line)"
+assert_eq "first run: the restart line, once" 1 "$(printf '%s\n' "$OUT" | grep -c 'Start a new session')"
 assert_eq "the guard copy is executable" yes "$(if [ -x "$R/$GD" ]; then echo yes; else echo no; fi)"
 
 P=$(cat "$R/$AG/demo-planner.md")
@@ -217,7 +230,7 @@ SUM=$(cat "$R/$AG/demo-planner.md" "$R/$AG/demo-executor.md" "$R/$AG/demo-review
 gen "$R"
 assert_eq "second run: exit 0" 0 "$RC"
 assert_eq "second run: all four unchanged" 4 "$(printf '%s\n' "$OUT" | grep -c '^unchanged ')"
-assert_not_contains "second run: no restart message" "Restart Claude Code" "$OUT"
+assert_not_contains "second run: wrote nothing, so no restart line" "Start a new session" "$OUT"
 assert_eq "second run: the files are identical" "$SUM" \
     "$(cat "$R/$AG/demo-planner.md" "$R/$AG/demo-executor.md" "$R/$AG/demo-reviewer.md" "$R/$GD" | sha256sum)"
 
@@ -227,6 +240,7 @@ assert_eq "facts change: exit 0" 0 "$RC"
 assert_contains "facts change: the reviewer is rewritten" "written $AG/demo-reviewer.md" "$OUT"
 assert_contains "facts change: the planner is not" "unchanged $AG/demo-planner.md" "$OUT"
 assert_contains "facts change: the new line is in" "- Beyond: also the logs." "$(cat "$R/$AG/demo-reviewer.md")"
+assert_eq "facts change: wrote an agent, so the restart line ends the output" "$RESTART" "$(last_line)"
 
 printf '%s\n' '- A lesson typed into the agent.' >> "$R/$AG/demo-planner.md"
 gen "$R"
@@ -236,10 +250,10 @@ assert_contains "hand edit: names the facts section" 'under "## Report (concise)
 assert_contains "hand edit: the edit is kept" "- A lesson typed into the agent." "$(cat "$R/$AG/demo-planner.md")"
 assert_contains "hand edit: the other files still run" "unchanged $AG/demo-executor.md" "$OUT"
 
-awk '{ print } $0 == "## Constraints" { print "- Hand-added." }' "$R/$AG/demo-executor.md" > "$TMP_ROOT/x.md"
+awk '{ print } $0 == "## Full gates (once, at the end)" { print "- Hand-added." }' "$R/$AG/demo-executor.md" > "$TMP_ROOT/x.md"
 cp "$TMP_ROOT/x.md" "$R/$AG/demo-executor.md"
 gen "$R"
-assert_contains "hand edit mid-file: names that heading's section" 'under "## Constraints" probably belongs in .hyper-relay/agents.md, section ## executor/constraints' "$OUT"
+assert_contains "hand edit mid-file: names that heading's section" 'under "## Full gates (once, at the end)" probably belongs in .hyper-relay/agents.md, section ## executor/gates' "$OUT"
 
 sed -i 's/^model: sonnet$/model: opus/' "$R/$AG/demo-reviewer.md"
 gen "$R"
@@ -249,13 +263,17 @@ gen "$R" --force
 assert_eq "--force: exit 0" 0 "$RC"
 assert_contains "--force: replaces the hand-edited planner" "written $AG/demo-planner.md (--force: replaced a hand-edited file)" "$OUT"
 assert_not_contains "--force: the hand edit is gone" "- A lesson typed into the agent." "$(cat "$R/$AG/demo-planner.md")"
+assert_eq "--force: wrote agents, so the restart line ends the output" "$RESTART" "$(last_line)"
 gen "$R"
 assert_eq "after --force: a plain run is clean" 0 "$RC"
+assert_not_contains "after --force: wrote nothing, so no restart line" "Start a new session" "$OUT"
 
 printf '%s\n' '# a local tweak' >> "$R/$GD"
 gen "$R"
 assert_contains "edited guard: refused, pointing at the template" "refused $GD: edited by hand; the guard comes from hyper-relay's templates/hooks/planner-guard.py" "$OUT"
 gen "$R" --force
+assert_contains "--force over the edited guard: the guard is written" "written $GD (--force: replaced a hand-edited file)" "$OUT"
+assert_not_contains "only the guard was written: no restart line" "Start a new session" "$OUT"
 
 echo '--- a hand-written agent (no marker)'
 new_repo
@@ -265,7 +283,7 @@ gen "$R"
 assert_eq "hand-written: exit 1" 1 "$RC"
 assert_contains "hand-written: refused" "refused $AG/demo-executor.md: no hyper-relay-agents marker" "$OUT"
 assert_contains "hand-written: the others are written" "written $AG/demo-planner.md" "$OUT"
-assert_not_contains "the agents folder existed: no restart message" "Restart Claude Code" "$OUT"
+assert_eq "hand-written: the others were written, so the restart line ends the output" "$RESTART" "$(last_line)"
 assert_eq "hand-written: kept" "Hand-written." "$(sed -n 6p "$R/$AG/demo-executor.md")"
 gen "$R" --force
 assert_eq "--force over a hand-written file: exit 0" 0 "$RC"
@@ -298,6 +316,72 @@ assert_contains "browser kind: seed facts under their heading" "## Seed facts
 assert_not_contains "browser kind: an empty gotchas heading is dropped" "## Gotchas that look like bugs" "$B"
 assert_contains "browser kind: the helpers' own lines stay" "- **360 px:**" "$B"
 assert_not_contains "browser kind: no placeholder left" "{{" "$B"
+
+echo '--- the execute key'
+new_plugin
+new_repo
+facts_header 'execute: branch'
+gen "$R"
+assert_eq "execute: branch is accepted" 0 "$RC"
+new_repo
+facts_header 'execute: worktree'
+gen "$R"
+assert_eq "execute: worktree is accepted" 0 "$RC"
+new_repo
+facts_header 'execute: solo'
+gen "$R"
+assert_eq "execute: another value: exit 1" 1 "$RC"
+assert_contains "execute: another value: named" 'execute must be branch or worktree, not "solo"' "$OUT"
+assert_eq "execute: another value: nothing written" no "$(exists "$R/.claude")"
+
+echo '--- the acceptance slots'
+new_repo
+printf '%s\n' '' '## executor/acceptance' '- Start the stack.' >> "$R/.hyper-relay/agents.md"
+gen "$R"
+assert_eq "the old executor/acceptance: exit 1" 1 "$RC"
+assert_contains "the old executor/acceptance: matches no slot" "section ## executor/acceptance matches no slot in the templates" "$OUT"
+
+new_repo
+printf '%s\n' '' '## executor/acceptance-worktree' '- Worktree: run the stack.' '' '## executor/acceptance-branch' '- Branch: restart the dev server.' >> "$R/.hyper-relay/agents.md"
+gen "$R"
+assert_eq "both acceptance slots: exit 0" 0 "$RC"
+X=$(cat "$R/$AG/demo-executor.md")
+assert_contains "both: the worktree facts under their heading" "### In a worktree
+- Worktree: run the stack." "$X"
+assert_contains "both: the branch facts under their heading" "### On a branch
+- Branch: restart the dev server." "$X"
+assert_contains "both: ## Acceptance stays" "## Acceptance" "$X"
+
+new_repo
+printf '%s\n' '' '## executor/acceptance-worktree' '- Worktree: run the stack.' >> "$R/.hyper-relay/agents.md"
+gen "$R"
+X=$(cat "$R/$AG/demo-executor.md")
+assert_contains "worktree facts only: their heading stays" "### In a worktree" "$X"
+assert_not_contains "worktree facts only: no empty On a branch" "### On a branch" "$X"
+
+new_repo
+printf '%s\n' '' '## executor/acceptance-branch' '- Branch: restart the dev server.' >> "$R/.hyper-relay/agents.md"
+gen "$R"
+X=$(cat "$R/$AG/demo-executor.md")
+assert_contains "branch facts only: their heading stays" "### On a branch" "$X"
+assert_not_contains "branch facts only: no empty In a worktree" "### In a worktree" "$X"
+assert_contains "branch facts only: ## Acceptance stays" "## Acceptance" "$X"
+
+new_repo
+gen "$R"
+X=$(cat "$R/$AG/demo-executor.md")
+assert_not_contains "no acceptance facts: no ## Acceptance" "## Acceptance" "$X"
+assert_not_contains "no acceptance facts: no ### heading" "### " "$X"
+
+echo "--- hyper-relay's own facts file"
+new_repo
+cp "$REPO/.hyper-relay/agents.md" "$R/.hyper-relay/agents.md"
+gen "$R"
+assert_eq "hyper-relay's facts: exit 0" 0 "$RC"
+assert_contains "hyper-relay's facts: its executor is written" "written $AG/relay-executor.md" "$OUT"
+gen "$R" --check
+assert_eq "hyper-relay's facts: --check after generating: exit 0" 0 "$RC"
+assert_eq "hyper-relay's facts: --check after generating: silent" "" "$OUT"
 
 echo '--- --check'
 new_plugin

@@ -25,7 +25,7 @@ planner's guard hook finds its copy through `$CLAUDE_PROJECT_DIR`, the folder th
 
 | Command | What it does |
 |---|---|
-| `hyper-relay-agents` | Writes the four files, one line each: `written`, `unchanged`, or `refused` with the reason. Exit 1 if any is refused or the facts file has a problem; then nothing is half-written. |
+| `hyper-relay-agents` | Writes the four files, one line each: `written`, `unchanged`, or `refused` with the reason. When it wrote an agent, a last line says to start a new session. Exit 1 if any is refused or the facts file has a problem; then nothing is half-written. |
 | `hyper-relay-agents --force` | The same, and also overwrites a refused file. Only after the owner has agreed (step 3). |
 | `hyper-relay-agents --check` | Writes nothing. One line per file that is missing, out of date, edited by hand or written by hand; exit 1 if there is any. |
 
@@ -39,6 +39,7 @@ give now; the version in the marker does not decide it.
 ---
 project: myapp
 reviewer: browser
+execute: worktree
 model.executor: sonnet
 ---
 Notes for humans. The generator ignores everything before the first ## heading.
@@ -56,6 +57,7 @@ Notes for humans. The generator ignores everything before the first ## heading.
 |---|---|
 | `project` (required) | Lowercase letters, digits and `-`. Names the files: `<project>-planner.md`. |
 | `reviewer` (required) | `browser` (a click-through of a running app) or `commands` (acceptance by running commands and live CLI sessions). |
+| `execute` | `branch` (an executor runs a plan on a new branch in the main checkout) or `worktree` (in its own worktree). The handoff in `hyper-relay:executing-plans`' `dispatching.md` offers it as this repo's default; without it, the handoff asks. The generator only checks the value. |
 | `model.planner`, `model.executor`, `model.reviewer` | A Claude Code model: `opus`, `sonnet`, `haiku` or a full model id. Defaults: planner `opus`, executor `sonnet`, reviewer `sonnet`. |
 
 Any other key is an error.
@@ -63,7 +65,7 @@ Any other key is an error.
 **Sections:** `## <role>/<slot>`, one per slot the repo fills. The body is copied verbatim into that slot of the
 template, which sits inside or after a bullet list, so write bullets. Every `## ` line starts a section; use `###`
 inside a body. A section that matches no slot, an empty section, or a section given twice is an error. A slot without
-a section is left out, and so is a heading left with nothing under it.
+a section is left out, and so is a `## ` or `### ` heading left with nothing under it.
 
 | Section | Where it lands | For example |
 |---|---|---|
@@ -71,10 +73,11 @@ a section is left out, and so is a heading left with nothing under it.
 | `planner/plan-format` | planner, after the plan-format line | extra header lines; a contract between paired plans |
 | `planner/execution-notes` | planner, "Every plan's Execution notes carry" | the full gates; how stacks may be started; owner-only steps |
 | `planner/report` | planner, end of "Report" | extra report items |
-| `executor/setup` | executor, "Where" | an install step a worktree needs |
+| `executor/setup` | executor, "Setup" | an install step a worktree needs |
 | `executor/gates` (**required**) | executor, "Full gates" | build, lint and test commands, and when the slow ones run |
 | `executor/constraints` | executor, "Constraints" | the only allowed way to start a stack; a test that goes with a kind of change |
-| `executor/acceptance` | executor, "A plan that ends with an acceptance task" | start the stack, leave it up, report its URLs and logins |
+| `executor/acceptance-worktree` | executor, "Acceptance", "In a worktree" | start the worktree's stack, leave it up, report its URLs and logins |
+| `executor/acceptance-branch` | executor, "Acceptance", "On a branch" | restart the owner's normal dev server on the branch, report its URLs |
 | `reviewer/before-you-start` | reviewer, "Before you start" | which URLs to check; commands never to run |
 | `reviewer/helpers` | reviewer, "Helpers" | one-time codes, a mail catcher, read-only database queries, a browser |
 | `reviewer/seed-facts` | reviewer, "Seed facts" | seeded logins and rate limits |
@@ -96,9 +99,10 @@ SKILL.md's folder): read them to see each slot in place.
 
 ## 2. Run the generator
 
-Run `hyper-relay-agents` and tell the owner what changed, file by file. If it printed `Created .claude/agents/`, say
-that the session must be restarted before any of these agents is dispatched: Claude Code watches only agent folders
-that existed when the session started.
+Run `hyper-relay-agents` and tell the owner what changed, file by file. When it wrote an agent, its last line is
+"Start a new session to use them: a running session keeps the agent definitions it loaded." Say so: this session
+still dispatches the definitions it loaded, even for a file it has just rewritten, so the new agents are dispatched
+only from a session started after this run.
 
 If the facts file has problems, nothing is written and every problem is listed. Fix them all, then run it again.
 

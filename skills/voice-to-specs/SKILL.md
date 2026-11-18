@@ -278,7 +278,7 @@ After a successful exit:
 This skill has a defined scope. It does **not**:
 - Write specs (that is the brainstorming skill's job)
 - Write implementation plans (that is the writing-plans skill's job)
-- Execute plans or make code changes (that is the subagent-driven-development skill's job)
+- Execute plans or make code changes (that is the executing-plans skill's job)
 - Start servers or run the application
 - Move or tick cards, or link docs (on the card path it only creates cards)
 - Segment the transcript without user confirmation

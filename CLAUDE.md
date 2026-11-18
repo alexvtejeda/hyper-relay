@@ -6,7 +6,7 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 
 ## Layout
 
-- `skills/<name>/`: the 17 skills. Claude Code names them `hyper-relay:<name>`; OpenCode uses the bare name.
+- `skills/<name>/`: the 16 skills. Claude Code names them `hyper-relay:<name>`; OpenCode uses the bare name.
 - `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`: the plugin, and the one-plugin marketplace that
   installs it (source `./`).
 - `templates/agents/` and `templates/hooks/planner-guard.py`: the role templates and the planner's guard.
@@ -19,7 +19,7 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 - `tests/add-card-line/` tests brainstorming's `scripts/add-card-line.sh`. `skills/voice-to-specs/tests/` and
   `skills/visual-companion/scripts/run-tests.sh` test those skills' scripts. `tests/hyper-relay-agents/` tests the
   generator, its hook and the guard.
-- `tests/claude-code/`, `tests/explicit-skill-requests/`, `tests/skill-triggering/`, `tests/subagent-driven-dev/`:
+- `tests/claude-code/`, `tests/explicit-skill-requests/`, `tests/skill-triggering/`:
   upstream's live suites. They run real `claude -p` sessions with `--plugin-dir`, which spends usage and loads the
   directory in place: run them from a worktree, never from a checkout that holds a `.mcp.json`. `docs/testing.md` is
   upstream's guide to them.
@@ -45,7 +45,8 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 
 ## How a change reaches the owner
 
-- Develop on a branch in a worktree under `.worktrees/`, and merge to `main`.
+- Develop on a branch, in the main checkout or in a worktree under `.worktrees/` (this repo's `execute:` default is
+  `branch`), and merge to `main`.
 - **Claude Code** installs from GitHub (`alexvtejeda/hyper-relay`), never from a local path: a local-directory
   marketplace loads gitignored files too, and this checkout's `.mcp.json` would load as the plugin's own MCP server.
   `plugin.json` pins `version`, so `claude plugin update` and auto-update change nothing until the version does. The
@@ -55,7 +56,8 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
   `scripts/bump-version.sh <x.y.z>`, then merge, push `main`, and tag `v<x.y.z>`.
 - **Role agents** in a repo change only when its orchestrator reruns `hyper-relay-agents` there; the `SessionStart`
   check says when they are out of date.
-- **OpenCode** reads `skills/` in this main checkout, so it sees a change as soon as it merges.
+- **OpenCode** reads `skills/` in this main checkout, so it sees a change as soon as it merges, and during a branch
+  run it sees that branch's skills.
 
 ## Checks
 

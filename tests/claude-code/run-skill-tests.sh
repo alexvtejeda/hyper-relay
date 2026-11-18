@@ -57,10 +57,10 @@ while [[ $# -gt 0 ]]; do
             echo "  --help, -h           Show this help"
             echo ""
             echo "Tests:"
-            echo "  test-subagent-driven-development.sh  Test skill loading and requirements"
+            echo "  (none at present)"
             echo ""
             echo "Integration Tests (use --integration):"
-            echo "  test-subagent-driven-development-integration.sh  Full workflow execution"
+            echo "  test-requesting-code-review.sh  The code reviewer catches planted bugs"
             exit 0
             ;;
         *)
@@ -71,14 +71,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# List of skill tests to run (fast unit tests)
-tests=(
-    "test-subagent-driven-development.sh"
-)
+# List of skill tests to run (fast unit tests); none at present
+tests=()
 
 # Integration tests (slow, full execution)
 integration_tests=(
-    "test-subagent-driven-development-integration.sh"
     "test-requesting-code-review.sh"
 )
 
@@ -98,7 +95,8 @@ failed=0
 skipped=0
 
 # Run each test
-for test in "${tests[@]}"; do
+# ${tests[@]+...}: an empty list expands to nothing, even under set -u in bash 3.2.
+for test in ${tests[@]+"${tests[@]}"}; do
     echo "----------------------------------------"
     echo "Running: $test"
     echo "----------------------------------------"

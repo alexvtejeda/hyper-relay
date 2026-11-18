@@ -1,6 +1,7 @@
 ---
 project: relay
 reviewer: commands
+execute: branch
 ---
 hyper-relay's own role agents. `bin/hyper-relay-agents` combines this file with `templates/` into
 `.claude/agents/relay-planner.md`, `relay-executor.md`, `relay-reviewer.md` and
