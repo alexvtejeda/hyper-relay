@@ -1126,13 +1126,13 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/dispatching-parallel-agents/SKILL.md`, `skills/requesting-code-review/SKILL.md`,
   `skills/voice-to-specs/SKILL.md`, `skills/writing-skills/render-graphs.js`
 
-- [ ] **Step 1: Delete the skill.**
+- [x] **Step 1: Delete the skill.**
 
 ```bash
 git rm -q skills/subagent-driven-development/SKILL.md skills/subagent-driven-development/code-quality-reviewer-prompt.md skills/subagent-driven-development/implementer-prompt.md skills/subagent-driven-development/spec-reviewer-prompt.md
 ```
 
-- [ ] **Step 2: `dispatching-parallel-agents`.** Replace:
+- [x] **Step 2: `dispatching-parallel-agents`.** Replace:
 ```text
 For executing an approved plan, use subagent-driven-development instead.
 ```
@@ -1141,7 +1141,7 @@ with:
 For executing an approved plan, use executing-plans instead.
 ```
 
-- [ ] **Step 3: `requesting-code-review`.** Replace:
+- [x] **Step 3: `requesting-code-review`.** Replace:
 ```text
 **Mandatory:**
 - After each task in subagent-driven development
@@ -1153,7 +1153,7 @@ with:
 - After completing major feature
 ```
 
-- [ ] **Step 4: `voice-to-specs`.** Replace:
+- [x] **Step 4: `voice-to-specs`.** Replace:
 ```text
 - Execute plans or make code changes (that is the subagent-driven-development skill's job)
 ```
@@ -1162,7 +1162,7 @@ with:
 - Execute plans or make code changes (that is the executing-plans skill's job)
 ```
 
-- [ ] **Step 5: `render-graphs.js`.** Replace, both occurrences (Edit with `replace_all`):
+- [x] **Step 5: `render-graphs.js`.** Replace, both occurrences (Edit with `replace_all`):
 ```text
 ../subagent-driven-development
 ```
@@ -1171,7 +1171,7 @@ with:
 ../brainstorming
 ```
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1179,7 +1179,7 @@ with:
 | `node --check skills/writing-skills/render-graphs.js` | silent |
 | `git ls-files skills \| cut -d/ -f2 \| sort -u \| wc -l` | `16` |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/dispatching-parallel-agents/SKILL.md skills/requesting-code-review/SKILL.md skills/voice-to-specs/SKILL.md skills/writing-skills/render-graphs.js
