@@ -372,7 +372,7 @@ rename) and `skills/orchestrating/reviewing.md`.
 **Files:**
 - Create: `skills/orchestrating/planning.md`
 
-- [ ] **Step 1: The planner leg.** Write `skills/orchestrating/planning.md` with exactly:
+- [x] **Step 1: The planner leg.** Write `skills/orchestrating/planning.md` with exactly:
 
 ````markdown
 # The planner leg
@@ -460,12 +460,12 @@ They run one after another, in the spec's order. After plan k merges (`reviewing
 stop-3 handoff question, and its branch is cut from the new `main`. Running them at once is not part of this skill.
 ````
 
-- [ ] **Step 2: Check.**
+- [x] **Step 2: Check.**
 
 Run: `grep -n '^## ' skills/orchestrating/planning.md`
 Expected: four lines: `## 1. Dispatch`, `## 2. Check the hand-back`, `## 3. Stop 3`, `## 4. Several plans`.
 
-- [ ] **Step 3: Commit.**
+- [x] **Step 3: Commit.**
 
 ```bash
 git add skills/orchestrating/planning.md
