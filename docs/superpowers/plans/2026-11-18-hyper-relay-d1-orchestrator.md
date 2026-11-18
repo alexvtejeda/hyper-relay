@@ -1852,3 +1852,29 @@ git -C /home/noob_master/hyper-relay commit -m "docs: piece D1 last-task record"
 <the committing session's attribution lines>" -- docs/superpowers/plans/2026-11-18-hyper-relay-d1-orchestrator.md
 ```
 Push it with the next change of `main` (the owner's call).
+
+## Last-task record (Task 10)
+
+- **Before the merge:** relay-reviewer 7 of 7 `reviewer` steps PASS, none NEEDS-HUMAN; fix rounds 0; code review on
+  Sonnet: "with fixes", Critical 0. Its one Important, that the fix-round limit "reads two ways", was checked against
+  the skills: `SKILL.md` and `reviewing.md` agree with the spec's R9 and §5.2, and only R6's shorthand differed, aligned
+  after the merge (`10d7b9f`). Proposed cards: the owner merged them into two, E.1 (`7211f935`) and D.3 (`e014d2ed`).
+  Token counts (output / cache reads, summed from each agent's transcript): executor 10,696 / 1,451,790, acceptance
+  reviewer 4,867 / 337,072, code reviewer 7,865 / 529,145.
+- **Owner steps:** Steps 8 and 9 (the map, the off-ramp) read at stop 4; agreed, no changes.
+- **Reinstall, 2026-11-18:** marketplace clone at `b125cfd`; `orchestrating` in the 0.1.0 cache: yes; the old
+  `executing-plans/dispatching.md` gone from it: yes.
+- **Regeneration:** hyper-relay `relay-planner` written, `relay-executor` unchanged, `relay-reviewer` written; SAT
+  `sat-planner` written, `sat-executor` unchanged, `sat-reviewer` written; diffs agreed: yes, exactly as planned. The
+  backups went to the session scratchpad instead of `/tmp/hr-d1-agents-before`.
+- **Owner's CLAUDE.md:** replaced 2026-11-18, with the plan's text unchanged.
+- **Probes:** (a) PASS on a rerun in `/tmp/hr-d1-probe-loop2`. The first run passed stop 3, then the owner's revert
+  ended it; the rerun went stop 3, stop 4, local merge, and every git row passed. What it did differently (all on
+  D.3): it installed Quartz's git hooks without asking (finding 7); stop 3's questions came at the end of its message
+  (finding 6); stop 4 came before the code reviewer's token count, which it gave after the merge (finding 9); with no
+  card, Task 1's boxes stayed unticked and stop 4 said Quartz would tick them (finding 8). It took `merge it` as the
+  local merge stop 4 had described, found there was no remote and skipped the pull itself. (b) b1 PASS, b2 PASS,
+  b3 PASS; (c) PASS; (d) OpenCode PASS: it reached stop 3 with the plan-review offer and the branch question; the
+  owner's model was DeepSeek V4.1 Flash; it offered `hyper-relay:agents` and dispatched the `general` subagent, which
+  inherited the session's model.
+- **Memories:** SAT's `orchestrator-workflow` and the hyper-relay handoff updated 2026-11-18.
