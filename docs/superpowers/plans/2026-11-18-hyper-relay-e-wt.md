@@ -344,7 +344,7 @@ Then `git ls-files -s bin/wt` must print a line starting `100755`.
 **Files:**
 - Create: `docs/wt.md`
 
-- [ ] **Step 1: Write `docs/wt.md`** with exactly:
+- [x] **Step 1: Write `docs/wt.md`** with exactly:
 
 ````markdown
 # wt: a disposable stack for each worktree
@@ -520,7 +520,7 @@ Three environment variables, read when `wt` runs (they are not `.wt.conf` keys):
   as `postgres:16`.
 ````
 
-- [ ] **Step 2: Check.**
+- [x] **Step 2: Check.**
 
 | Run | Expected |
 |---|---|
@@ -529,7 +529,7 @@ Three environment variables, read when `wt` runs (they are not `.wt.conf` keys):
 | `git grep -h -o -E 'WT_[A-Z_]+' -- bin/wt \| sort -u` | eight names: `WT_ENV`, `WT_ENV_BASE`, `WT_MAX_STACKS`, `WT_NEW_SETUP`, `WT_SEED_PROFILE`, `WT_SETUP`, `WT_STATE_DIR`, `WT_WAIT_SECONDS` |
 | `git grep --untracked -h -o -E 'WT_[A-Z_]+' -- docs/wt.md \| sort -u` | the same eight names, nothing else |
 
-- [ ] **Step 3: Commit.**
+- [x] **Step 3: Commit.**
 
 ```bash
 git add docs/wt.md
