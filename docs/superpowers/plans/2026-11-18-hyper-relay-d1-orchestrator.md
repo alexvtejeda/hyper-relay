@@ -603,7 +603,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/brainstorming/SKILL.md`
 
-- [ ] **Step 1: The HARD-GATE.** Replace:
+- [x] **Step 1: The HARD-GATE.** Replace:
 ```text
 This applies to EVERY project regardless of perceived simplicity.
 ```
@@ -612,7 +612,7 @@ with:
 This applies to EVERY project regardless of perceived simplicity, except an off-ramp case (below).
 ```
 
-- [ ] **Step 2: "This Is Too Simple", and the off-ramp section after it.** Replace:
+- [x] **Step 2: "This Is Too Simple", and the off-ramp section after it.** Replace:
 ```text
 Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
 ```
@@ -625,7 +625,7 @@ Every project goes through this process, except an off-ramp case (below). A todo
 A request may skip the relay (no design, spec or plan) only when it is one of: a typo; a one-line config change; a rename; a single obvious bugfix; a question that changes no files. For any of them except the question, say which case it matches and ask, in a message of its own: "This looks like an off-ramp case (*a one-line config change*). I'd do it directly, with no spec or plan. OK?" Skip the relay only on a yes. When the owner already said to just do it, that is the yes. Anything not on the list, or any doubt, goes through the relay without asking. If the work turns out bigger than one change, stop and take it through the relay.
 ```
 
-- [ ] **Step 3: Checklist item 10.** Replace:
+- [x] **Step 3: Checklist item 10.** Replace:
 ```text
 10. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 ```
@@ -634,7 +634,7 @@ with:
 10. **Hand over to the relay** — invoke `hyper-relay:orchestrating`: its planner leg dispatches a planner, which writes the plan. Do not write the plan, and do not invoke `writing-plans`.
 ```
 
-- [ ] **Step 4: The flow diagram's end node.** Replace:
+- [x] **Step 4: The flow diagram's end node.** Replace:
 ```text
     "Invoke writing-plans skill" [shape=doublecircle];
 ```
@@ -652,7 +652,7 @@ with:
     "User reviews spec?" -> "Invoke orchestrating skill" [label="approved"];
 ```
 
-- [ ] **Step 5: The terminal state.** Replace:
+- [x] **Step 5: The terminal state.** Replace:
 ```text
 **The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
 ```
@@ -661,7 +661,7 @@ with:
 **The terminal state is invoking `hyper-relay:orchestrating`.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is `orchestrating`, whose planner leg writes the plan.
 ```
 
-- [ ] **Step 6: The held-back spec's pointer.** Replace:
+- [x] **Step 6: The held-back spec's pointer.** Replace:
 ```text
 and leave the commit for after that branch merges (`hyper-relay:executing-plans`' `dispatching.md`, step 9).
 ```
@@ -670,7 +670,7 @@ with:
 and leave the commit for after that branch merges (`hyper-relay:orchestrating`'s `reviewing.md`, §5).
 ```
 
-- [ ] **Step 7: "Implementation".** Replace:
+- [x] **Step 7: "Implementation".** Replace:
 ```text
 - Invoke the writing-plans skill to create a detailed implementation plan
 - Do NOT invoke any other skill. writing-plans is the next step.
@@ -681,7 +681,7 @@ with:
 - Do not write the plan yourself, and do not invoke `writing-plans`. Do NOT invoke any other skill: `orchestrating` is the next step.
 ```
 
-- [ ] **Step 8: Check.**
+- [x] **Step 8: Check.**
 
 | Run | Expected |
 |---|---|
@@ -690,7 +690,7 @@ with:
 | `git grep -c 'except an off-ramp case (below)' -- skills/brainstorming/SKILL.md` | `skills/brainstorming/SKILL.md:2` |
 | `git grep -n '^## The Off-Ramp (Experiment)$' -- skills/brainstorming/SKILL.md` | one line, just before `## Checklist` |
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 git add skills/brainstorming/SKILL.md
