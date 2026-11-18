@@ -136,7 +136,7 @@ guard refuses `git --version`; spec §5 says 2.43.0).
 - Modify: `bin/wt:104` (in `write_base_env`)
 - Test: `tests/wt/run-tests.sh:118` (the refusals section)
 
-- [ ] **Step 1: The baseline is the one this plan read.**
+- [x] **Step 1: The baseline is the one this plan read.**
 
 | Run | Expected |
 |---|---|
@@ -145,7 +145,7 @@ guard refuses `git --version`; spec §5 says 2.43.0).
 
 If either differs, stop and report: `wt` or its suite changed after this plan was written.
 
-- [ ] **Step 2: Write the three failing cases.** In `tests/wt/run-tests.sh`, replace:
+- [x] **Step 2: Write the three failing cases.** In `tests/wt/run-tests.sh`, replace:
 
 ```text
 assert_not_contains "an unknown placeholder builds nothing" "up --build" "$(cat "$FAKE_LOG")"
@@ -195,14 +195,14 @@ and the worktree, so today's not-found check lets it through (D2). In the third 
 tracks the link and `[ -f ]` follows it; the commit uses the identity `new_case` set in the repo's shared config, as
 `new_repo` already does from a worktree.
 
-- [ ] **Step 3: Run the suite; the twelve new checks fail.**
+- [x] **Step 3: Run the suite; the twelve new checks fail.**
 
 Run: `sh tests/wt/run-tests.sh | grep -e '^FAIL' -e 'passed, '`
 Expected: twelve `FAIL` lines, each naming one of the checks above (all contain `base file`), then
 `118 passed, 12 failed`. Today `wt up` copies each file (through the link, in the third case) to `.env` and starts
 the stack on the fake `docker`.
 
-- [ ] **Step 4: Add the `ls-files` check.** In `bin/wt`, replace:
+- [x] **Step 4: Add the `ls-files` check.** In `bin/wt`, replace:
 
 ```text
     [ -f "$ROOT/$ENV_BASE" ] || die "WT_ENV_BASE file not found: $ENV_BASE"
@@ -219,13 +219,13 @@ with:
 It runs after `take_slot` and before `.env` is touched or `WT_SETUP` runs, the same point as the not-found error, so a
 refused `wt up` keeps its slot as a missing base file does today (spec §1).
 
-- [ ] **Step 5: Run the suite; only the symlink case still fails (D14).**
+- [x] **Step 5: Run the suite; only the symlink case still fails (D14).**
 
 Run: `sh tests/wt/run-tests.sh | grep -e '^FAIL' -e 'passed, '`
 Expected: four `FAIL` lines, all `a symlinked base file …`, then `126 passed, 4 failed`: git tracks the link, so
 `ls-files` accepts it (spec §5).
 
-- [ ] **Step 6: Add the symlink check (spec E1.4).** In `bin/wt`, replace:
+- [x] **Step 6: Add the symlink check (spec E1.4).** In `bin/wt`, replace:
 
 ```text
         die "WT_ENV_BASE must be a file git tracks: $ENV_BASE"
@@ -241,7 +241,7 @@ with:
 So `write_base_env` now opens with the not-found line and the two checks, in that order, then the existing `.env`
 check. Nothing else in `bin/wt` changes, its header comment included.
 
-- [ ] **Step 7: Run the suite; it passes.**
+- [x] **Step 7: Run the suite; it passes.**
 
 | Run | Expected |
 |---|---|
@@ -250,7 +250,7 @@ check. Nothing else in `bin/wt` changes, its header comment included.
 | `dash -n bin/wt`, then `dash -n tests/wt/run-tests.sh` | silent |
 | `git diff --numstat -- bin/wt tests/wt/run-tests.sh` | `3	0	bin/wt` and `30	0	tests/wt/run-tests.sh` |
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add bin/wt tests/wt/run-tests.sh
