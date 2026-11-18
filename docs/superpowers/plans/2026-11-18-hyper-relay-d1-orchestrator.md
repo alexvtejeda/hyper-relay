@@ -1479,17 +1479,17 @@ one code review of the branch on Sonnet (`requesting-code-review`'s template, ra
 `$(git merge-base main hyper-relay-d1-orchestrator)..hyper-relay-d1-orchestrator`, this plan and the spec), and its
 stop-4 report gives the acceptance reviewer's and the code reviewer's token counts against the executor's.
 
-- [ ] **Step 1 (`reviewer`): The manifests and the skill count.**
+- [x] **Step 1 (`reviewer`): The manifests and the skill count.**
   - Run `claude plugin validate .`. PASS: it passes (exit 0), and its warnings are the root `CLAUDE.md` one and, at
     most, `ICON_MISSING`.
   - Run `git ls-files 'skills/*/SKILL.md' | wc -l`. PASS: `17`.
 
-- [ ] **Step 2 (`reviewer`): The suites.**
+- [x] **Step 2 (`reviewer`): The suites.**
   - Run `sh tests/hyper-relay-agents/run-tests.sh | tail -n 1`. PASS: `153 passed, 0 failed`.
   - Run `sh tests/hyper-relay-agents/guard-test.sh | tail -n 1`. PASS: `51 passed, 0 failed`.
   - Run `sh tests/add-card-line/run-tests.sh | tail -n 1`. PASS: the line ends `0 failed`.
 
-- [ ] **Step 3 (`reviewer`): The pointers, and the move.**
+- [x] **Step 3 (`reviewer`): The pointers, and the move.**
   - Run `git grep -n -E 'executing-plans.{0,6}dispatching' -- skills templates README.md CLAUDE.md`. PASS: no output.
   - Run `git grep -n -e 'dispatching\.md' --and --not -e orchestrating -- skills templates ':!skills/orchestrating'`.
     PASS: no output.
@@ -1499,20 +1499,20 @@ stop-4 report gives the acceptance reviewer's and the code reviewer's token coun
   - Run `git log --follow --format=%h -- skills/orchestrating/dispatching.md | tail -n 1`. PASS: `6579c81`, or a longer
     prefix of it (the file's history followed the `git mv`).
 
-- [ ] **Step 4 (`reviewer`): The old wording is gone.**
+- [x] **Step 4 (`reviewer`): The old wording is gone.**
   - Run `git grep -n -i 'subagent-driven' -- skills templates README.md CLAUDE.md`. PASS: no output.
   - Run `git grep -n -i -e 'each task' -e 'per.task' -e 'next task' -e 'task [0-9]' -e 'completing tasks' -- skills/requesting-code-review`.
     PASS: no output.
   - Run `git grep -n -i -e 'invoke writing-plans' -e 'invoke the writing-plans' -e 'invoking writing-plans' -e 'writing-plans is the next step' -- skills/brainstorming`.
     PASS: no output.
 
-- [ ] **Step 5 (`reviewer`): The new skill's folder.**
+- [x] **Step 5 (`reviewer`): The new skill's folder.**
   - Run `ls -A skills/orchestrating`. PASS: exactly `SKILL.md`, `dispatching.md`, `planning.md`, `reviewing.md`.
   - Run `git ls-files skills/orchestrating`. PASS: the same four, under `skills/orchestrating/`.
   - Run `git grep -n -e '/home/' -e '~/' -e '/Users/' -e '/tmp/' -- skills/orchestrating`. PASS: no output (no path on
     this machine).
 
-- [ ] **Step 6 (`reviewer`): Every reference in the new files resolves.** Read `skills/orchestrating/SKILL.md`,
+- [x] **Step 6 (`reviewer`): Every reference in the new files resolves.** Read `skills/orchestrating/SKILL.md`,
   `planning.md`, `reviewing.md` and `dispatching.md` in full. Then:
   - Run `git grep -h -o -E 'hyper-relay:[a-z-]+' -- skills/orchestrating | sort -u`. PASS: for each
     `hyper-relay:<name>` it prints, `skills/<name>/SKILL.md` is in `git ls-files 'skills/*/SKILL.md'`.
@@ -1522,22 +1522,22 @@ stop-4 report gives the acceptance reviewer's and the code reviewer's token coun
     `reviewing.md` §1–§5, and every "`<file>` §N" reference in the four files names a section with that number whose
     heading fits the sentence. List any reference that does not resolve as a FAIL, with its line.
 
-- [ ] **Step 7 (`reviewer`): `${CLAUDE_SKILL_DIR}` references in the skills this plan touches.** Run
+- [x] **Step 7 (`reviewer`): `${CLAUDE_SKILL_DIR}` references in the skills this plan touches.** Run
   `git grep -n 'CLAUDE_SKILL_DIR' -- skills/orchestrating skills/brainstorming skills/executing-plans skills/writing-plans skills/requesting-code-review`.
   PASS: five lines, four in `skills/orchestrating/SKILL.md` and one in `skills/brainstorming/SKILL.md`, and each also
   names, on the same line, the same file relative to its skill (for example "(`planning.md` beside this SKILL.md)" or
   "(`../brainstorming/scripts/add-card-line.sh` from this SKILL.md)"). (Other skills' references, in
   `visual-companion` and `voice-to-specs`, predate this plan and name their files in a nearby sentence.)
 
-- [ ] **Step 8 (`owner`): The map.** Read it on the branch:
+- [x] **Step 8 (`owner`): The map.** Read it on the branch:
   `git -C /home/noob_master/hyper-relay show hyper-relay-d1-orchestrator:skills/orchestrating/SKILL.md`. PASS: the
   legs, the four stops and the "Finding where work stands" table read as the approved design; the owner says so.
 
-- [ ] **Step 9 (`owner`): The off-ramp.** Read the "The Off-Ramp (Experiment)" section in
+- [x] **Step 9 (`owner`): The off-ramp.** Read the "The Off-Ramp (Experiment)" section in
   `git -C /home/noob_master/hyper-relay show hyper-relay-d1-orchestrator:skills/brainstorming/SKILL.md`. PASS: the
   owner agrees with it as written (spec §6.1's text).
 
-- [ ] **Step 10 (`after merge`): Re-check on `main`.**
+- [x] **Step 10 (`after merge`): Re-check on `main`.**
 
 | Run | PASS |
 |---|---|
@@ -1547,7 +1547,7 @@ stop-4 report gives the acceptance reviewer's and the code reviewer's token coun
 | `cd /home/noob_master/hyper-relay && claude plugin validate .` | passes; warnings only the root `CLAUDE.md` one and, at most, `ICON_MISSING` |
 | `git -C /home/noob_master/hyper-relay status --short` | nothing but the owner's untracked `tasks/` |
 
-- [ ] **Step 11 (`after merge`): Push, then the owner reinstalls.** The version stays 0.1.0.
+- [x] **Step 11 (`after merge`): Push, then the owner reinstalls.** The version stays 0.1.0.
 
 ```bash
 git -C /home/noob_master/hyper-relay push origin main
@@ -1565,7 +1565,7 @@ Then the owner runs `/plugin install hyper-relay@hyper-relay` **in a Claude Code
 If a check fails, stop and tell the owner; do not delete or uninstall anything. Sessions started before the reinstall
 keep the old copy.
 
-- [ ] **Step 12 (`after merge`): Regenerate both repos' agents (§10.3 step 2; E19).**
+- [x] **Step 12 (`after merge`): Regenerate both repos' agents (§10.3 step 2; E19).**
 
 Before:
 
@@ -1592,7 +1592,7 @@ Regenerate, and show the owner each diff:
 
 Then the owner starts a new session: this one keeps the agent definitions it loaded (spec §11).
 
-- [ ] **Step 13 (`after merge`): The owner's `~/.claude/CLAUDE.md` (§10.3 step 3; E5).** The file is not tracked
+- [x] **Step 13 (`after merge`): The owner's `~/.claude/CLAUDE.md` (§10.3 step 3; E5).** The file is not tracked
   (`git -C /home/noob_master ls-files .claude/CLAUDE.md` prints nothing), so there is nothing to commit. **Show the
   owner this text before editing, and edit only on the owner's OK.** In `/home/noob_master/.claude/CLAUDE.md`, replace
   everything from the line `## Workflow: Brainstorm → Spec → Plan → Execute` up to, not including, the line
@@ -1640,7 +1640,7 @@ machine, brainstorming's card-line script is
 
 Record any wording the owner changed.
 
-- [ ] **Step 14 (`after merge`): Live probes (§10.3 step 4; E18).** In throwaway repos without Quartz, each session new
+- [x] **Step 14 (`after merge`): Live probes (§10.3 step 4; E18).** In throwaway repos without Quartz, each session new
   and started after Steps 11–13. **Setup (the orchestrator),** for each `<dir>` of `/tmp/hr-d1-probe-loop`,
   `/tmp/hr-d1-probe-offramp`, `/tmp/hr-d1-probe-resume` and `/tmp/hr-d1-probe-opencode`:
 
@@ -1779,7 +1779,7 @@ which subagent it dispatched.
 
 The fix loop is not forced in a probe; it is recorded the first time it runs for real.
 
-- [ ] **Step 15 (`after merge`): The memories (§10.3 step 5).**
+- [x] **Step 15 (`after merge`): The memories (§10.3 step 5).**
 
 (a) SAT's `/home/noob_master/.claude/projects/-home-noob-master-sat-pentraze-com/memory/orchestrator-workflow.md`.
 Replace its `description:` line with:
@@ -1818,7 +1818,7 @@ habits; both repos' agents regenerated. Next: E (`wt`), then D2.
 and, in that folder's `MEMORY.md`, the handoff line's summary `A,B,C done; D1 brainstorm Q2 open (restart first); F
 rename card; read first` with `A, B, C, D1 done; next E (wt), then D2; F rename card; read first`.
 
-- [ ] **Step 16 (`after merge`): Clean up; anything failed?**
+- [x] **Step 16 (`after merge`): Clean up; anything failed?**
 
 ```bash
 rm -rf /tmp/hr-d1-probe-loop /tmp/hr-d1-probe-offramp /tmp/hr-d1-probe-resume /tmp/hr-d1-agents-before
@@ -1827,7 +1827,7 @@ Remove `/tmp/hr-d1-probe-opencode` once the owner has closed OpenCode there. A f
 the usual spec and plan, merge, push, reinstall (Step 11), and repeat the step. To roll an agent back meanwhile, copy
 it from `/tmp/hr-d1-agents-before/` before cleaning up.
 
-- [ ] **Step 17 (`after merge`): Record (E16).** Append to this plan, in the main checkout (on `main`):
+- [x] **Step 17 (`after merge`): Record (E16).** Append to this plan, in the main checkout (on `main`):
 
 ```markdown
 ## Last-task record (Task 10)
