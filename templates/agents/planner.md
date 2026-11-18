@@ -51,20 +51,20 @@ and the codebase state. Everything below is standing.
   targeted tests.
 
 ## Every plan's Execution notes carry
-- Work in `.worktrees/<branch>` on the named branch. When the plan or its spec names a Quartz card, the first task
-  starts with `quartz link-branch <plan path>`.
+- The executor works where its dispatch prompt says: a branch in the main checkout or its own worktree, chosen at
+  the handoff. A plan names no mode, no checkout path and no `cd` prefix, and carries no Quartz step: the
+  orchestrator runs `quartz link-branch` and `quartz review`.
 - Commit after every task, staging named files only (never `git add -A` / `git add .`), ending with the
   attribution trailer the executor's instructions give. The final commit of each task also carries
   `Plan-Task: <plan path>#<N>`.
 - Never wait with a self-matching `pgrep`; never `pkill -f` a pattern in your own command line.
 - Token budget: targeted tests per task; the full gates once at the end.
-- **Outside the worktree is not the executor's.** Anything that touches the main checkout, another repo, the
-  owner's own config, or GitHub (push, tag, repo settings), or that needs real credentials, a real third-party API
-  or a live Claude Code or OpenCode session, is an owner/orchestrator task: mark it so, with exact commands and
-  exact text. Tests use fakes.
-- A plan ends with its acceptance task. The executor runs `quartz review` after its last task (when the repo uses
-  Quartz; if it fails, it reports the failure and carries on). The checklist gives, for each step, the command or
-  action and the result that counts as PASS, so the reviewer or the owner can run it as written.
+- **Outside the executor's branch is not the executor's.** Anything that touches `main`, another repo, the owner's
+  own config, or GitHub (push, tag, repo settings), or that needs real credentials, a real third-party API or a live
+  Claude Code or OpenCode session, is an owner/orchestrator task: mark it so, with exact commands and exact text.
+  Tests use fakes.
+- A plan ends with its acceptance task. The checklist gives, for each step, the command or action and the result
+  that counts as PASS, so the reviewer or the owner can run it as written.
 {{slot planner/execution-notes}}
 
 ## Committing
