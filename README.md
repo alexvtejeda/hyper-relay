@@ -103,6 +103,20 @@ whisper under `${XDG_DATA_HOME:-~/.local/share}/hyper-relay/voice-to-specs/`, ou
 delete it. Whisper runs on the CPU: `setup.sh` installs CPU-only torch first, because PyPI's default CUDA build crashes
 under WSL.
 
+### wt
+
+`wt` (`bin/wt`) gives each git worktree a disposable Docker Compose stack, so a branch can be clicked through beside
+your real stack. Once the plugin is installed, Claude Code's Bash tool finds it by name: a plugin's `bin/` is on that
+tool's `PATH`. For your own shell, or a Makefile that calls `wt`, symlink it from a clone into a directory on your
+`PATH`:
+
+```sh
+ln -sfn /path/to/hyper-relay/bin/wt ~/.local/bin/wt
+```
+
+Each project that uses it commits a short `.wt.conf`. [docs/wt.md](docs/wt.md) says what to put in it, what `wt`
+needs (dash, Docker Compose 2.24.4 or later, `jq`, `ss`) and what each command does.
+
 ## Roadmap
 
 | Piece | What | Status |
@@ -112,7 +126,7 @@ under WSL.
 | C | **Our own executing-plans:** executes in the worktree it is given (or on a branch, per repo), commits per task with `Plan-Task` trailers, runs the full checks once, and stops before merging | on `main` |
 | D1 | **The orchestrator, one spec at a time:** a new `orchestrating` skill runs the relay from an approved spec to the merge. It dispatches the planner, the executor and the reviewers, checks every hand-back, runs an acceptance check and one code review per branch, and stops for you at four points | in progress |
 | D2 | **Several plans at once:** runs a spec's plans side by side, checks them for migration and shared-file conflicts before dispatch, stacks a dependent plan on an unmerged branch, and hands you one preview stack to click through | planned, after E |
-| E | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | brainstorming |
+| E | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | on `main` |
 | F | **`docs/hyper-relay/`:** specs and plans move out of `docs/superpowers/`, once Quartz accepts the new path | planned |
 
 ## Credits

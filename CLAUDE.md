@@ -16,9 +16,11 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 - `hooks/hooks.json`: one `SessionStart` hook, `hyper-relay-agents --check --hook`, which prints nothing unless the
   repo's generated agents are out of date.
 - `.hyper-relay/agents.md`: this repo's own facts, for its `relay-*` agents.
+- `bin/wt`: `wt`, a disposable Docker Compose stack for each git worktree (POSIX shell, run by dash). `docs/wt.md` is
+  its user reference. Claude Code puts the plugin's `bin/` on the Bash tool's `PATH`, so skills call it by name.
 - `tests/add-card-line/` tests brainstorming's `scripts/add-card-line.sh`. `skills/voice-to-specs/tests/` and
   `skills/visual-companion/scripts/run-tests.sh` test those skills' scripts. `tests/hyper-relay-agents/` tests the
-  generator, its hook and the guard.
+  generator, its hook and the guard. `tests/wt/` tests `wt`, with a fake `docker` and `ss`.
 - `tests/claude-code/`, `tests/explicit-skill-requests/`, `tests/skill-triggering/`:
   upstream's live suites. They run real `claude -p` sessions with `--plugin-dir`, which spends usage and loads the
   directory in place: run them from a worktree, never from a checkout that holds a `.mcp.json`. `docs/testing.md` is
@@ -58,6 +60,8 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
   check says when they are out of date.
 - **OpenCode** reads `skills/` in this main checkout, so it sees a change as soon as it merges, and during a branch
   run it sees that branch's skills.
+- **`wt`** in the owner's shell is `~/.local/bin/wt`, a symlink to this main checkout's `bin/wt`: a change reaches it
+  as soon as it merges, and during a branch run the shell runs that branch's `wt`.
 
 ## Checks
 
@@ -68,4 +72,5 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 | voice-to-specs | `sh skills/voice-to-specs/tests/transcribe-sh.test.sh` and `sh skills/voice-to-specs/tests/setup-sh.test.sh` | `0 failed` from each |
 | Role agents | `sh tests/hyper-relay-agents/run-tests.sh` and `sh tests/hyper-relay-agents/guard-test.sh` | `0 failed` from each |
 | visual-companion | `bash skills/visual-companion/scripts/run-tests.sh` | every case `ok`, exit 0 |
+| wt | `sh tests/wt/run-tests.sh` | `0 failed` |
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |
