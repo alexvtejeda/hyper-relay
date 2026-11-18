@@ -148,7 +148,7 @@ refuses `readlink`); Task 4 Step 14 checks both.
   `tests/wt/fixtures/ps-ok.json`, `tests/wt/fixtures/ps-seed-failed.json`, `tests/wt/fixtures/ps-seed-running.json`,
   `tests/wt/fixtures/ps-starting.json`
 
-- [ ] **Step 1: The sources are the ones this plan read.**
+- [x] **Step 1: The sources are the ones this plan read.**
 
 | Run | Expected |
 |---|---|
@@ -158,7 +158,7 @@ refuses `readlink`); Task 4 Step 14 checks both.
 
 If any differs, stop and report: the tool changed after this plan was written.
 
-- [ ] **Step 2: Copy the tool, the suite and the four `ps-*` fixtures.**
+- [x] **Step 2: Copy the tool, the suite and the four `ps-*` fixtures.**
 
 ```bash
 mkdir -p tests/wt/fixtures
@@ -171,7 +171,7 @@ cp ~/.claude/tests/wt/fixtures/ps-ok.json ~/.claude/tests/wt/fixtures/ps-seed-fa
 The two compose fixtures come in Step 5, under their new names. `run-tests.sh` finds the tool at
 `$HERE/../../bin/wt`, which is `bin/wt` here too: its lookup does not change.
 
-- [ ] **Step 3: The suite's names become generic (35 lines; D1, D2).** Ten edits to `tests/wt/run-tests.sh`.
+- [x] **Step 3: The suite's names become generic (35 lines; D1, D2).** Ten edits to `tests/wt/run-tests.sh`.
 
 (a) Replace:
 ```text
@@ -262,14 +262,14 @@ Check:
 | `grep -c -i quartz tests/wt/run-tests.sh` | `0` |
 | `grep -c -i -w sat tests/wt/run-tests.sh` | `0` |
 
-- [ ] **Step 4: Run the suite; it fails.** The suite now asks for `app.json` and `pinned-net.json`, which do not exist
+- [x] **Step 4: Run the suite; it fails.** The suite now asks for `app.json` and `pinned-net.json`, which do not exist
   yet.
 
 Run: `sh tests/wt/run-tests.sh | grep -e '^FAIL' -e 'passed, '`
 Expected: a non-zero failed count on the last line, with failures including `FAIL up succeeds` and
 `FAIL pinned-net shape succeeds`.
 
-- [ ] **Step 5: The two compose fixtures, under their new names.**
+- [x] **Step 5: The two compose fixtures, under their new names.**
 
 ```bash
 cp ~/.claude/tests/wt/fixtures/quartz.json tests/wt/fixtures/app.json
@@ -289,12 +289,12 @@ fixed address keep their values (spec §3).
 | `git diff --no-index --numstat ~/.claude/tests/wt/fixtures/sat.json tests/wt/fixtures/pinned-net.json` | `7	7	…` |
 | `grep -c -i -e quartz -e '"sat-' tests/wt/fixtures/app.json tests/wt/fixtures/pinned-net.json` | `tests/wt/fixtures/app.json:0` and `tests/wt/fixtures/pinned-net.json:0` |
 
-- [ ] **Step 6: Run the suite; it passes.**
+- [x] **Step 6: Run the suite; it passes.**
 
 Run: `sh tests/wt/run-tests.sh | tail -n 1`
 Expected: `118 passed, 0 failed`
 
-- [ ] **Step 7: The tool's two edits (spec §2; D3).** In `bin/wt`:
+- [x] **Step 7: The tool's two edits (spec §2; D3).** In `bin/wt`:
 
 (a) Replace:
 ```text
@@ -328,7 +328,7 @@ Check:
 | `git grep --untracked -n -i -w -E 'sat\|quartz' -- bin/wt tests/wt` | nothing |
 | `git grep --untracked -n -i quartz -- bin/wt tests/wt` | nothing |
 
-- [ ] **Step 8: Commit, once, citing the four home-repo commits (E3).**
+- [x] **Step 8: Commit, once, citing the four home-repo commits (E3).**
 
 ```bash
 git add bin/wt tests/wt/run-tests.sh tests/wt/fixtures/app.json tests/wt/fixtures/pinned-net.json tests/wt/fixtures/ps-ok.json tests/wt/fixtures/ps-seed-failed.json tests/wt/fixtures/ps-seed-running.json tests/wt/fixtures/ps-starting.json
