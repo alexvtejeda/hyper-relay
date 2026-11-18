@@ -705,7 +705,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/writing-plans/SKILL.md`
 - Rewrite: `skills/writing-plans/plan-document-reviewer-prompt.md`
 
-- [ ] **Step 1: The description and the Context line.** In `skills/writing-plans/SKILL.md`, replace:
+- [x] **Step 1: The description and the Context line.** In `skills/writing-plans/SKILL.md`, replace:
 ```text
 description: Use when you have a spec or requirements for a multi-step task, before touching code
 ```
@@ -723,7 +723,7 @@ with:
 The orchestrator sets up a branch or a worktree at the handoff (`hyper-relay:orchestrating`'s `dispatching.md`), and the dispatch prompt tells the executor where it is.
 ```
 
-- [ ] **Step 2: The spec's plan count, and the Quartz pointer.** Replace:
+- [x] **Step 2: The spec's plan count, and the Quartz pointer.** Replace:
 ```text
 If they differ, stop and ask the user before writing any plan. Once they approve a different number, update the spec's `**Plans:**` line to it, adding the line for more than one plan and removing it for one, and commit the spec as "Committing the plan" below says. The hooks upload the changed spec, which updates the card's expected count.
 ```
@@ -741,7 +741,7 @@ with:
 the orchestrator runs both, at dispatch and after verifying the executor's report (`hyper-relay:orchestrating`'s `dispatching.md`).
 ```
 
-- [ ] **Step 3: Committing, and after saving (E8).** Replace:
+- [x] **Step 3: Committing, and after saving (E8).** Replace:
 ```text
 Commit a plan, or a spec you updated, only while the repo's main checkout is on `main`:
 ```
@@ -770,7 +770,7 @@ with:
 Commit it (above), report its path and task count to the orchestrator, and stop. Do not offer ways to execute it and do not start executing: the orchestrator checks the plan, stops for the owner, and runs the handoff (`hyper-relay:orchestrating`'s `planning.md` and `dispatching.md`).
 ```
 
-- [ ] **Step 4: The plan format the orchestrator checks (E7, confirmed by the owner 2026-11-18).**
+- [x] **Step 4: The plan format the orchestrator checks (E7, confirmed by the owner 2026-11-18).**
   Replace:
 ```text
 ## Task Structure
@@ -785,7 +785,7 @@ with:
 ## Task Structure
 ```
 
-- [ ] **Step 5: The plan reviewer's prompt.** Write `skills/writing-plans/plan-document-reviewer-prompt.md` with
+- [x] **Step 5: The plan reviewer's prompt.** Write `skills/writing-plans/plan-document-reviewer-prompt.md` with
   exactly:
 
 ````markdown
@@ -841,7 +841,7 @@ Agent tool (general-purpose, model: sonnet):
 planner, which revises the plan and commits it again.
 ````
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 | Run | Expected |
 |---|---|
@@ -850,7 +850,7 @@ planner, which revises the plan and commits it again.
 | `sed -n '1,4p' skills/writing-plans/SKILL.md` | the front matter, `name: writing-plans` and the new one-line description |
 | `git grep -n -e 'Task tool' -e 'Approved' -- skills/writing-plans/plan-document-reviewer-prompt.md` | no output |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/writing-plans/SKILL.md skills/writing-plans/plan-document-reviewer-prompt.md
