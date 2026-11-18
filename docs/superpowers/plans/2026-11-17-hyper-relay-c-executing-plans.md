@@ -1449,7 +1449,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `README.md`, `CLAUDE.md`
 
-- [ ] **Step 1: `README.md`.** Replace:
+- [x] **Step 1: `README.md`.** Replace:
 ```text
 | Execute | `executing-plans`, `subagent-driven-development`, `using-git-worktrees`, `test-driven-development` | Commits, one per task, in their own worktree |
 ```
@@ -1467,7 +1467,7 @@ with:
 runs the full checks once, and stops before merging | on `main` |
 ```
 
-- [ ] **Step 2: `CLAUDE.md`.** Replace:
+- [x] **Step 2: `CLAUDE.md`.** Replace:
 ```text
 - `skills/<name>/`: the 17 skills. Claude Code names them `hyper-relay:<name>`; OpenCode uses the bare name.
 ```
@@ -1505,7 +1505,7 @@ with:
   run it sees that branch's skills.
 ```
 
-- [ ] **Step 3: The full gates, once.**
+- [x] **Step 3: The full gates, once.**
 
 | Run | Expected |
 |---|---|
@@ -1523,7 +1523,7 @@ with:
 
 Upstream's live suites are not run (report this): they start real `claude -p` sessions.
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add README.md CLAUDE.md
@@ -1533,7 +1533,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 ```
 Then `git status --short` must print nothing.
 
-- [ ] **Step 5: In review.** Run `quartz review` in the worktree. If it fails, report the failure and carry on. Then
+- [x] **Step 5: In review.** Run `quartz review` in the worktree. If it fails, report the failure and carry on. Then
   report (gate results with counts, every deviation, any `quartz:` line, the suites not run and why) and copy Task
   9's acceptance checklist (its Steps 1–7, with each step's PASS output) into the report. Stop: Task 9 is not yours.
 
