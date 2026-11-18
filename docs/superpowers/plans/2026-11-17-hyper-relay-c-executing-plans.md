@@ -743,7 +743,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Rewrite: `skills/executing-plans/SKILL.md`
 - Create: `skills/executing-plans/dispatching.md`
 
-- [ ] **Step 1: The executor's process.** Write `skills/executing-plans/SKILL.md` with exactly:
+- [x] **Step 1: The executor's process.** Write `skills/executing-plans/SKILL.md` with exactly:
 
 ````markdown
 ---
@@ -840,7 +840,7 @@ You share the repo's main checkout with the orchestrator, who keeps working whil
 - `hyper-relay:finishing-a-development-branch` belongs to the owner and the orchestrator, after the click-through.
 ````
 
-- [ ] **Step 2: The orchestrator's half.** Write `skills/executing-plans/dispatching.md` with exactly:
+- [x] **Step 2: The orchestrator's half.** Write `skills/executing-plans/dispatching.md` with exactly:
 
 ````markdown
 # Handing a plan to an executor
@@ -978,7 +978,7 @@ staged by its path (`git add <path>`, then `git commit -m "<message>" -- <path>â
 ticks queued during the run drain at the next stop.
 ````
 
-- [ ] **Step 3: Check.**
+- [x] **Step 3: Check.**
 
 | Run | Expected |
 |---|---|
@@ -986,7 +986,7 @@ ticks queued during the run drain at the next stop.
 | `git grep -n -F 'CLAUDE_SKILL_DIR}/dispatching.md` (`dispatching.md` beside this' -- skills/executing-plans/SKILL.md` | one line, line 8 |
 | `sed -n '1,4p' skills/executing-plans/SKILL.md` | the front matter: `name: executing-plans` and the one-line description |
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add skills/executing-plans/SKILL.md skills/executing-plans/dispatching.md
