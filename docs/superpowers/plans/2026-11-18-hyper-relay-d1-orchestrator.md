@@ -864,7 +864,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/executing-plans/SKILL.md`, `skills/using-git-worktrees/SKILL.md`, `skills/agents/SKILL.md`
 
-- [ ] **Step 1: `executing-plans`' description and first body line.** In `skills/executing-plans/SKILL.md`, replace:
+- [x] **Step 1: `executing-plans`' description and first body line.** In `skills/executing-plans/SKILL.md`, replace:
 ```text
 description: Use when an approved implementation plan is to be executed. The executor dispatched to run one plan follows this file; an orchestrator handing a plan off at the plan-to-execute handoff reads dispatching.md beside it instead, and never executes the plan itself.
 ```
@@ -884,7 +884,7 @@ with:
 You never execute a plan yourself.
 ```
 
-- [ ] **Step 2: `executing-plans`' Integration.** Replace:
+- [x] **Step 2: `executing-plans`' Integration.** Replace:
 ```text
 - `hyper-relay:writing-plans` writes the plan; `dispatching.md` hands it to you.
 ```
@@ -894,7 +894,7 @@ with:
 - `hyper-relay:writing-plans` is the planner's: a planner wrote the plan you run.
 ```
 
-- [ ] **Step 3: `using-git-worktrees`' description.** In `skills/using-git-worktrees/SKILL.md`, replace:
+- [x] **Step 3: `using-git-worktrees`' description.** In `skills/using-git-worktrees/SKILL.md`, replace:
 ```text
 whose executor's worktree is set up (and never entered) by executing-plans' dispatching.md.
 ```
@@ -903,7 +903,7 @@ with:
 whose executor's worktree is set up (and never entered) by orchestrating's dispatching.md.
 ```
 
-- [ ] **Step 4: `agents`' header table.** In `skills/agents/SKILL.md`, replace:
+- [x] **Step 4: `agents`' header table.** In `skills/agents/SKILL.md`, replace:
 ```text
 The handoff in `hyper-relay:executing-plans`' `dispatching.md` offers it as this repo's default;
 ```
@@ -912,7 +912,7 @@ with:
 The handoff in `hyper-relay:orchestrating`'s `dispatching.md` offers it as this repo's default;
 ```
 
-- [ ] **Step 5: Check.** Tasks 4–6 together leave no old pointer.
+- [x] **Step 5: Check.** Tasks 4–6 together leave no old pointer.
 
 | Run | Expected |
 |---|---|
@@ -921,7 +921,7 @@ The handoff in `hyper-relay:orchestrating`'s `dispatching.md` offers it as this 
 | `git grep -n 'dispatching\.md' -- skills templates ':!skills/orchestrating'` | six lines (executing-plans 1, writing-plans 3, using-git-worktrees 1, agents 1), each naming `orchestrating` |
 | `git grep -n 'CLAUDE_SKILL_DIR' -- skills/executing-plans` | no output |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/executing-plans/SKILL.md skills/using-git-worktrees/SKILL.md skills/agents/SKILL.md
