@@ -1,7 +1,7 @@
 #!/bin/sh
 # POSIX tests for templates/hooks/planner-guard.py, the planner's PreToolUse guard: what it
 # lets through (exit 0) and what it refuses (exit 2, with a "planner guard:" reason on stderr),
-# fed the JSON Claude Code sends a PreToolUse hook. Its rules are sat-planner-guard.py's.
+# fed the JSON Claude Code sends a PreToolUse hook. Its rules are those of the guard it was copied from.
 # Usage: sh tests/hyper-relay-agents/guard-test.sh   (GUARD overrides the script under test)
 # Expect: "51 passed, 0 failed"
 set -u
@@ -89,8 +89,8 @@ case $ERR in
     *) bad "the reason restates the rules" "$ERR" ;;
 esac
 case $ERR in
-    *sat-planner*) bad "the reason no longer says sat-planner" "$ERR" ;;
-    *) ok "the reason no longer says sat-planner" ;;
+    "planner guard:"*) ok "the reason starts with planner guard:" ;;
+    *) bad "the reason starts with planner guard:" "$ERR" ;;
 esac
 
 echo '--- Write, Edit, MultiEdit, NotebookEdit'
