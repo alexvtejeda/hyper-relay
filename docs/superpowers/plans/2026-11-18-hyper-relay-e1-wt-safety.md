@@ -266,7 +266,7 @@ Then `git ls-files -s bin/wt` must still print a line starting `100755`.
 **Files:**
 - Modify: `docs/wt.md` (lines 31, 106–107, 111, 112, 145, 154, 165–166, 170–171 of today's file)
 
-- [ ] **Step 1: Eight edits to `docs/wt.md`.**
+- [x] **Step 1: Eight edits to `docs/wt.md`.**
 
 (a) Requirements, the Linux bullet. Replace:
 ```text
@@ -360,7 +360,7 @@ with:
 
 Nothing else in `docs/wt.md` changes, and `README.md` does not change (spec §3).
 
-- [ ] **Step 2: Check the doc.**
+- [x] **Step 2: Check the doc.**
 
 | Run | Expected |
 |---|---|
@@ -372,7 +372,7 @@ Nothing else in `docs/wt.md` changes, and `README.md` does not change (spec §3)
 | `git grep -n -e macOS -e 'build script' -e 'Real credentials' -e 'git clean' -e 'names a file git does not track' -e 'is no sandbox' -- docs/wt.md` | six lines: 31, 112, 120, 153, 163 and 182 |
 | `wc -l < docs/wt.md` | `183` |
 
-- [ ] **Step 3: The full gates, once.**
+- [x] **Step 3: The full gates, once.**
 
 | Run | Expected |
 |---|---|
@@ -385,7 +385,7 @@ Nothing else in `docs/wt.md` changes, and `README.md` does not change (spec §3)
 
 Upstream's live suites are not run (report this): they start real `claude -p` sessions.
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add docs/wt.md
