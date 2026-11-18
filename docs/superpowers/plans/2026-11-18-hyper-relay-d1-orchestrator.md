@@ -1368,7 +1368,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `README.md`, `CLAUDE.md`
 
-- [ ] **Step 1: README's status.** Replace:
+- [x] **Step 1: README's status.** Replace:
 ```text
 > **Status: 0.1.0.** This release moves the skills into a versioned plugin with **no behaviour change**. Later releases
 > add the role agents, per-repo configuration and the orchestrator (see [Roadmap](#roadmap)).
@@ -1379,7 +1379,7 @@ with:
 > several plans at once, a disposable stack per worktree and the docs' own folder (see [Roadmap](#roadmap)).
 ```
 
-- [ ] **Step 2: README's relay table, and the line under it.** Replace:
+- [x] **Step 2: README's relay table, and the line under it.** Replace:
 ```text
 | Plan | `writing-plans` | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with full code, tests and a binding contract between plans |
 ```
@@ -1414,7 +1414,7 @@ merge).
 Also in the box:
 ```
 
-- [ ] **Step 3: README's roadmap (E1).** Replace:
+- [x] **Step 3: README's roadmap (E1).** Replace:
 ```text
 and stops for you at four points | in progress |
 ```
@@ -1423,7 +1423,7 @@ with:
 and stops for you at four points | on `main` |
 ```
 
-- [ ] **Step 4: `CLAUDE.md`.** Replace:
+- [x] **Step 4: `CLAUDE.md`.** Replace:
 ```text
 - `skills/<name>/`: the 16 skills.
 ```
@@ -1432,7 +1432,7 @@ with:
 - `skills/<name>/`: the 17 skills.
 ```
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add README.md CLAUDE.md
@@ -1441,7 +1441,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 6: The full gates, once (spec §10.1).**
+- [x] **Step 6: The full gates, once (spec §10.1).**
 
 | Run | Expected |
 |---|---|
