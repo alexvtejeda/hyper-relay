@@ -648,7 +648,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `templates/agents/planner.md`, `templates/agents/reviewer-commands.md`
 
-- [ ] **Step 1: The planner (§5.2).** In `templates/agents/planner.md`, replace:
+- [x] **Step 1: The planner (§5.2).** In `templates/agents/planner.md`, replace:
 ```text
 - Work in `.worktrees/<branch>` on the named branch. When the plan or its spec names a Quartz card, the first task
   starts with `quartz link-branch <plan path>`.
@@ -680,7 +680,7 @@ with:
   that counts as PASS, so the reviewer or the owner can run it as written.
 ```
 
-- [ ] **Step 2: The commands reviewer (E2; drop this step if the owner did not confirm E2).** In
+- [x] **Step 2: The commands reviewer (E2; drop this step if the owner did not confirm E2).** In
   `templates/agents/reviewer-commands.md`, replace:
 ```text
   Performs the acceptance check for ONE {{project}} plan ({{root}}) in its worktree: runs the plan's acceptance
@@ -720,7 +720,7 @@ with:
    plans, on a branch run). If not, stop and report. Don't fix it.
 ```
 
-- [ ] **Step 3: Check.**
+- [x] **Step 3: Check.**
 
 | Run | Expected |
 |---|---|
@@ -728,7 +728,7 @@ with:
 | `git grep -n "worktree" -- templates/agents/reviewer-commands.md` | only lines saying "the main checkout or a worktree" and the Hard rules' "any checkout or worktree" |
 | `sh tests/hyper-relay-agents/run-tests.sh \| tail -n 1` | `153 passed, 0 failed` |
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add templates/agents/planner.md templates/agents/reviewer-commands.md
