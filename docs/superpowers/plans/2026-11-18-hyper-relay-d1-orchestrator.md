@@ -935,7 +935,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Rewrite: `skills/requesting-code-review/SKILL.md`, `skills/requesting-code-review/code-reviewer.md`
 
-- [ ] **Step 1: The skill.** Write `skills/requesting-code-review/SKILL.md` with exactly:
+- [x] **Step 1: The skill.** Write `skills/requesting-code-review/SKILL.md` with exactly:
 
 ````markdown
 ---
@@ -1037,7 +1037,7 @@ You: [Check the Critical issue against the code: it is real, so the executor fix
 See template at: requesting-code-review/code-reviewer.md
 ````
 
-- [ ] **Step 2: The reviewer's template.** Write `skills/requesting-code-review/code-reviewer.md` with exactly:
+- [x] **Step 2: The reviewer's template.** Write `skills/requesting-code-review/code-reviewer.md` with exactly:
 
 ````markdown
 # Code Reviewer Prompt Template
@@ -1225,7 +1225,7 @@ Agent tool (general-purpose, model: sonnet):
 ```
 ````
 
-- [ ] **Step 3: Check.**
+- [x] **Step 3: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1234,7 +1234,7 @@ Agent tool (general-purpose, model: sonnet):
 | `git grep -n -e 'Merge with an unfixed Critical issue' -e 'Drop a finding without recording it' -- skills/requesting-code-review/SKILL.md` | two lines |
 | `sed -n '1,4p' skills/requesting-code-review/SKILL.md` | the front matter, `name: requesting-code-review` and the new description |
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add skills/requesting-code-review/SKILL.md skills/requesting-code-review/code-reviewer.md
