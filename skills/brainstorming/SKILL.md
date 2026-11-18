@@ -15,7 +15,7 @@ Do NOT invoke any implementation skill, write any code, scaffold any project, or
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
 
-Every project goes through this process, except an off-ramp case (below). A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+Every project goes through this process, except an off-ramp case (below). A todo list, a single-function utility, a multi-line config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
 
 ## The Off-Ramp (Experiment)
 
@@ -25,7 +25,7 @@ A request may skip the relay (no design, spec or plan) only when it is one of: a
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Tick Brain** — when the work has a Quartz card, call the Quartz MCP's `tick_brain` with the card id. The tick moves the card to the brainstorming column. With no card, skip this. If it fails, report the failure and carry on
+1. **Quartz** — run `hyper-relay:orchestrating`'s Quartz check (`${CLAUDE_SKILL_DIR}/../orchestrating/quartz.md`, §1 and §2; `../orchestrating/quartz.md` from this SKILL.md). When the repo uses Quartz and the work has a card, call `tick_brain` with its id. If it fails, report the failure and carry on
 2. **Explore project context** — check files, docs, recent commits
 3. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 4. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
@@ -118,7 +118,7 @@ digraph brainstorming {
 - When the work has a Quartz card, run `${CLAUDE_SKILL_DIR}/scripts/add-card-line.sh <spec-path> <card-id> [<card-id>...]` (`scripts/add-card-line.sh` beside this SKILL.md) straight after writing the spec. With no card, skip this. If the script fails, report the failure to the user and carry on: a script failure does not stop this skill.
 - When the work needs more than one implementation plan, for example an API plan and a web plan, add a `**Plans:** <n>` line to the spec's header, before its first `---` or `## `, with `<n>` from 1 to 9. If the design does not make the number clear, ask the user how many plans it needs. With one plan, leave the line out. Quartz reads it, and keeps the card open until that many plans have merged.
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document to git, only while the repo's main checkout is on `main` (`git branch --show-current` there prints `main`), staging it by its path. When the main checkout is on another branch, a plan is running there: do not commit. Run `quartz link-doc <spec-path>` instead (it puts an uncommitted doc on its cards; skip it without Quartz), and leave the commit for after that branch merges (`hyper-relay:orchestrating`'s `reviewing.md`, §5).
+- Commit the design document to git, only while the repo's main checkout is on `main` (`git branch --show-current` there prints `main`), staging it by its path. When the main checkout is on another branch, a plan is running there: do not commit. Run `quartz link-doc <spec-path>` instead (it puts an uncommitted doc on its cards; skip it when step 1 found that the repo does not use Quartz), and leave the commit for after that branch merges (`hyper-relay:orchestrating`'s `reviewing.md`, §5).
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:

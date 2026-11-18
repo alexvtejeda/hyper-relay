@@ -149,7 +149,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 Commit a plan only while the repo's main checkout is on `main`: there, `git branch --show-current` prints `main` and `git rev-parse -q --verify MERGE_HEAD` prints nothing. Stage each file by its path and commit just those: `git add <path>`, then `git commit -m "<message>" -- <path> [<path>...]`. If the commit prints a `quartz:` line, do what it says.
 
-When the main checkout is on another branch, a plan is running there (a branch run). Do not commit, and do not edit a file that is already committed. Run `quartz link-doc <path>` on your new plan (it puts an uncommitted doc on its cards; skip it without Quartz), and report that it is held back. The orchestrator commits it after that branch merges (`hyper-relay:orchestrating`'s `reviewing.md`, §5).
+When the main checkout is on another branch, a plan is running there (a branch run). Do not commit, and do not edit a file that is already committed. Run `quartz link-doc <path>` on your new plan (it puts an uncommitted doc on its cards; skip it when your dispatch prompt says the repo does not use Quartz), and report that it is held back. The orchestrator commits it after that branch merges (`hyper-relay:orchestrating`'s `reviewing.md`, §5).
 
 ## After saving the plan
 
