@@ -1,9 +1,10 @@
 # Handing a plan to an executor
 
-The orchestrator's half of `executing-plans`. You are the session the owner talks to. You hand ONE approved plan to
-ONE executor, keep working while it runs, verify what it hands back, and see the plan through review and merge. You
-never execute a plan yourself: a fresh executor, in its own context, works better than a window full of decisions
-and explanations. (`SKILL.md`, beside this file, is the executor's process.)
+The handoff leg of `orchestrating` (`SKILL.md` beside this file is the map), reached from stop 3 (`planning.md` §3).
+You are the session the owner talks to. You hand ONE approved plan to ONE executor, keep working while it runs, and
+verify what it hands back; `reviewing.md` sees the plan through review and merge. You never execute a plan yourself:
+a fresh executor, in its own context, works better than a window full of decisions and explanations. The executor's
+process is the `hyper-relay:executing-plans` skill.
 
 **A branch run is active exactly when the repo's main checkout is not on `main`:**
 `GIT_OPTIONAL_LOCKS=0 git -C <main checkout> branch --show-current` prints another branch. Nothing else needs
@@ -78,7 +79,7 @@ Dispatch ONE executor, in the background:
 - otherwise a general-purpose agent whose first instruction is "Invoke the `hyper-relay:executing-plans` skill and
   follow it." (In OpenCode: the `general` subagent, told to load the `executing-plans` skill first.)
 
-The prompt gives what the executor's `SKILL.md` lists under "The dispatch prompt gives":
+The prompt gives what `hyper-relay:executing-plans` lists under "The dispatch prompt gives":
 - the plan's path (absolute when it is not committed on `main`), and which tasks are the executor's, e.g. "Tasks 1–8;
   Task 9 is the orchestrator's";
 - the mode, `branch` or `worktree`;
@@ -118,16 +119,4 @@ Before relaying anything, where the branch is checked out:
 Then run `quartz review` there (the cards move to In review); if it fails, move the cards by hand through the Quartz
 MCP. Tell the owner only failures, gate results, deviations and the decisions you need: the board shows the rest.
 
-## 8. Click-through and merge
-
-The owner clicks through: after a branch run, on the normal stack, once the executor's "On a branch" acceptance steps
-have run; after a worktree run, on the worktree's `wt` stack. The owner decides the merge, through
-`hyper-relay:finishing-a-development-branch`, which handles both: for a branch, it checks out `main`, merges and
-deletes the branch; for a worktree, it merges, then removes the worktree. When the worktree has a `wt` stack, stop
-it first (`(cd <worktree> && wt down)`).
-
-## 9. After a branch merge
-
-The main checkout is back on `main`. Make the edits that waited, and commit the specs and plans you held back, each
-staged by its path (`git add <path>`, then `git commit -m "<message>" -- <path>…`), so the hooks upload them. Task
-ticks queued during the run drain at the next stop.
+Then continue with `reviewing.md`.
