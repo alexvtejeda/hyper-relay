@@ -183,7 +183,7 @@ Task 8 runs it, and its count stays `153 passed, 0 failed`.
 - Move and modify: `skills/executing-plans/dispatching.md` → `skills/orchestrating/dispatching.md`
 - Create: `skills/orchestrating/reviewing.md`
 
-- [ ] **Step 1: Move the file, so its history follows.**
+- [x] **Step 1: Move the file, so its history follows.**
 
 ```bash
 mkdir -p skills/orchestrating
@@ -193,7 +193,7 @@ git mv skills/executing-plans/dispatching.md skills/orchestrating/dispatching.md
 Run: `git status --short -- skills/executing-plans skills/orchestrating`
 Expected: `R  skills/executing-plans/dispatching.md -> skills/orchestrating/dispatching.md`
 
-- [ ] **Step 2: The opening (spec §4, first bullet).** In `skills/orchestrating/dispatching.md`, replace:
+- [x] **Step 2: The opening (spec §4, first bullet).** In `skills/orchestrating/dispatching.md`, replace:
 ```text
 The orchestrator's half of `executing-plans`. You are the session the owner talks to. You hand ONE approved plan to
 ONE executor, keep working while it runs, verify what it hands back, and see the plan through review and merge. You
@@ -209,7 +209,7 @@ a fresh executor, in its own context, works better than a window full of decisio
 process is the `hyper-relay:executing-plans` skill.
 ```
 
-- [ ] **Step 3: §5 points at the executor's skill (spec §4, last bullet).** Replace:
+- [x] **Step 3: §5 points at the executor's skill (spec §4, last bullet).** Replace:
 ```text
 The prompt gives what the executor's `SKILL.md` lists under "The dispatch prompt gives":
 ```
@@ -218,7 +218,7 @@ with:
 The prompt gives what `hyper-relay:executing-plans` lists under "The dispatch prompt gives":
 ```
 
-- [ ] **Step 4: §7 hands on to `reviewing.md`; §8 and §9 leave (spec §4, second and third bullets).** Replace:
+- [x] **Step 4: §7 hands on to `reviewing.md`; §8 and §9 leave (spec §4, second and third bullets).** Replace:
 ```text
 MCP. Tell the owner only failures, gate results, deviations and the decisions you need: the board shows the rest.
 
@@ -243,7 +243,7 @@ MCP. Tell the owner only failures, gate results, deviations and the decisions yo
 Then continue with `reviewing.md`.
 ```
 
-- [ ] **Step 5: The review leg.** Write `skills/orchestrating/reviewing.md` with exactly:
+- [x] **Step 5: The review leg.** Write `skills/orchestrating/reviewing.md` with exactly:
 
 ````markdown
 # The review leg, the click-through and the merge
@@ -347,7 +347,7 @@ Then, in either mode, run the plan's `after merge` acceptance steps with the own
 its handoff follows (`planning.md` §4).
 ````
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 | Run | Expected |
 |---|---|
@@ -356,7 +356,7 @@ its handoff follows (`planning.md` §4).
 | `tail -n 1 skills/orchestrating/dispatching.md` | ``Then continue with `reviewing.md`.`` |
 | `grep -n -e 'Click-through and merge' -e 'After a branch merge' -e 'beside this file, is the executor' skills/orchestrating/dispatching.md` | no output |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/orchestrating/dispatching.md skills/orchestrating/reviewing.md
