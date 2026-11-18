@@ -1,0 +1,16 @@
+{
+  "description": "hyper-relay: one line at session start when this repo's generated role agents are out of date",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/bin/hyper-relay-agents --check --hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

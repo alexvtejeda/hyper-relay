@@ -36,8 +36,9 @@ everything stands.
 | Review | `verification-before-completion`, `requesting-code-review`, `receiving-code-review` | Evidence that it works: tests, then a click-through of the running app |
 | Finish | `finishing-a-development-branch` | A merge, on your call |
 
-Also in the box: `systematic-debugging` (root cause before any fix), `dispatching-parallel-agents`, `writing-skills`
-and `using-hyper-relay` (how to find and use the skills).
+Also in the box: `systematic-debugging` (root cause before any fix), `dispatching-parallel-agents`, `writing-skills`,
+`using-hyper-relay` (how to find and use the skills) and `agents` (generates each repo's planner, executor and reviewer
+agents from hyper-relay's templates and the repo's own `.hyper-relay/agents.md`).
 
 ### The rules of the relay
 
@@ -107,7 +108,7 @@ under WSL.
 | Piece | What | Status |
 |---|---|---|
 | A | **The fork's home:** the skills as a versioned plugin for Claude Code and OpenCode, with no behaviour change | 0.1.0 |
-| B | **Role agents generated per project:** hyper-relay ships planner, executor and reviewer templates; each repo keeps one small facts file (`.hyper-relay/agents.md`: its checks, its test stack and logins, its gotchas, a model per role), and a generator writes the repo's own agents from the two. A session-start notice says when they are out of date, and a guide adapts them for OpenCode | planning |
+| B | **Role agents generated per repo:** a planner, an executor and a reviewer built from hyper-relay's templates and one small committed facts file per repo (`.hyper-relay/agents.md`), with a session-start notice when they fall out of date | on `main` |
 | C | **Our own executing-plans:** executes in the worktree it is given (or on a branch, per repo), commits per task with `Plan-Task` trailers, runs the full checks once, and stops before merging | planned |
 | D | **The orchestrator:** dispatches the legs, verifies every hand-back, stacks dependent plans, checks for migration and shared-file conflicts, and hands you the stack to click through | planned |
 | – | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | planned |
