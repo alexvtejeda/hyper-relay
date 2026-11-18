@@ -479,7 +479,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Create: `skills/orchestrating/SKILL.md`
 
-- [ ] **Step 1: The map.** Write `skills/orchestrating/SKILL.md` with exactly:
+- [x] **Step 1: The map.** Write `skills/orchestrating/SKILL.md` with exactly:
 
 ````markdown
 ---
@@ -581,7 +581,7 @@ Each falls back to plain Markdown and git without Quartz.
   meanwhile.
 ````
 
-- [ ] **Step 2: Check.**
+- [x] **Step 2: Check.**
 
 | Run | Expected |
 |---|---|
@@ -589,7 +589,7 @@ Each falls back to plain Markdown and git without Quartz.
 | `grep -n 'CLAUDE_SKILL_DIR' skills/orchestrating/SKILL.md` | four lines; each also names the same file relative to this SKILL.md (`beside this SKILL.md`, or `from this SKILL.md`) |
 | `ls -A skills/orchestrating` | `SKILL.md`, `dispatching.md`, `planning.md`, `reviewing.md`, nothing else |
 
-- [ ] **Step 3: Commit.**
+- [x] **Step 3: Commit.**
 
 ```bash
 git add skills/orchestrating/SKILL.md
