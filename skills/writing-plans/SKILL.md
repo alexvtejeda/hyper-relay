@@ -13,7 +13,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** If working in an isolated worktree, it should have been created via the `hyper-relay:using-git-worktrees` skill at execution time.
+**Context:** A plan names neither where it runs nor a path to run it in: no worktree path, no `cd` prefix. The orchestrator sets up a branch or a worktree at the handoff (`hyper-relay:executing-plans`' `dispatching.md`), and the dispatch prompt tells the executor where it is.
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
@@ -24,7 +24,7 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 ## The spec's plan count
 
-Before writing, compare the number of plans you intend to write with the spec's `**Plans:** <n>` header line. A spec without the line means 1. If they differ, stop and ask the user before writing any plan. Once they approve a different number, update the spec's `**Plans:**` line to it, adding the line for more than one plan and removing it for one, and commit the spec. The hooks upload the changed spec, which updates the card's expected count.
+Before writing, compare the number of plans you intend to write with the spec's `**Plans:** <n>` header line. A spec without the line means 1. If they differ, stop and ask the user before writing any plan. Once they approve a different number, update the spec's `**Plans:**` line to it, adding the line for more than one plan and removing it for one, and commit the spec as "Committing the plan" below says. The hooks upload the changed spec, which updates the card's expected count.
 
 ## File Structure
 
@@ -53,7 +53,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use hyper-relay:subagent-driven-development (recommended) or hyper-relay:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: hyper-relay:executing-plans (the executor preloads it). Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -64,17 +64,9 @@ This structure informs the task decomposition. Each task should produce self-con
 ---
 ```
 
-## Linking the plan's branch
+## No Quartz steps in a plan
 
-When the plan or its spec names a Quartz card (a `**Card:**` or `**Cards:**` line in the plan, or one in the spec on its `**Spec:**` line), the plan's first task opens with this required step, with the plan's own path filled in:
-
-> After creating your branch, run `quartz link-branch <this plan's path>`. If it fails, report the failure and carry on.
-
-With no card, there is no step.
-
-## Before a click-through
-
-When a plan has a step that asks the owner to click through a change, usually with the URL that `wt up` printed, that step first runs `quartz review` in the worktree, just before asking. If it fails, report the failure and carry on.
+A plan carries no `quartz link-branch` step and no `quartz review` step: the orchestrator runs both, at dispatch and after verifying the executor's report (`hyper-relay:executing-plans`' `dispatching.md`).
 
 ## Task Structure
 
@@ -148,22 +140,14 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
-## Execution Handoff
+## Committing the plan
 
-After saving the plan, offer execution choice:
+Commit a plan, or a spec you updated, only while the repo's main checkout is on `main`: there, `git branch --show-current` prints `main` and `git rev-parse -q --verify MERGE_HEAD` prints nothing. Stage each file by its path and commit just those: `git add <path>`, then `git commit -m "<message>" -- <path> [<path>...]`. If the commit prints a `quartz:` line, do what it says.
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+When the main checkout is on another branch, a plan is running there (a branch run). Do not commit, and do not edit a file that is already committed:
+- a new plan, or a spec you created during the run: run `quartz link-doc <path>` (it puts an uncommitted doc on its cards; skip it without Quartz), and report that it is held back. The orchestrator commits it after that branch merges (`dispatching.md`, step 9);
+- a committed spec whose `**Plans:**` line must change: report the change; it is made after the merge.
 
-**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
+## After saving the plan
 
-**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
-
-**Which approach?"**
-
-**If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use hyper-relay:subagent-driven-development
-- Fresh subagent per task + two-stage review
-
-**If Inline Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use hyper-relay:executing-plans
-- Batch execution with checkpoints for review
+Commit it (above), report its path and task count, and stop. Do not offer ways to execute it and do not start executing: once the owner approves the plan, the orchestrator runs the handoff in `hyper-relay:executing-plans`' `dispatching.md`.
