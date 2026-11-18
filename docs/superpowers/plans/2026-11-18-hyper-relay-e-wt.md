@@ -25,7 +25,9 @@ its §8 for the README and `CLAUDE.md` lines D1's plan edits); plan C
 (`docs/superpowers/plans/2026-11-17-hyper-relay-c-executing-plans.md`, lines 1–991 and 1447–1776, for format);
 `README.md`, `.gitignore`, `.gitattributes`, `.hyper-relay/agents.md`, `.git/config` (the `origin` remote) and the
 generated `.claude/agents/relay-reviewer.md` (its hard rules shape the `reviewer` steps), all in full;
-`git ls-files` of `docs/superpowers/`, `bin/`, `tests/add-card-line/` and `docs/testing.md`; `git grep` for `wt` in
+D1's plan as committed in `f10be85` (`git grep` of its `README.md` and `CLAUDE.md` lines, and its Task 9, lines
+1366–1435, which hold all its edits to both); `git ls-files` of `docs/superpowers/`, `bin/`, `tests/add-card-line/`
+and `docs/testing.md`; `git grep` for `wt` in
 `skills/`, `templates/`, `hooks/`, `.hyper-relay/`, `README.md` and `CLAUDE.md` (only `dispatching.md` names it, by
 name) and for test runners (none globs `tests/*`). Read outside the repo: `~/.claude/bin/wt` (444 lines),
 `~/.claude/tests/wt/run-tests.sh` and all six fixtures (in full); in the home repo, `git log` of `wt`'s paths (the
@@ -104,10 +106,11 @@ refuses `readlink`); Task 4 Step 14 checks both.
 | D10 | §6.1: `git grep … -- bin/wt tests/wt docs/wt.md` finds nothing | `git grep` reads tracked files only, so Tasks 1 and 2 check with `git grep --untracked` before their commits; Task 3 and Task 4 run it as written. |
 | D11 | §6.3 step 2: `wt ls` exits 0 "from SAT's main checkout" | This plan is public, so it does not print SAT's path; the orchestrator runs the command there. |
 | D12 | §6.3 step 1: the owner reinstalls with `/plugin install hyper-relay@hyper-relay` | As written (in a session). `CLAUDE.md` says the shell's `claude plugin install` also refreshes the copy; D1's spec (§11) says it does not. Either way Step 13 checks the cache, not the message. |
-| D13 | E5: E runs after D1 merges, or in a worktree beside D1's run | The plan names no mode. Its README anchors are the E roadmap row and the end of the Install section; D1's are the relay table, the line under it, the status blockquote and the D1 row. The E row is two lines below the D1 row, with the D2 row between: if D1's plan also edits the D2 row, the two hunks touch and git reports a conflict there. Task 4 Step 12 checks the merge before it happens. |
+| D13 | E5: E runs after D1 merges, or in a worktree beside D1's run | The plan names no mode. Its README anchors are the E roadmap row and the end of the Install section; its `CLAUDE.md` anchors the Layout's `.hyper-relay/agents.md` and tests bullets, the OpenCode bullet and the Checks table's visual-companion row. D1's committed plan (`f10be85`, Task 9) edits README's status blockquote, the relay table's Plan, Review and Finish rows with a new line under the table, and the D1 row, and `CLAUDE.md`'s skill count: none of E's lines, and not the D2 row that sits between the D1 and E rows, so the two branches should merge cleanly in either order. Task 4 Step 12 checks the merge before it happens. |
 | D14 | Card line | Included, from the spec. |
 | D15 | §4: "one generic example" `.wt.conf` | Written fresh, with keys no project here uses (`PUBLIC_API_URL`, `ALLOWED_ORIGIN`) and a `WT_NEW_SETUP` of `npm ci`. It quotes no project's file. |
 | D16 | §4's list for `docs/wt.md` | Covered in full. It also says `wt` needs Linux (`ss` is iproute2's) and which compose file names `wt` looks for, and carries a failures table taken from the Quartz-repo spec's "Failure handling", re-checked against the tool (a failed `WT_SETUP` starts nothing, unlike a failed build or seed, which leaves the stack up). |
+| D17 | §5: README says the repo ships `wt` (the E row, the `### wt` subsection) | D1's plan (`f10be85`, Task 9 Step 1) rewrites README's status blockquote to list "a disposable stack per worktree" as still to come. This plan leaves that line alone (D1 edits it), so once both are on `main` it is stale. Task 4 Step 18 fixes it on `main`, after both have merged. **Owner: confirm the new wording.** |
 
 ## Spec coverage
 
@@ -119,8 +122,8 @@ refuses `readlink`); Task 4 Step 14 checks both.
 | 2. `bin/wt` | 1 |
 | 3. `tests/wt/` | 1 |
 | 4. `docs/wt.md` | 2 |
-| 5. `README.md` and `CLAUDE.md` | 3 |
-| 6. Testing and acceptance | 6.1: 1, 3. 6.2: 4 (Steps 1–10). 6.3: 4 (Steps 13–17) |
+| 5. `README.md` and `CLAUDE.md` | 3; 4 (Step 18, the status line once D1 is in) |
+| 6. Testing and acceptance | 6.1: 1, 3. 6.2: 4 (Steps 1–10). 6.3: 4 (Steps 13–18) |
 | 7. External facts (checked 2026-11-18) | header (re-verified), 1 (the suite's baseline), 4 (Steps 13, 14) |
 | 8. Out of scope | 1 (Step 7: nothing in what `wt` does changes), Execution notes |
 | 9. Plans | this plan; 4 (its §6.3 steps, after the merge) |
@@ -662,9 +665,9 @@ Then `git status --short` must print nothing (on a branch run, nothing but the o
 
 Each step says who runs it. **`reviewer`** steps (1–10) run before the merge, in the plan's checkout on the branch
 `hyper-relay-e-wt`, by the acceptance reviewer, which writes only in its evidence folder. **`owner`** steps (11–12)
-run at the click-through. **`after merge`** steps (13–17) are the owner's and the orchestrator's, one command per Bash
-call; their commits are in other repos and carry no `Plan-Task:` trailer, so the orchestrator ticks this task by hand
-when Step 17 is done (commit just the plan: `docs: plan progress, task 4 of 4`). No step starts a live session or real
+run at the click-through. **`after merge`** steps (13–18) are the owner's and the orchestrator's, one command per Bash
+call; their commits carry no `Plan-Task:` trailer, so the orchestrator ticks this task by hand when Step 18 is done
+(commit just the plan: `docs: plan progress, task 4 of 4`). No step starts a live session or real
 Docker: the suite runs on its fake `docker`.
 
 - [ ] **Step 1 (`reviewer`): The suite.**
@@ -858,4 +861,36 @@ Act on any `quartz:` line the commit prints. Pushing Quartz follows its usual fl
 
 - [ ] **Step 17 (`after merge`): The handoff memory.** Update this repo's handoff memory (in
   `~/.claude/projects/-home-noob-master-hyper-relay/memory/`): E is merged; `wt` lives in `bin/wt`; `~/.local/bin/wt`
-  points at the main checkout's copy; the home repo's copy is retired. PASS: the memory says so.
+  points at the main checkout's copy; the home repo's copy is retired; and, if D1 is not merged yet, Step 18 waits for
+  it. PASS: the memory says so.
+
+- [ ] **Step 18 (`after merge`; once both D1 and E are on `main`, so after whichever merges second): README's status
+  line (D17).** Precondition: the main checkout is on `main` (no branch run active), and
+  `git -C ~/hyper-relay status --short -- README.md` prints nothing.
+
+| Run | PASS |
+|---|---|
+| `git -C ~/hyper-relay grep -n -F 'a disposable stack per worktree' -- README.md` | one line, in the status blockquote (D1's text). If it prints nothing, D1's status text is not on `main`: stop and check whether D1 has merged |
+
+In `~/hyper-relay/README.md`, with the Edit tool, replace:
+```text
+> **Status: 0.1.0.** The skills, the role agents, per-repo configuration and the orchestrator are in. Still to come:
+> several plans at once, a disposable stack per worktree and the docs' own folder (see [Roadmap](#roadmap)).
+```
+with:
+```text
+> **Status: 0.1.0.** The skills, the role agents, per-repo configuration, the orchestrator and `wt` are in. Still to
+> come: several plans at once and the docs' own folder (see [Roadmap](#roadmap)).
+```
+
+```bash
+git -C ~/hyper-relay add README.md
+git -C ~/hyper-relay commit -m "docs: README status, wt is in" -m "<the committing session's attribution lines>" -- README.md
+```
+
+| Run | PASS |
+|---|---|
+| `git -C ~/hyper-relay grep -n -F 'a disposable stack per worktree' -- README.md` | nothing |
+| `git -C ~/hyper-relay show --stat --format=%s HEAD` | `docs: README status, wt is in`, `README.md` only, 2 insertions and 2 deletions |
+
+Then push `main` with the owner's go-ahead, as in Step 13 (no reinstall is needed for a README change).
