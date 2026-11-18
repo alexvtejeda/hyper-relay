@@ -1950,3 +1950,37 @@ git -C /home/noob_master/hyper-relay commit -m "docs: piece C last-task record" 
 <the committing session's attribution lines>" -- docs/superpowers/plans/2026-11-17-hyper-relay-c-executing-plans.md
 ```
 Push it with the next change of `main` (the owner's call).
+
+## Last-task record (Task 9)
+
+- **Reinstall, 2026-11-17:** marketplace clone at `ee63e34`; `dispatching.md` in the 0.1.0 cache: yes;
+  `subagent-driven-development` gone from it: yes. The shell's `claude plugin install hyper-relay@hyper-relay`
+  printed "already installed" and moved only the marketplace clone, not the cache. The cache refreshed at 23:13,
+  around the owner's in-session `/plugin install` (which also printed "already installed") and the session's plugin
+  reload. `main` reached GitHub at 23:11, pushed by the owner.
+- **Notice and regeneration:** hyper-relay `hyper-relay: relay-planner, relay-executor, relay-reviewer are out of
+  date; run hyper-relay-agents (see the hyper-relay:agents skill).`; SAT `hyper-relay: agents check failed: section
+  ## executor/acceptance matches no slot in the templates; is it a typo? (the hyper-relay:agents skill lists the
+  slots)`. Diffs agreed: yes, no changes. SAT's facts committed in SAT as `4ad88dcb`. `quartz review` reworded in
+  SAT's facts: yes, two lines, with the owner: `planner/execution-notes` drops `quartz review` from the click-through
+  list, and `executor/acceptance-worktree` runs `wt up` "after your last task" instead of "before `quartz review`".
+  Afterwards `NONE` from both repos.
+- **Owner's CLAUDE.md:** edits (a)–(e) made 2026-11-17, as written. Separately, the owner had changed the phase
+  table's spec and plan paths to `docs/hyper-relay/`; Quartz hardcodes `docs/superpowers/`, so that was reverted with
+  the owner's OK and card F, "Rename docs/superpowers to docs/hyper-relay" (`a740893e-c893-4ab1-88a3-d32844825581`),
+  opened for it.
+- **Branch probe:** pass on every row. M1 asked Branch or Worktree (no default), ran `git switch -c toy-greet`, no
+  Quartz step, and dispatched one background general-purpose executor. M2 wrote the spec and did not commit it,
+  giving the hold-back reasons; its hash was unchanged at the hand-back. M3 merged (a fast-forward) and committed the
+  spec alone afterwards. Its first shell call was refused by the owner's codebase-memory "Grep is the fallback" hook
+  (this machine's setup, not hyper-relay); it recovered.
+- **Worktree probe:** pass on every row. It committed `.gitignore` (`.worktrees/`) on `main`, ran `git worktree add`
+  without entering, and dispatched in the background; M2's spec was committed on `main` at once; no `checkout:` in
+  the reflog; M3 made a merge commit and left one worktree. One slip: while verifying the hand-back, the probe session
+  ran a bare `cd` into the worktree (`dispatching.md` says `(cd … && …)` or `git -C`); it noticed, went back and wrote
+  nothing there.
+- **OpenCode:** pass, with DeepSeek V4.1 Flash 1017: both commits with their trailers on `toy-greet`, `main` only
+  `chore: toy plan`. Ran in the background: yes, OpenCode gave the owner control back while the executor ran.
+- **Found after the merge:** `skills/requesting-code-review/SKILL.md` still has a `**Subagent-Driven Development:**`
+  block and an `**Executing Plans:**` block (review after each task) under "Integration with Workflows": the spec and
+  the plan's greps were case-sensitive. Folded into D1 (owner, 2026-11-17).
