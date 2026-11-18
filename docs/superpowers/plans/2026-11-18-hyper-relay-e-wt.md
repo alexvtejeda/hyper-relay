@@ -670,19 +670,19 @@ call; their commits carry no `Plan-Task:` trailer, so the orchestrator ticks thi
 (commit just the plan: `docs: plan progress, task 4 of 4`). No step starts a live session or real
 Docker: the suite runs on its fake `docker`.
 
-- [ ] **Step 1 (`reviewer`): The suite.**
+- [x] **Step 1 (`reviewer`): The suite.**
 
 | Run | PASS |
 |---|---|
 | `sh tests/wt/run-tests.sh \| tail -n 1` | `118 passed, 0 failed` |
 
-- [ ] **Step 2 (`reviewer`): Through a symlink, as the owner's shell will run it (D8).**
+- [x] **Step 2 (`reviewer`): Through a symlink, as the owner's shell will run it (D8).**
 
 | Run | PASS |
 |---|---|
 | `ln -s "$(pwd)/bin/wt" <evidence folder>/wt`, then `WT_BIN=<evidence folder>/wt sh tests/wt/run-tests.sh \| tail -n 1` | `118 passed, 0 failed` |
 
-- [ ] **Step 3 (`reviewer`): Syntax and mode.**
+- [x] **Step 3 (`reviewer`): Syntax and mode.**
 
 | Run | PASS |
 |---|---|
@@ -690,7 +690,7 @@ Docker: the suite runs on its fake `docker`.
 | `test -x bin/wt && echo executable` | `executable` |
 | `git ls-files -s bin/wt` | a line starting `100755` |
 
-- [ ] **Step 4 (`reviewer`): Only names changed (spec §2, §3).**
+- [x] **Step 4 (`reviewer`): Only names changed (spec §2, §3).**
 
 | Run | PASS |
 |---|---|
@@ -700,7 +700,7 @@ Docker: the suite runs on its fake `docker`.
 | `git diff --no-index ~/.claude/tests/wt/fixtures/sat.json tests/wt/fixtures/pinned-net.json` | 7 changed lines, each changing only an `"image"` prefix to `pinned-` |
 | `for f in ps-ok ps-seed-failed ps-seed-running ps-starting; do cmp ~/.claude/tests/wt/fixtures/$f.json tests/wt/fixtures/$f.json; done` | silent |
 
-- [ ] **Step 5 (`reviewer`): No other project's name (E4).**
+- [x] **Step 5 (`reviewer`): No other project's name (E4).**
 
 | Run | PASS |
 |---|---|
@@ -709,14 +709,14 @@ Docker: the suite runs on its fake `docker`.
 | `git log --format=%B main..HEAD \| grep -c -i -w -E 'sat\|quartz'` | `0` |
 | `git diff main...HEAD -- README.md CLAUDE.md \| grep '^+' \| grep -c -i -w -E 'sat\|quartz'` | `0` |
 
-- [ ] **Step 6 (`reviewer`): One commit adds the files and cites the history (E3).**
+- [x] **Step 6 (`reviewer`): One commit adds the files and cites the history (E3).**
 
 | Run | PASS |
 |---|---|
 | `git log --diff-filter=A --format=%h main..HEAD -- bin/wt tests/wt` | exactly one hash |
 | `git log --diff-filter=A --format=%B main..HEAD -- bin/wt tests/wt` | names `30c7fa2`, `3100b02`, `de70253` and `8f1f556` |
 
-- [ ] **Step 7 (`reviewer`): `docs/wt.md` documents exactly the keys `wt` reads (spec §6.2).**
+- [x] **Step 7 (`reviewer`): `docs/wt.md` documents exactly the keys `wt` reads (spec §6.2).**
 
 | Run | PASS |
 |---|---|
@@ -724,31 +724,31 @@ Docker: the suite runs on its fake `docker`.
 | Read the `.wt.conf` table in `docs/wt.md` | exactly five rows: those five keys, no other |
 | `git grep -h -o -E 'WT_[A-Z_]+' -- bin/wt \| sort -u`, then `git grep -h -o -E 'WT_[A-Z_]+' -- docs/wt.md \| sort -u` | the same eight names from each |
 
-- [ ] **Step 8 (`reviewer`): The links resolve (spec §6.2; D9).**
+- [x] **Step 8 (`reviewer`): The links resolve (spec §6.2; D9).**
 
 | Run | PASS |
 |---|---|
 | `git grep -n -F '](docs/wt.md)' -- README.md`, then `test -f docs/wt.md && echo found` | one line, then `found` |
 | `git grep -n -F '](../README.md#wt)' -- docs/wt.md`, then `git grep -n -x -F '### wt' -- README.md` | one line each |
 
-- [ ] **Step 9 (`reviewer`): README and `CLAUDE.md` say the repo ships `wt` (spec §5).**
+- [x] **Step 9 (`reviewer`): README and `CLAUDE.md` say the repo ships `wt` (spec §5).**
 
 | Run | PASS |
 |---|---|
 | ``git grep -n -F 'Each repo adds a short `.wt.conf` \| on `main` \|' -- README.md`` | one line: the roadmap's E row |
 | `git grep -n -F -e 'bin/wt' -e 'tests/wt/' -e 'docs/wt.md' -- CLAUDE.md` | the Layout names all three, and the Checks table has the row ``\| wt \| `sh tests/wt/run-tests.sh` \| `0 failed` \|`` |
 
-- [ ] **Step 10 (`reviewer`): The manifests.**
+- [x] **Step 10 (`reviewer`): The manifests.**
 
 | Run | PASS |
 |---|---|
 | `claude plugin validate .` | passes; its only warnings are the root `CLAUDE.md` one and, if it appears, `ICON_MISSING` |
 
-- [ ] **Step 11 (`owner`): Read what users will read.** `git show hyper-relay-e-wt:docs/wt.md`, and the README's
+- [x] **Step 11 (`owner`): Read what users will read.** `git show hyper-relay-e-wt:docs/wt.md`, and the README's
   `### wt` subsection (`git show hyper-relay-e-wt:README.md`). PASS: the owner agrees they describe `wt` as it works,
   and name no other project.
 
-- [ ] **Step 12 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
+- [x] **Step 12 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly (D13).**
 
 | Run | PASS |
@@ -758,7 +758,7 @@ Docker: the suite runs on its fake `docker`.
 On exit 1 it names the conflicted files: tell the owner, and in the merge keep both sides' lines (E's: the E row, the
 `### wt` subsection, the Layout, "How a change reaches the owner" and Checks lines; D1's: everything else).
 
-- [ ] **Step 13 (`after merge`): Push, then the owner reinstalls.** Precondition: the owner has merged
+- [x] **Step 13 (`after merge`): Push, then the owner reinstalls.** Precondition: the owner has merged
   `hyper-relay-e-wt` into `main`, and the main checkout is on `main`. The version stays 0.1.0.
 
 ```bash
@@ -774,7 +774,7 @@ Then the owner, in a Claude Code session: `/plugin install hyper-relay@hyper-rel
 
 If either fails, stop and tell the owner; do not delete or uninstall anything.
 
-- [ ] **Step 14 (`after merge`; the owner runs the `ln`, which is the owner's shell setup): Repoint the symlink.**
+- [x] **Step 14 (`after merge`; the owner runs the `ln`, which is the owner's shell setup): Repoint the symlink.**
 
 First, `readlink ~/.local/bin/wt` must print `/home/noob_master/.claude/bin/wt`; if it prints anything else, stop and
 ask the owner. Then the owner runs:
@@ -790,7 +790,7 @@ ln -sfn ~/hyper-relay/bin/wt ~/.local/bin/wt
 | `wt ls`, run in SAT's main checkout | exit 0 (it lists the stacks, or prints `no wt stacks`) |
 | `WT_BIN=$HOME/.local/bin/wt sh ~/hyper-relay/tests/wt/run-tests.sh \| tail -n 1` | `118 passed, 0 failed` |
 
-- [ ] **Step 15 (`after merge`; only once Step 14 passes, or the symlink would dangle): Retire the home repo's copy
+- [x] **Step 15 (`after merge`; only once Step 14 passes, or the symlink would dangle): Retire the home repo's copy
   (D6).** The home repo's own rules apply: stage named paths only, never `git add -A`.
 
 | Run | PASS |
@@ -824,7 +824,7 @@ with:
 | `readlink -e ~/.local/bin/wt` | `/home/noob_master/hyper-relay/bin/wt` (the symlink resolves) |
 | `git -C ~ status --short -- .gitignore CLAUDE.md` | the same as the baseline: the owner's `.gitignore` change untouched, `CLAUDE.md` still untracked |
 
-- [ ] **Step 16 (`after merge`): The Quartz-repo spec points at hyper-relay (D7).** The owner confirmed the line
+- [x] **Step 16 (`after merge`): The Quartz-repo spec points at hyper-relay (D7).** The owner confirmed the line
   below on 2026-11-18. Quartz's own rules apply.
 
 | Run | PASS |
@@ -859,12 +859,12 @@ git -C ~/quartz commit -m "docs: the wt spec points at hyper-relay, where wt now
 
 Act on any `quartz:` line the commit prints. Pushing Quartz follows its usual flow (the owner's call).
 
-- [ ] **Step 17 (`after merge`): The handoff memory.** Update this repo's handoff memory (in
+- [x] **Step 17 (`after merge`): The handoff memory.** Update this repo's handoff memory (in
   `~/.claude/projects/-home-noob-master-hyper-relay/memory/`): E is merged; `wt` lives in `bin/wt`; `~/.local/bin/wt`
   points at the main checkout's copy; the home repo's copy is retired; and, if D1 is not merged yet, Step 18 waits for
   it. PASS: the memory says so.
 
-- [ ] **Step 18 (`after merge`; once both D1 and E are on `main`, so after whichever merges second): README's status
+- [x] **Step 18 (`after merge`; once both D1 and E are on `main`, so after whichever merges second): README's status
   line (D17).** Precondition: the main checkout is on `main` (no branch run active), and
   `git -C ~/hyper-relay status --short -- README.md` prints nothing.
 
