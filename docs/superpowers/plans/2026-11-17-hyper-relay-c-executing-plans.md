@@ -1552,7 +1552,7 @@ checkout `/home/noob_master/hyper-relay` is on `main`.
 
 Each step gives its command and what counts as PASS. The orchestrator runs one command per Bash call.
 
-- [ ] **Step 1: Re-check on `main` (§7.1).**
+- [x] **Step 1: Re-check on `main` (§7.1).**
 
 | Run | PASS |
 |---|---|
@@ -1562,7 +1562,7 @@ Each step gives its command and what counts as PASS. The orchestrator runs one c
 | `cd /home/noob_master/hyper-relay && claude plugin validate .` | passes; warnings only the root `CLAUDE.md` one and `ICON_MISSING` |
 | `git -C /home/noob_master/hyper-relay status --short` | nothing but the owner's untracked local files (`tasks/`) |
 
-- [ ] **Step 2: Push, then the owner reinstalls.** The version stays 0.1.0.
+- [x] **Step 2: Push, then the owner reinstalls.** The version stays 0.1.0.
 
 ```bash
 git -C /home/noob_master/hyper-relay push origin main
@@ -1579,7 +1579,7 @@ claude plugin install hyper-relay@hyper-relay
 If any check fails, stop and tell the owner; do not delete or uninstall anything. Sessions started before the
 reinstall keep the old copy: every later step that starts Claude Code uses a new session.
 
-- [ ] **Step 3: The session-start notice, for real; regenerate both repos (§7.2 step 2; C12; E14).**
+- [x] **Step 3: The session-start notice, for real; regenerate both repos (§7.2 step 2; C12; E14).**
 
 The notice before regenerating, from new sessions:
 
@@ -1654,7 +1654,7 @@ The notice is gone, from new sessions:
 Per the restart line (C12), the regenerated agents are dispatched only from sessions started after this step; tell
 the owner.
 
-- [ ] **Step 4: The owner's `~/.claude/CLAUDE.md` (§7.2 step 3; E11).** Show the owner each change, and make it once
+- [x] **Step 4: The owner's `~/.claude/CLAUDE.md` (§7.2 step 3; E11).** Show the owner each change, and make it once
   the owner agrees. The file is not tracked (`git -C /home/noob_master ls-files .claude/CLAUDE.md` prints nothing), so
   there is nothing to commit.
 
@@ -1737,7 +1737,7 @@ with:
 PASS: `git -C /home/noob_master grep --no-index -n -e "subagent-driven" -e "Solo" -e "the plans carry them" -e "There is no \`quartz link-doc\` step" -- .claude/CLAUDE.md`
 prints nothing, and `git -C /home/noob_master grep --no-index -c "dispatching.md" -- .claude/CLAUDE.md` prints `.claude/CLAUDE.md:5`.
 
-- [ ] **Step 5: Live probe, Branch mode, in a throwaway repo without Quartz (§7.2 step 4).** Two sessions take part:
+- [x] **Step 5: Live probe, Branch mode, in a throwaway repo without Quartz (§7.2 step 4).** Two sessions take part:
   the **probe session** (a new interactive `claude` the owner starts in the throwaway repo; it plays the orchestrator)
   and **the orchestrator** (this hyper-relay session, which sets up and checks, read-only).
 
@@ -1884,7 +1884,7 @@ pulling. PASS, after it reports:
 | `git -C /tmp/hr-c-probe-branch log --format=%s -3` | that commit, then `feat: bye`, then `feat: greet` |
 | `git -C /tmp/hr-c-probe-branch status --short` | nothing |
 
-- [ ] **Step 6: Live probe, Worktree mode.** Same setup in `/tmp/hr-c-probe-worktree` (the same `git init`, the same
+- [x] **Step 6: Live probe, Worktree mode.** Same setup in `/tmp/hr-c-probe-worktree` (the same `git init`, the same
   two files with the Write tool, the same `add` and `commit`, with `/tmp/hr-c-probe-worktree` for
   `/tmp/hr-c-probe-branch`). There is no `.gitignore`, so `dispatching.md` step 3 must add `.worktrees/` itself.
   The owner starts a new probe session there (`cd /tmp/hr-c-probe-worktree && claude`), sends M1, answers `2`, then
@@ -1910,7 +1910,7 @@ is one line, `git -C /tmp/hr-c-probe-worktree branch --list toy-greet` prints no
 `git -C /tmp/hr-c-probe-worktree branch --show-current` prints `main`. (The reflog is not checked after the merge:
 `finishing-a-development-branch` runs `git checkout main` there, which may log `checkout: moving from main to main`.)
 
-- [ ] **Step 7: OpenCode, the owner (§7.2 step 5; E13).** Same setup in `/tmp/hr-c-probe-opencode`. In OpenCode in
+- [x] **Step 7: OpenCode, the owner (§7.2 step 5; E13).** Same setup in `/tmp/hr-c-probe-opencode`. In OpenCode in
   that folder (a model with credit), the owner sends:
 
 > The plan docs/superpowers/plans/2026-11-17-toy-greet.md is written and approved. Load the executing-plans skill and hand it off as its dispatching.md says, on a branch.
@@ -1920,7 +1920,7 @@ commits with their trailers, and `git -C /tmp/hr-c-probe-opencode log --format=%
 **Record** (no pass or fail): did OpenCode give control back while the executor ran (could the owner send another
 message and get an answer before the report came), or did it wait?
 
-- [ ] **Step 8: Clean up; anything failed?**
+- [x] **Step 8: Clean up; anything failed?**
 
 ```bash
 rm -rf /tmp/hr-c-probe-branch /tmp/hr-c-probe-worktree /tmp/hr-c-probe-opencode /tmp/hr-c-agents-before
@@ -1928,7 +1928,7 @@ rm -rf /tmp/hr-c-probe-branch /tmp/hr-c-probe-worktree /tmp/hr-c-probe-opencode 
 A failed step: fix it on a branch through the usual spec and plan, merge, push, reinstall (Step 2), and repeat the
 step. To roll an agent back meanwhile, copy it from `/tmp/hr-c-agents-before/` before cleaning up.
 
-- [ ] **Step 9: Record.** Append to this plan, in the main checkout (on `main`):
+- [x] **Step 9: Record.** Append to this plan, in the main checkout (on `main`):
 
 ```markdown
 ## Last-task record (Task 9)
