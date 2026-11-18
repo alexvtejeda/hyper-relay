@@ -1,0 +1,9 @@
+{"name":"x","services":{
+"api":{"image":"app-api:local","build":{"context":"./api"},"ports":[{"mode":"ingress","host_ip":"127.0.0.1","target":8082,"published":"8082","protocol":"tcp"}]},
+"db":{"image":"postgres:16","ports":[{"mode":"ingress","host_ip":"127.0.0.1","target":5432,"published":"5434","protocol":"tcp"}]},
+"mcp":{"image":"app-mcp:local","build":{"context":"./mcp"},"ports":[{"mode":"ingress","host_ip":"127.0.0.1","target":8083,"published":"8083","protocol":"tcp"}]},
+"migrate":{"image":"app-api:local","build":{"context":"./api"}},
+"redis":{"image":"redis:7","ports":[{"mode":"ingress","host_ip":"127.0.0.1","target":6379,"published":"6381","protocol":"tcp"}]},
+"seed":{"image":"app-api:local","build":{"context":"./api"},"profiles":["seed"]},
+"web":{"image":"app-web:local","build":{"context":"./web"},"ports":[{"mode":"ingress","host_ip":"127.0.0.1","target":3001,"published":"3001","protocol":"tcp"}]}
+},"networks":{"default":{"name":"x_default","ipam":{}}}}

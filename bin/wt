@@ -1,0 +1,444 @@
+#!/bin/sh
+# wt: a disposable Docker Compose stack for each git worktree.
+# POSIX shell, run by dash. How to use it, and what to put in .wt.conf:
+# docs/wt.md in hyper-relay.
+#
+#   wt new <branch> [--from <base>]
+#                    create .worktrees/<branch without its type/ prefix> on <branch>
+#                    (new, from <base>, default main; or an existing branch), then
+#                    run the new worktree's WT_NEW_SETUP. No containers.
+#   wt up            in a worktree: build, start, seed if new, print the URLs
+#   wt ls            every wt stack on this machine
+#   wt down [name]   stop a stack and delete its database and images
+set -eu
+
+STATE_ROOT="${WT_STATE_DIR:-$HOME/.local/state/wt}"
+MAX_STACKS="${WT_MAX_STACKS:-3}"
+WAIT_SECONDS="${WT_WAIT_SECONDS:-300}"
+NAME_RE='^[a-z0-9][a-z0-9_-]*-wt-[a-z0-9-]+$'
+
+die() {
+    printf 'wt: %s\n' "$*" >&2
+    exit 1
+}
+
+slugify() { # text
+    printf '%s' "$1" | tr '[:upper:]' '[:lower:]' |
+        sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-30 | sed -E 's/-+$//'
+}
+
+# Sets ROOT and STACK for the current directory. Refuses a main checkout, which
+# is the check that keeps the owner's real stack safe.
+locate_worktree() {
+    ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || die "not inside a git repository"
+    git_dir=$(cd "$(git rev-parse --git-dir)" && pwd -P)
+    git_common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+    if [ "$git_dir" = "$git_common" ]; then
+        die "this is a main checkout, not a worktree; wt only runs inside a worktree"
+    fi
+    project=$(slugify "$(basename "$(dirname "$git_common")")")
+    ref=$(git branch --show-current)
+    [ -n "$ref" ] || ref=$(basename "$ROOT")
+    SLUG=$(slugify "$ref")
+    [ -n "$project" ] && [ -n "$SLUG" ] || die "cannot derive a stack name from this worktree"
+    STACK="$project-wt-$SLUG"
+}
+
+find_compose_file() {
+    for candidate in compose.yaml compose.yml docker-compose.yaml docker-compose.yml; do
+        if [ -f "$ROOT/$candidate" ]; then
+            COMPOSE_FILE_PATH="$ROOT/$candidate"
+            return 0
+        fi
+    done
+    die "no compose file in $ROOT"
+}
+
+# The project's compose file, plus the override and profile once they are set.
+dc() {
+    docker compose --project-directory "$ROOT" -p "$STACK" -f "$COMPOSE_FILE_PATH" \
+        ${OVERRIDE:+-f "$OVERRIDE"} ${PROFILE:+--profile "$PROFILE"} "$@"
+}
+
+load_config() {
+    [ -f "$ROOT/.wt.conf" ] || die "no .wt.conf in $ROOT; see hyper-relay's docs/wt.md for what to put in it"
+    unset WT_ENV WT_ENV_BASE WT_SEED_PROFILE WT_SETUP
+    # shellcheck disable=SC1091
+    . "$ROOT/.wt.conf"
+    ENV_BASE="${WT_ENV_BASE:-.env.example}"
+    ENV_PAIRS="${WT_ENV:-}"
+    SEED_PROFILE="${WT_SEED_PROFILE:-}"
+    SETUP="${WT_SETUP:-}"
+}
+
+list_stacks() {
+    [ -d "$STATE_ROOT" ] || return 0
+    for dir in "$STATE_ROOT"/*/; do
+        [ -f "${dir}slot" ] || continue
+        basename "$dir"
+    done
+}
+
+take_slot() {
+    if [ -f "$STATE/slot" ]; then
+        SLOT=$(cat "$STATE/slot")
+        return 0
+    fi
+    count=$(list_stacks | wc -l)
+    if [ "$count" -ge "$MAX_STACKS" ]; then
+        printf 'wt: %s stacks already exist (limit %s). Remove one with wt down <name>:\n' \
+            "$count" "$MAX_STACKS" >&2
+        cmd_ls >&2
+        exit 1
+    fi
+    SLOT=1
+    while grep -qsx "$SLOT" "$STATE_ROOT"/*/slot; do
+        SLOT=$((SLOT + 1))
+    done
+    mkdir -p "$STATE"
+    printf '%s\n' "$SLOT" > "$STATE/slot"
+    printf '%s\n' "$ROOT" > "$STATE/worktree"
+}
+
+write_base_env() {
+    [ -f "$ROOT/$ENV_BASE" ] || die "WT_ENV_BASE file not found: $ENV_BASE"
+    if [ -e "$ROOT/.env" ] && [ ! -f "$STATE/env_created" ]; then
+        die "$ROOT/.env already exists and wt did not create it; move it away first"
+    fi
+    : > "$STATE/env_created"
+    cp "$ROOT/$ENV_BASE" "$ROOT/.env"
+}
+
+run_setup_once() {
+    [ -n "$SETUP" ] || return 0
+    [ ! -f "$STATE/setup_done" ] || return 0
+    if ! (cd "$ROOT" && sh -c "$SETUP"); then
+        die "WT_SETUP failed: $SETUP"
+    fi
+    : > "$STATE/setup_done"
+}
+
+port_busy() { # port
+    ss -ltn "sport = :$1" | grep -q LISTEN
+}
+
+allocate_ports() { # config.json
+    [ ! -f "$STATE/ports" ] || return 0
+    jq -r '.services | to_entries | sort_by(.key)[] | .key as $s
+        | (.value.ports // [])[] | "\($s) \(.target) \(.protocol // "tcp")"' "$1" > "$STATE/ports.wanted"
+    base=$((30000 + SLOT * 100))
+    n=0
+    : > "$STATE/ports.new"
+    while read -r svc target proto; do
+        port=$((base + n))
+        n=$((n + 1))
+        while port_busy "$port"; do
+            port=$((base + n))
+            n=$((n + 1))
+        done
+        [ "$n" -le 100 ] || die "no free port for $svc in slot $SLOT"
+        printf '%s %s %s %s\n' "$svc" "$target" "$proto" "$port" >> "$STATE/ports.new"
+    done < "$STATE/ports.wanted"
+    mv "$STATE/ports.new" "$STATE/ports"
+    rm -f "$STATE/ports.wanted"
+}
+
+# Writes the override, and $STATE/images and $STATE/ips as it goes.
+write_override() { # config.json
+    cfg=$1
+    pinned=$(jq -r '[.networks // {} | to_entries[] | select(.value.ipam.config[0].subnet? != null) | .key] | join(" ")' "$cfg")
+    case $pinned in
+        *" "*) die "more than one network pins a subnet: $pinned" ;;
+    esac
+    subnet_prefix="10.77.$SLOT"
+    out="$STATE/override.yml"
+    : > "$STATE/images.new"
+    : > "$STATE/ips"
+    printf 'services:\n' > "$out"
+    for svc in $(jq -r '.services | keys[]' "$cfg"); do
+        : > "$STATE/svc.yml"
+
+        image=$(jq -r --arg s "$svc" '.services[$s] | select(has("build") and has("image")) | .image' "$cfg")
+        if [ -n "$image" ]; then
+            case ${image##*/} in
+                *:*) repo=${image%:*} ;;
+                *) repo=$image ;;
+            esac
+            printf '    image: %s:wt-%s\n' "$repo" "$SLUG" >> "$STATE/svc.yml"
+            printf '%s:wt-%s\n' "$repo" "$SLUG" >> "$STATE/images.new"
+        fi
+
+        if grep -q "^$svc " "$STATE/ports"; then
+            printf '    ports: !override\n' >> "$STATE/svc.yml"
+            while read -r p_svc p_target p_proto p_port; do
+                [ "$p_svc" = "$svc" ] || continue
+                printf '      - "127.0.0.1:%s:%s/%s"\n' "$p_port" "$p_target" "$p_proto" >> "$STATE/svc.yml"
+            done < "$STATE/ports"
+        fi
+
+        if [ -n "$pinned" ]; then
+            ip=$(jq -r --arg s "$svc" --arg n "$pinned" '.services[$s].networks[$n].ipv4_address // empty' "$cfg")
+            if [ -n "$ip" ]; then
+                new_ip="$subnet_prefix.${ip##*.}"
+                printf '    networks:\n      %s:\n        ipv4_address: %s\n' "$pinned" "$new_ip" >> "$STATE/svc.yml"
+                printf '%s %s\n' "$svc" "$new_ip" >> "$STATE/ips"
+            fi
+        fi
+
+        if [ -s "$STATE/svc.yml" ]; then
+            printf '  %s:\n' "$svc" >> "$out"
+            cat "$STATE/svc.yml" >> "$out"
+        fi
+    done
+    rm -f "$STATE/svc.yml"
+    if [ -n "$pinned" ]; then
+        printf 'networks:\n  %s:\n    ipam:\n      config: !override\n        - subnet: %s.0/24\n' \
+            "$pinned" "$subnet_prefix" >> "$out"
+    fi
+    sort -u "$STATE/images.new" > "$STATE/images"
+    rm -f "$STATE/images.new"
+}
+
+lookup_placeholder() { # name
+    case $1 in
+        ip:*)
+            value=$(awk -v s="${1#ip:}" '$1 == s { print $2; exit }' "$STATE/ips")
+            ;;
+        *)
+            value=$(awk -v s="$1" '$1 == s { print $4; exit }' "$STATE/ports")
+            ;;
+    esac
+    [ -n "$value" ] || die "unknown placeholder {$1} in WT_ENV"
+    printf '%s' "$value"
+}
+
+resolve_value() { # text
+    rest=$1
+    resolved=
+    while :; do
+        case $rest in
+            *\{*\}*)
+                before=${rest%%\{*}
+                after=${rest#*\{}
+                name=${after%%\}*}
+                rest=${after#*\}}
+                found=$(lookup_placeholder "$name")
+                resolved=$resolved$before$found
+                ;;
+            *)
+                printf '%s' "$resolved$rest"
+                return 0
+                ;;
+        esac
+    done
+}
+
+apply_env() {
+    set -f
+    for pair in $ENV_PAIRS; do
+        case $pair in
+            *=*) ;;
+            *) die "WT_ENV entry has no '=': $pair" ;;
+        esac
+        key=${pair%%=*}
+        grep -q "^$key=" "$ROOT/$ENV_BASE" || die "WT_ENV key $key is not in $ENV_BASE; is it a typo?"
+        new_value=$(resolve_value "${pair#*=}")
+        K="$key" V="$new_value" awk 'index($0, ENVIRON["K"] "=") == 1 { print ENVIRON["K"] "=" ENVIRON["V"]; next } { print }' \
+            "$ROOT/.env" > "$STATE/env.new"
+        cp "$STATE/env.new" "$ROOT/.env"
+    done
+    set +f
+    rm -f "$STATE/env.new"
+}
+
+start_stack() {
+    log="$STATE/up.log"
+    { dc up --build -d && echo 0 > "$STATE/up.rc" || echo $? > "$STATE/up.rc"; } 2>&1 | tee "$log"
+    rc=$(cat "$STATE/up.rc")
+    rm -f "$STATE/up.rc"
+    [ "$rc" = 0 ] && return 0
+    if grep -qiE 'port is already allocated|address already in use' "$log"; then
+        rm -f "$STATE/ports"
+        die "a port was taken during start; run wt up again to allocate new ones"
+    fi
+    die "docker compose up failed (exit $rc); see docker compose -p $STACK logs, or wt down to start clean"
+}
+
+# `up -d` returns 0 even when a seed container later exits non-zero, so every
+# container's final state is checked here. A seed is a one-off, so while one is
+# being run, "running" only counts as ready for the other services.
+wait_ready() {
+    deadline=$(($(date +%s) + WAIT_SECONDS))
+    seeds=$(jq -c --arg p "$PROFILE" '[.services | to_entries[] | select(any(.value.profiles[]?; . == $p)) | .key]' "$STATE/config.json")
+    while :; do
+        dc ps -a --format json > "$STATE/ps.json"
+        failed=$(jq -sr '[.[] | select(.State == "exited" and .ExitCode != 0) | .Service] | join(" ")' "$STATE/ps.json")
+        [ -z "$failed" ] || die "service failed: $failed; see docker compose -p $STACK logs $failed"
+        total=$(jq -s 'length' "$STATE/ps.json")
+        pending=$(jq -sr --argjson seeds "$seeds" '[.[] | select(.State != "exited" and (.State != "running" or (.Health // "") == "starting" or (.Health // "") == "unhealthy" or (.Service as $s | $seeds | index($s) != null))) | .Service] | join(" ")' "$STATE/ps.json")
+        if [ "$total" -gt 0 ] && [ -z "$pending" ]; then
+            rm -f "$STATE/ps.json"
+            return 0
+        fi
+        [ "$(date +%s)" -lt "$deadline" ] || die "timed out after ${WAIT_SECONDS}s waiting for: ${pending:-containers}"
+        sleep 2
+    done
+}
+
+print_urls() { # state dir
+    [ -f "$1/ports" ] || return 0
+    while read -r u_svc u_target u_proto u_port; do
+        printf '  %-16s http://localhost:%s\n' "$u_svc" "$u_port"
+    done < "$1/ports"
+}
+
+cmd_up() {
+    locate_worktree
+    load_config
+    find_compose_file
+    STATE="$STATE_ROOT/$STACK"
+    if [ -f "$STATE/worktree" ] && [ "$(cat "$STATE/worktree")" != "$ROOT" ]; then
+        die "stack $STACK belongs to $(cat "$STATE/worktree")"
+    fi
+    mkdir -p "$STATE_ROOT"
+    take_slot
+    write_base_env
+    run_setup_once
+
+    OVERRIDE=
+    PROFILE=$SEED_PROFILE
+    dc config --format json > "$STATE/config.json"
+    allocate_ports "$STATE/config.json"
+    write_override "$STATE/config.json"
+    apply_env
+
+    OVERRIDE="$STATE/override.yml"
+    PROFILE=
+    [ -f "$STATE/seeded" ] || PROFILE=$SEED_PROFILE
+    start_stack
+    wait_ready
+    [ -z "$PROFILE" ] || : > "$STATE/seeded"
+
+    printf 'wt: %s is up\n' "$STACK"
+    print_urls "$STATE"
+}
+
+cmd_new() {
+    branch=
+    base=main
+    from_given=0
+    while [ $# -gt 0 ]; do
+        case $1 in
+            --from)
+                [ $# -ge 2 ] || die "--from needs a branch"
+                base=$2
+                from_given=1
+                shift 2
+                ;;
+            --from=*)
+                base=${1#--from=}
+                from_given=1
+                shift
+                ;;
+            -*) die "unknown option $1; usage: wt new <branch> [--from <base>]" ;;
+            *)
+                [ -z "$branch" ] || die "one branch only; usage: wt new <branch> [--from <base>]"
+                branch=$1
+                shift
+                ;;
+        esac
+    done
+    [ -n "$branch" ] || die "usage: wt new <branch> [--from <base>]"
+    [ -n "$base" ] || die "--from needs a branch"
+    git rev-parse --git-dir >/dev/null 2>&1 || die "not inside a git repository"
+    git check-ref-format --branch "$branch" >/dev/null 2>&1 || die "not a valid branch name: $branch"
+
+    # Always under the MAIN checkout, wherever this runs from.
+    main=$(dirname "$(cd "$(git rev-parse --git-common-dir)" && pwd -P)")
+    name=$(printf '%s' "${branch#*/}" | tr '/' '-')
+    rel=".worktrees/$name"
+    dir="$main/$rel"
+    [ ! -e "$dir" ] && [ ! -L "$dir" ] || die "$dir already exists"
+    git -C "$main" check-ignore -q "$rel" || die ".worktrees/ is not gitignored in $main; ignore it first"
+
+    if git -C "$main" show-ref --verify --quiet "refs/heads/$branch"; then
+        git -C "$main" worktree add -q "$dir" "$branch" || die "git worktree add failed for $branch"
+        if [ "$from_given" = 1 ]; then
+            printf 'wt: branch %s already exists; reused it and ignored --from %s\n' "$branch" "$base"
+        else
+            printf 'wt: branch %s already exists; reused it\n' "$branch"
+        fi
+        from=$branch
+    else
+        git -C "$main" rev-parse --verify --quiet "$base^{commit}" >/dev/null || die "base not found: $base"
+        git -C "$main" worktree add -q -b "$branch" "$dir" "$base" || die "git worktree add failed for $branch"
+        from=$base
+    fi
+
+    # The new worktree's own config: the branch's content decides its setup.
+    NEW_SETUP=
+    if [ -f "$dir/.wt.conf" ]; then
+        unset WT_NEW_SETUP
+        # shellcheck disable=SC1091
+        . "$dir/.wt.conf"
+        NEW_SETUP="${WT_NEW_SETUP:-}"
+    fi
+    if [ -n "$NEW_SETUP" ]; then
+        if ! (cd "$dir" && sh -c "$NEW_SETUP"); then
+            die "worktree created at $dir, but WT_NEW_SETUP failed: $NEW_SETUP"
+        fi
+    fi
+    printf 'wt: %s on %s (from %s)\n' "$dir" "$branch" "$from"
+}
+
+cmd_ls() {
+    stacks=$(list_stacks)
+    if [ -z "$stacks" ]; then
+        echo "no wt stacks"
+        return 0
+    fi
+    for name in $stacks; do
+        dir="$STATE_ROOT/$name"
+        path=$(cat "$dir/worktree")
+        running=$(docker ps -q --filter "label=com.docker.compose.project=$name" | wc -l)
+        mark=
+        [ -d "$path" ] || mark=" [stale: worktree is gone; run wt down $name]"
+        printf '%s  %s running  %s%s\n' "$name" "$running" "$path" "$mark"
+        print_urls "$dir"
+    done
+}
+
+cmd_down() {
+    if [ $# -gt 0 ]; then
+        name=$1
+    else
+        locate_worktree
+        name=$STACK
+    fi
+    printf '%s\n' "$name" | grep -Eq "$NAME_RE" || die "refusing $name: not a wt stack name"
+    dir="$STATE_ROOT/$name"
+    [ -f "$dir/slot" ] || die "no wt stack named $name"
+
+    # From the state directory there is no compose file to load, so compose finds
+    # the project by its label. That also covers containers from a seed profile.
+    (cd "$dir" && docker compose -p "$name" down -v --remove-orphans)
+    if [ -f "$dir/images" ]; then
+        while read -r image; do
+            docker image rm "$image" >/dev/null 2>&1 || printf 'wt: could not remove image %s\n' "$image" >&2
+        done < "$dir/images"
+    fi
+    if [ -f "$dir/env_created" ]; then
+        path=$(cat "$dir/worktree")
+        rm -f "$path/.env"
+    fi
+    rm -rf "$dir"
+    printf 'wt: removed %s\n' "$name"
+}
+
+case ${1:-} in
+    new) shift; cmd_new "$@" ;;
+    up) shift; cmd_up "$@" ;;
+    ls) shift; cmd_ls "$@" ;;
+    down) shift; cmd_down "$@" ;;
+    *) die "usage: wt new <branch> [--from <base>] | wt up | wt ls | wt down [name]" ;;
+esac
