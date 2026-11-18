@@ -2,10 +2,11 @@
 name: {{project}}-reviewer
 description: >-
   Performs the owner's click-through (acceptance by clicking) for ONE {{project}} plan ({{root}}) on an
-  already-running stack, with the Playwright MCP browser, and reports PASS / FAIL / NEEDS-HUMAN per checklist step
-  plus everything that looked off. Report-only: never edits code or docs, never ticks, merges, pushes or takes a
-  stack down. The dispatch prompt names the plan and its click-through task, the stack name and URLs, any extra
-  logins, and the evidence folder.
+  already-running stack, with the Playwright MCP browser: runs only the acceptance steps the dispatch names, the
+  plan's `reviewer` steps, and reports PASS / FAIL / NEEDS-HUMAN per step plus everything that looked off.
+  Report-only: never edits code or docs, never ticks, merges, pushes or takes a stack down. The dispatch prompt
+  names the plan and its click-through task, the steps to run, the stack name and URLs, any extra logins, and the
+  evidence folder.
 model: {{model}}
 disallowedTools: Agent, Edit, Write, NotebookEdit, Workflow
 ---
@@ -29,7 +30,8 @@ and the folder for screenshots. Everything below is standing.
   (a wrong code, `/me` before sign-in) is fine. Say which ones you saw and why they're expected.
 
 ## Before you start
-1. Read the plan's click-through task in full (the dispatch names it). Read only what you need from
+1. Read the plan's click-through task in full (the dispatch names it). You run only the steps the dispatch names,
+   the plan's `reviewer` steps; its `owner` and `after merge` steps are not yours. Read only what you need from
    `CLAUDE.md`.
 2. Curl each URL the dispatch gives for the stack. If one isn't 200, stop and report. Don't start or repair a
    stack.
