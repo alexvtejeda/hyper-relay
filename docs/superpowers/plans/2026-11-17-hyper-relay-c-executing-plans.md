@@ -1000,7 +1000,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/writing-plans/SKILL.md`, `skills/brainstorming/SKILL.md`, `skills/using-git-worktrees/SKILL.md`
 
-- [ ] **Step 1: `writing-plans`, context and plan count.** Replace:
+- [x] **Step 1: `writing-plans`, context and plan count.** Replace:
 ```text
 **Context:** If working in an isolated worktree, it should have been created via the `hyper-relay:using-git-worktrees` skill at execution time.
 ```
@@ -1018,7 +1018,7 @@ with:
 and commit the spec as "Committing the plan" below says. The hooks upload the changed spec, which updates the card's expected count.
 ```
 
-- [ ] **Step 2: `writing-plans`, the header line.** Replace:
+- [x] **Step 2: `writing-plans`, the header line.** Replace:
 ```text
 > **For agentic workers:** REQUIRED SUB-SKILL: Use hyper-relay:subagent-driven-development (recommended) or hyper-relay:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 ```
@@ -1027,7 +1027,7 @@ with:
 > **For agentic workers:** REQUIRED SUB-SKILL: hyper-relay:executing-plans (the executor preloads it). Steps use checkbox (`- [ ]`) syntax for tracking.
 ```
 
-- [ ] **Step 3: `writing-plans`, the Quartz steps (C10).** Replace:
+- [x] **Step 3: `writing-plans`, the Quartz steps (C10).** Replace:
 ```text
 ## Linking the plan's branch
 
@@ -1048,7 +1048,7 @@ with:
 A plan carries no `quartz link-branch` step and no `quartz review` step: the orchestrator runs both, at dispatch and after verifying the executor's report (`hyper-relay:executing-plans`' `dispatching.md`).
 ```
 
-- [ ] **Step 4: `writing-plans`, committing and the handoff (C11).** Replace everything from the line
+- [x] **Step 4: `writing-plans`, committing and the handoff (C11).** Replace everything from the line
   `## Execution Handoff` to the end of the file (the last line is `- Batch execution with checkpoints for review`)
   with:
 ```text
@@ -1065,7 +1065,7 @@ When the main checkout is on another branch, a plan is running there (a branch r
 Commit it (above), report its path and task count, and stop. Do not offer ways to execute it and do not start executing: once the owner approves the plan, the orchestrator runs the handoff in `hyper-relay:executing-plans`' `dispatching.md`.
 ```
 
-- [ ] **Step 5: `brainstorming` (§4.3).** In `skills/brainstorming/SKILL.md`, replace:
+- [x] **Step 5: `brainstorming` (§4.3).** In `skills/brainstorming/SKILL.md`, replace:
 ```text
 7. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`, add its Quartz card line if the work has a card, and commit
 ```
@@ -1092,7 +1092,7 @@ with:
 > "Spec written to `<path>`. Please review it
 ```
 
-- [ ] **Step 6: `using-git-worktrees` (§4.4; E3).** In `skills/using-git-worktrees/SKILL.md`, replace the line:
+- [x] **Step 6: `using-git-worktrees` (§4.4; E3).** In `skills/using-git-worktrees/SKILL.md`, replace the line:
 ```text
 description: Use when starting feature work that needs isolation from the current workspace, or before executing an implementation plan. REQUIRED whenever the user says "worktree", "isolate this", "keep my checkout free", "work on something else while this runs", or picks the worktree option at a plan-to-execute handoff. Ensures an isolated workspace exists via native tools (EnterWorktree) or git worktree fallback.
 ```
@@ -1101,7 +1101,7 @@ with:
 description: Use when starting feature work of your own that needs isolation from the current workspace. REQUIRED whenever the user says "worktree", "isolate this", "keep my checkout free" or "work on something else while this runs" about such work. Not for running an implementation plan, whose executor's worktree is set up (and never entered) by executing-plans' dispatching.md. Ensures an isolated workspace exists via native tools (EnterWorktree) or git worktree fallback.
 ```
 
-- [ ] **Step 7: Check.**
+- [x] **Step 7: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1109,7 +1109,7 @@ description: Use when starting feature work of your own that needs isolation fro
 | `git grep -n -e "written and committed" -e "plan-to-execute handoff" -- skills/brainstorming skills/using-git-worktrees` | no output |
 | `git grep -c "dispatching.md" -- skills/writing-plans/SKILL.md skills/brainstorming/SKILL.md skills/using-git-worktrees/SKILL.md` | `skills/brainstorming/SKILL.md:1`, `skills/using-git-worktrees/SKILL.md:1`, `skills/writing-plans/SKILL.md:4` |
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add skills/writing-plans/SKILL.md skills/brainstorming/SKILL.md skills/using-git-worktrees/SKILL.md
