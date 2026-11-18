@@ -19,8 +19,9 @@ suite, `tests/orchestrating/run-tests.sh`, written first, guards D1's gates, the
 **Tech Stack:** Markdown skills; POSIX `sh` run by dash, with GNU `grep`, `sed` and `cp`; the existing suites as
 regression checks; Claude Code 2.1.x and OpenCode; the `quartz` CLI and its MCP (described, never run by the executor).
 
-**How this was checked:** written against `main` at `02cb1fd` by reading only; nothing was built, run, installed or
-generated. Read in this repo: `CLAUDE.md` (in full); the D.3 spec (in full); E.1's plan (in full, the newest plan and
+**How this was checked:** written against `main` at `02cb1fd` by reading only, and revised at `396ad28` for the
+owner's stop-3 answers (spec decision D3.9 and its two §2.2 bullets, read with `git show 396ad28`); nothing was built,
+run, installed or generated. Read in this repo: `CLAUDE.md` (in full); the D.3 spec (in full); E.1's plan (in full, the newest plan and
 this one's model); D1's plan (1–200 and 1366–1881: its header, notes, deviations, Task 9's gates, Task 10's probes and
 its last-task record, which names the findings); `skills/orchestrating/SKILL.md`, `planning.md`, `dispatching.md`,
 `reviewing.md`, `skills/brainstorming/SKILL.md`, `skills/writing-plans/SKILL.md`, `README.md`,
@@ -121,8 +122,8 @@ tool schemas (P13).
 | # | The spec says | Decision |
 |---|---|---|
 | P1 | §2.1 row 3: "the CLI's own test", with no command | `quartz.md` §1 gives it as a command that prints nothing from `.mcp.json` (which may hold other servers' secrets): `jq -e '.mcpServers.quartz.url \| strings \| length > 0'`, true exactly when the url is a non-empty string, as in `config.go`; a `python3 -c` line when `jq` is missing. |
-| P2 | §2.2, a repo name: the four file and hook steps, then a message, then "the next check (§1) finishes the setup"; §9 (b): the missing token and MCP "are each reported once" while brainstorming carries on | Setup's fourth step is "Run §1 again": it now gives row 3, so the connected checks run at once, and their Hooks check is the `quartz install-git-hook` the spec lists (it runs once, not twice). Setup's closing message carries each check that failed, in one line, before the `direnv allow` and restart lines. That is how probe (b)'s reports happen during brainstorming. |
-| P3 | §2.2: `.env` is ignored; "`.mcp.json` and `.envrc` … stay untracked" | **Owner: decide at stop 3.** Setup also adds `.mcp.json` and `.envrc` to `.git/info/exclude` when git does not track them. An untracked, unignored file shows as `??` in `git status --short`, and on a branch run that stops the acceptance reviewer ("Before you start" step 2 in `templates/agents/reviewer-commands.md`: only untracked `docs/superpowers/` files may show) and `dispatching.md` §7's clean-tree check. The exclude line is local and commits nothing; committing the files stays the owner's call. Probe (b) checks it. **If the owner says no:** drop the step-3 sentence that starts "Do the same for" and probe (b)'s `git status` row. |
+| P2 | §2.2, a repo name: the four file and hook steps, then a message, then "the next check (§1) finishes the setup"; §9 (b): the missing token and MCP "are each reported once" while brainstorming carries on | Setup's fourth step is "Run §1 again": it now gives row 3, so the connected checks run at once, and their Hooks check is the `quartz install-git-hook` the spec lists (it runs once, not twice). Setup's closing message then opens with the token prompt when the token check failed (D3.9), then the `direnv allow` and restart lines, then each other check that failed, in one line; its last step says the relay waits for neither the token nor the restart. That is how probe (b)'s reports happen during brainstorming. |
+| P3 | §2.2: `.env` is ignored; "`.mcp.json` and `.envrc` … stay untracked" | **Decided by the owner (2026-11-18, stop 3): yes, now spec D3.9.** Setup also adds `.mcp.json` and `.envrc` to `.git/info/exclude` when git does not track them. An untracked, unignored file shows as `??` in `git status --short`, and on a branch run that stops the acceptance reviewer ("Before you start" step 2 in `templates/agents/reviewer-commands.md`: only untracked `docs/superpowers/` files may show) and `dispatching.md` §7's clean-tree check. The exclude line is local and commits nothing; committing the files stays the owner's call. Probe (b) checks it. |
 | P4 | §2.2: a failed step is reported "once", and "the next check (§1) retries it" | Once per session: a retry that fails again says nothing more. |
 | P5 | §5: the review status comes from the card (`get_task`), and without Quartz the orchestrator asks | Also asks when the repo uses Quartz but its MCP is not loaded in this session: the status cannot be read then. |
 | P6 | §1 changes "The stops" in `SKILL.md` by adding a rule | Its table's rows 3 and 4 list the same items in the new order (questions first), so the table does not contradict the rule. |
@@ -144,7 +145,7 @@ tool schemas (P13).
 | Spec section | Tasks |
 |---|---|
 | Goal | 1–8 |
-| Decisions (owner, 2026-11-18) | D3.1: 1–8 (finding 5 is not touched). D3.2, D3.3, D3.4: 2. D3.5: 3, 4, 5. D3.6: 3, 5. D3.7: 2, 6. D3.8: 1, 7 |
+| Decisions (owner, 2026-11-18) | D3.1: 1–8 (finding 5 is not touched). D3.2, D3.3, D3.4: 2. D3.5: 3, 4, 5. D3.6: 3, 5. D3.7: 2, 6. D3.8: 1, 7. D3.9: 2; 8 (Steps 6, 9, 14b) |
 | 1. What changes where | 1 (the test), 2 (`quartz.md`, `SKILL.md`'s pointer), 3 (`SKILL.md`'s stops and state table), 4 (`planning.md`, `dispatching.md`), 5 (`reviewing.md`), 6 (`brainstorming`, `writing-plans`), 7 (`README.md`, `CLAUDE.md`) |
 | 2. `skills/orchestrating/quartz.md` | 2 (§2.1–§2.4); 5 (§2.3's hand ticks in `reviewing.md` §5); 8 (Steps 6, 14) |
 | 3. The stops (finding 6) | 3 (the rule), 4 (stop 3), 5 (stop 4); 8 (Steps 7, 14a) |
@@ -447,7 +448,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-### Task 2: `quartz.md`, and `SKILL.md` points at it (spec §2, §7; D3.2–D3.4, D3.7; findings 7, 8; P1–P4, P8, P9)
+### Task 2: `quartz.md`, and `SKILL.md` points at it (spec §2, §7; D3.2–D3.4, D3.7, D3.9; findings 7, 8; P1–P4, P8, P9)
 
 **Files:**
 - Create: `skills/orchestrating/quartz.md`
@@ -541,12 +542,14 @@ Send this as a message of its own, and wait for the answer:
 3. `.env` ignored: `git check-ignore -q .env` succeeds, or add a `.env` line to `.git/info/exclude`. Do the same for
    `.mcp.json` and `.envrc` when git does not track them, so they stay out of a branch run's clean-tree checks.
 4. Run §1 again. It now gives row 3, so run the checks below (they install the hooks).
-5. Then one message: each check that failed, in one line ("A step that fails", below; until the restart, the MCP is
-   one); then: run `direnv allow`, then restart the session from a shell in the repo, so the MCP server and its token
-   load (in Claude Code, `claude --continue` keeps the conversation); without direnv, export `QUARTZ_TOKEN` before
-   starting the session. `.mcp.json` and `.envrc` hold no secret and stay untracked: committing them is the owner's
-   call.
-6. Carry on meanwhile. The relay never waits for the restart; the next check (§1) finishes the setup.
+5. Then one message. When the token check (below) failed, it opens with the prompt for the token: create it in the
+   project's settings in Quartz's web app, and put it in `<main checkout>/.env` as `QUARTZ_TOKEN=<token>`, in an
+   editor, never in the chat; `.envrc` loads it from there. Then: run `direnv allow`, then restart the session from a
+   shell in the repo, so the MCP server and its token load (in Claude Code, `claude --continue` keeps the
+   conversation); without direnv, export `QUARTZ_TOKEN` before starting the session. Then each other check that
+   failed, in one line ("A step that fails", below; until the restart, the MCP is one). `.mcp.json` and `.envrc` hold
+   no secret and stay untracked: committing them is the owner's call.
+6. Carry on meanwhile. The relay never waits for the token or the restart; the next check (§1) finishes the setup.
 
 When `.mcp.json` or `.envrc` is tracked, its edit is a tracked-file edit: during a branch run it waits for the merge
 (`dispatching.md` §6).
@@ -679,7 +682,7 @@ these greps.)
 
 ```bash
 git add skills/orchestrating/quartz.md skills/orchestrating/SKILL.md
-git commit -m "feat: orchestrating's quartz.md says when a repo uses Quartz, sets it up, and holds the duties" -m "One check, read from files and git each time: no CLI, declined (git config hyper-relay.quartz off), connected (.mcp.json has a quartz url), or not connected, which starts a setup that asks the owner only for their own steps and remembers a no. The connected checks install the hooks and report each missing piece once. Ticks come only in a connected repo with its hooks; elsewhere the orchestrator ticks by hand after the merge. SKILL.md's Quartz duties move here, without the unconditional install-git-hook, with status notes added; SKILL.md keeps a pointer." -m "Plan-Task: docs/superpowers/plans/2026-11-18-hyper-relay-d3-orchestrating-findings.md#2
+git commit -m "feat: orchestrating's quartz.md says when a repo uses Quartz, sets it up, and holds the duties" -m "One check, read from files and git each time: no CLI, declined (git config hyper-relay.quartz off), connected (.mcp.json has a quartz url), or not connected, which starts a setup that asks the owner only for their own steps and remembers a no. Setup keeps .mcp.json and .envrc out of git status, and its closing message opens with the token prompt when the token is missing; the connected checks install the hooks and report each missing piece once. Ticks come only in a connected repo with its hooks; elsewhere the orchestrator ticks by hand after the merge. SKILL.md's Quartz duties move here, without the unconditional install-git-hook, with status notes added; SKILL.md keeps a pointer." -m "Plan-Task: docs/superpowers/plans/2026-11-18-hyper-relay-d3-orchestrating-findings.md#2
 Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
@@ -1236,7 +1239,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 Upstream's live suites are not run (report this): they start real `claude -p` sessions. Then report, copy Task 8's
 checklist (Steps 1–16, each with its marker and its PASS) into your report, and stop: Task 8 is not yours.
 
-### Task 8: Acceptance (spec §9; P3, P12, P15, P16, P18). Not the executor's
+### Task 8: Acceptance (spec §9; D3.9; P3, P12, P15, P16, P18). Not the executor's
 
 Each step is marked with who runs it:
 - **`reviewer`**: the acceptance reviewer, before the merge, in the checkout and on the branch
@@ -1299,14 +1302,17 @@ reinstall (Step 12). The version stays 0.1.0.
 | `git grep -n -e 'Wait for every leg' -e 'promises a Quartz tick' -e 'add_note' -- skills/orchestrating/reviewing.md` | three lines: §2's `add_note`, then §4's wait and its tick promise |
 
 - [ ] **Step 6 (`reviewer`): `quartz.md` against spec §2.** Read `skills/orchestrating/quartz.md` in full, the spec's
-  §2, and this plan's P1–P4, P8 and P9. Then `git diff main...HEAD -- skills/orchestrating/SKILL.md` for the duties
+  §2 and its decision D3.9, and this plan's P1–P4, P8 and P9. Then `git diff main...HEAD -- skills/orchestrating/SKILL.md` for the duties
   that left `SKILL.md`. PASS, each point quoted:
   - §1's table has the spec's four rows in the spec's order, with its tests and results; "Uses Quartz" means row 3
     only; the undo is `--unset` in either scope; row 3's test is given as a command that prints nothing from the file.
   - §2 defines "configured properly" as the spec's four parts; the setup message is the spec's, word for word; the
     three answers (a no, neither, a repo name) do what spec §2.2 says; the repo-name steps write the spec's `.mcp.json`
-    server and `.envrc` lines, ignore `.env` (and, per P3, `.mcp.json` and `.envrc`), install the hooks through the
-    connected checks (P2), and end with the spec's restart message; a tracked `.mcp.json` or `.envrc` waits for the
+    server and `.envrc` lines, ignore `.env` and, when git does not track them, `.mcp.json` and `.envrc` (D3.9),
+    install the hooks through the connected checks (P2), and end with one message that, when the token check failed,
+    opens with spec §2.2's token prompt (D3.9: the project's settings in Quartz's web app, `<main checkout>/.env`, an
+    editor, never the chat, `.envrc` loads it), then the spec's restart lines, then each other failed check in one
+    line; the relay waits for neither the token nor the restart; a tracked `.mcp.json` or `.envrc` waits for the
     merge during a branch run.
   - The connected checks are the spec's five (hooks, token, MCP, card, card lines), and "A step that fails" is the
     spec's rule (once per session, P4).
@@ -1340,10 +1346,11 @@ reinstall (Step 12). The version stays 0.1.0.
 | `git grep -n -F 'sh tests/orchestrating/run-tests.sh' -- CLAUDE.md` | one line, a Checks row expecting `0 failed` |
 | `git diff --numstat main...HEAD -- CLAUDE.md` | `2	1	CLAUDE.md` |
 
-- [ ] **Step 9 (`owner`): Read the setup and decide P3.** Read
+- [ ] **Step 9 (`owner`): Read the setup.** Read
   `git -C /home/noob_master/hyper-relay show hyper-relay-d3-orchestrating-findings:skills/orchestrating/quartz.md`, §2.
-  PASS: the owner agrees with the setup message and the steps as written, including P3's exclude lines for `.mcp.json`
-  and `.envrc` (if not, the orchestrator records the change and it goes to the executor as a finding).
+  PASS: the owner agrees with the setup message, the steps and the closing message as written, including D3.9's
+  exclude lines for `.mcp.json` and `.envrc` and its token prompt (if not, the orchestrator records the change and it
+  goes to the executor as a finding).
 
 - [ ] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
   cleanly.**
@@ -1612,9 +1619,12 @@ PASS, in order (the owner watches; the orchestrator checks the git rows):
 PASS, in order:
 1. Before any brainstorming question, the setup message arrives as a message of its own. The owner answers
    `The repo name is toy-probe.` and puts no token anywhere.
-2. The next message names the missing token and the missing MCP, each in one line, with `direnv allow` and the
-   restart; brainstorming then carries on (it explores or asks its next question), and later messages do not report
-   the token or the MCP again. The owner ends the session after brainstorming's next question.
+2. The next message opens with the token prompt (D3.9): create the token in the project's settings in Quartz's web
+   app, and put it in this repo's `.env` (`/tmp/hr-d3-probe-setup/.env`) as `QUARTZ_TOKEN=<token>`, in an editor,
+   never in the chat, since `.envrc` loads it from there. Then `direnv allow` and the restart, then the missing MCP in
+   one line. Brainstorming then carries on without waiting for the token (it explores or asks its next question), and
+   later messages do not report the token or the MCP again. The owner ends the session after brainstorming's next
+   question.
 
 | Run | PASS |
 |---|---|
@@ -1622,7 +1632,7 @@ PASS, in order:
 | `cat /tmp/hr-d3-probe-setup/.envrc` | exactly the two lines `watch_file .env` and `export QUARTZ_TOKEN=$(grep '^QUARTZ_TOKEN=' .env 2>/dev/null \| cut -d= -f2)` |
 | `git -C /tmp/hr-d3-probe-setup check-ignore -q .env && echo ignored` | `ignored` |
 | `grep -c -F 'quartz hook' /tmp/hr-d3-probe-setup/.git/hooks/post-commit /tmp/hr-d3-probe-setup/.git/hooks/post-merge` | `…/post-commit:1` and `…/post-merge:1` |
-| `git -C /tmp/hr-d3-probe-setup status --short` | nothing: `.mcp.json` and `.envrc` are excluded (P3; drop this row if the owner said no at Step 9) |
+| `git -C /tmp/hr-d3-probe-setup status --short` | nothing: `.mcp.json` and `.envrc` are excluded (P3, D3.9) |
 | `git -C /tmp/hr-d3-probe-setup config --get hyper-relay.quartz` | nothing (exit 1) |
 
 **(c) Resume without Quartz.** The owner runs `cd /tmp/hr-d3-probe-resume && claude` and sends:
@@ -1650,7 +1660,7 @@ step.
 - **Before the merge:** acceptance reviewer <verdict line>; fix rounds <n, what each changed>; code review: Critical
   <fixed / dropped, why>, proposed cards <kept / dropped>; token counts: executor <n>, acceptance reviewer <n>, code
   reviewer <n>.
-- **Owner steps:** Step 9 <agreed / what changed; P3 kept or dropped>.
+- **Owner steps:** Step 9 <agreed / what changed>.
 - **Reinstall, <date>:** marketplace clone at <SHA>; `quartz.md` in the 0.1.0 cache: <yes/no>.
 - **Probes:** (a) <pass/fail, anything it did differently>; (b) <>; (c) <>.
 ```
