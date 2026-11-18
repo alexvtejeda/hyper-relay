@@ -16,7 +16,8 @@ gives:
 - what the executor's report says it left running (URLs, logins);
 - an evidence folder outside the checkout: your harness's scratchpad when it has one, otherwise a new `mktemp -d`.
 
-When the plan has no `reviewer` steps, skip the dispatch and say so at stop 4.
+When the plan has no `reviewer` steps, skip the dispatch, say so at stop 4, and post §2's status note now, as
+`` `<plan path>`: acceptance done, no reviewer steps. ``
 
 **Without a generated reviewer** (`SKILL.md`, Fallbacks), dispatch a general-purpose agent (in OpenCode, the
 `general` subagent) with the same prompt and this standing brief:
@@ -49,9 +50,19 @@ The executor's fix prompt gives:
 - commit each fix staging named files only, with the attribution lines and **no** `Plan-Task:` trailer;
 - rerun the gates, and report.
 
-After a fix, verify it as `dispatching.md` §7 does: the gates, the new commits, a clean tree. Then the reviewer,
-resumed or fresh, reruns only the steps that failed. A step that fails again after its second fix round goes to the
-owner.
+After a fix, verify it with `dispatching.md` §7's checks 1–4 (the gates, the new commits, a clean tree, the
+deviations). `quartz review` does not run again: the cards are already In review. Then the reviewer, resumed or
+fresh, reruns only the steps that failed. A step that fails again after its second fix round goes to the owner.
+
+**The status note.** When the fix loop ends (every FAIL fixed, or made a card by the owner), and the repo uses Quartz
+with its MCP loaded (`quartz.md` §1 and §2), post a status note on each of the plan's cards (its card line, or its
+spec's): `add_note` with `status: true`, at most 500 characters:
+
+`` `<plan path>`: acceptance done, N/M PASS, K NEEDS-HUMAN, F fix rounds. ``
+
+N of the M `reviewer` steps passed and K are NEEDS-HUMAN, after F fix rounds. A status replaces the card's previous
+one, which is enough: the code review runs only after acceptance. A resumed orchestrator reads it (`SKILL.md`,
+Finding where work stands). A note that fails is reported once, in one line (`quartz.md` §2).
 
 ## 3. The code review, last
 
@@ -67,21 +78,35 @@ branch, after acceptance and its fixes, so it reads the final diff.
   rerun the steps the fix touches (all its steps, when that is unclear).
 - **Important and Minor:** proposed cards (§4).
 
+When the code review and its Critical fixes are done, post the status note as §2 does:
+
+`` `<plan path>`: code review done, C Critical (x fixed, y dropped), I Important, m Minor. At stop 4. ``
+
 ## 4. Stop 4, the click-through and the merge
 
-One report, which ends the message:
+**Wait for every leg's usage first.** Before writing stop 4, wait for the completion notification of every agent this
+run dispatched: the executor and its fix rounds, the acceptance reviewer, the code reviewer. An agent's reply arrives
+before the notification that carries its usage. Where the harness reports no usage, stop 4 says so.
 
-- the acceptance verdicts, with each NEEDS-HUMAN step listed as the owner's;
-- each fix round, and what it changed;
-- the Critical findings fixed, and those dropped with why;
+One message, which ends there. It opens with its questions, numbered, in this order (`SKILL.md`, The stops):
+
 - the proposed cards, one line each (title, file, why), for the owner to keep or drop;
-- the token counts of the acceptance reviewer and the code reviewer against the executor's, as your harness reports
-  them, until the owner says they have seen enough;
-- the plan's `owner` steps, which the owner runs at the click-through;
+- the NEEDS-HUMAN steps and the plan's `owner` steps, which the owner runs at the click-through;
 - where to click through (below).
 
+Then the report, short, one line per item:
+
+- the acceptance verdicts;
+- each fix round, and what it changed;
+- the Critical findings fixed, and those dropped with why;
+- the token counts of the acceptance reviewer and the code reviewer against the executor's, as your harness reports
+  them ("not reported" where it reports none), until the owner says they have seen enough.
+
+Stop 4 promises a Quartz tick only where `quartz.md` §3 says one will come.
+
 The cards the owner keeps go to Needs brainstorming through the Quartz MCP, kind `bug` or `change`, in the plan's
-initiative, each body naming the plan, the file and the evidence. Without Quartz, they stay listed in the report.
+initiative, each body naming the plan, the file and the evidence. When the repo does not use Quartz (`quartz.md` §1),
+they stay listed in stop 4.
 
 The owner clicks through: after a branch run, on the normal stack, once the executor's "On a branch" acceptance steps
 have run; after a worktree run, on the worktree's `wt` stack. The owner decides the merge, through
@@ -93,7 +118,9 @@ it first (`(cd <worktree> && wt down)`).
 
 After a branch merge, the main checkout is back on `main`. Make the edits that waited, and commit the specs and plans
 you held back, each staged by its path (`git add <path>`, then `git commit -m "<message>" -- <path>…`), so the hooks
-upload them. Task ticks queued during the run drain at the next stop.
+upload them. Where Quartz's hook ticks tasks (`quartz.md` §3), the ticks queued during the run drain at the next
+stop.
 
-Then, in either mode, run the plan's `after merge` acceptance steps with the owner. When the spec has another plan,
-its handoff follows (`planning.md` §4).
+Then, in either mode, run the plan's `after merge` acceptance steps with the owner. When they are done, tick the
+acceptance task by hand if no commit ticked it; where nothing ticks a committed task (`quartz.md` §3), tick every task
+with a `Plan-Task:` commit in the same edit. When the spec has another plan, its handoff follows (`planning.md` §4).
