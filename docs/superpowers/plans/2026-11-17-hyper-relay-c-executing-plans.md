@@ -141,11 +141,11 @@ expected counts of the three test suites; `git diff --stat main` of every file t
 - Modify: `templates/agents/executor.md` (rewritten), `bin/hyper-relay-agents`, `tests/hyper-relay-agents/run-tests.sh`,
   `.hyper-relay/agents.md`
 
-- [ ] **Step 1: Link the branch.** In the worktree, run
+- [x] **Step 1: Link the branch.** In the worktree, run
   `quartz link-branch docs/superpowers/plans/2026-11-17-hyper-relay-c-executing-plans.md`. If it fails, report the
   failure and carry on.
 
-- [ ] **Step 2: The failing tests.** Make these edits to `tests/hyper-relay-agents/run-tests.sh`.
+- [x] **Step 2: The failing tests.** Make these edits to `tests/hyper-relay-agents/run-tests.sh`.
 
 Replace:
 ```text
@@ -360,13 +360,13 @@ assert_eq "hyper-relay's facts: --check after generating: silent" "" "$OUT"
 echo '--- --check'
 ```
 
-- [ ] **Step 3: Run the tests; they fail.**
+- [x] **Step 3: Run the tests; they fail.**
 
 Run: `sh tests/hyper-relay-agents/run-tests.sh | grep -e '^FAIL' -e 'passed, '`
 Expected: a non-zero failed count on the last line, with failures including `FAIL execute: branch is accepted`,
 `FAIL first run: wrote agents, so the restart line ends the output` and `FAIL both acceptance slots: exit 0`.
 
-- [ ] **Step 4: The executor template.** Write `templates/agents/executor.md` with exactly:
+- [x] **Step 4: The executor template.** Write `templates/agents/executor.md` with exactly:
 
 ```markdown
 ---
@@ -407,7 +407,7 @@ its process, its "never" list and its report are yours. The dispatch prompt give
 {{slot executor/acceptance-branch}}
 ```
 
-- [ ] **Step 5: The generator.** Four edits to `bin/hyper-relay-agents`.
+- [x] **Step 5: The generator.** Four edits to `bin/hyper-relay-agents`.
 
 (a) Replace:
 ```text
@@ -518,7 +518,7 @@ with:
 }
 ```
 
-- [ ] **Step 6: hyper-relay's facts (C9).** In `.hyper-relay/agents.md`, replace:
+- [x] **Step 6: hyper-relay's facts (C9).** In `.hyper-relay/agents.md`, replace:
 ```text
 project: relay
 reviewer: commands
@@ -532,7 +532,7 @@ execute: branch
 ---
 ```
 
-- [ ] **Step 7: Run the tests; they pass.**
+- [x] **Step 7: Run the tests; they pass.**
 
 | Run | Expected |
 |---|---|
@@ -540,7 +540,7 @@ execute: branch
 | `dash -n bin/hyper-relay-agents`, then `dash -n tests/hyper-relay-agents/run-tests.sh` | silent |
 | `git ls-files -s bin/hyper-relay-agents` | mode `100755` (unchanged) |
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add templates/agents/executor.md bin/hyper-relay-agents tests/hyper-relay-agents/run-tests.sh .hyper-relay/agents.md
