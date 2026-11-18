@@ -28,7 +28,8 @@ not change.
 
 ## Requirements
 
-- Linux, with a POSIX shell: `wt` is written for dash and runs as `#!/bin/sh`.
+- Linux only, with a POSIX shell: `wt` is written for dash and runs as `#!/bin/sh`. macOS is not supported, because
+  `wt` checks ports with `ss`, from Linux's iproute2.
 - git.
 - Docker Compose 2.24.4 or later, for the `!override` YAML tag.
 - `jq`, and `ss` (from iproute2).
@@ -104,12 +105,19 @@ the stack's state.
 ## `.wt.conf`
 
 Commit a `.wt.conf` at the project's root. `wt` sources it as shell from the root of the worktree it works on, so each
-branch reads its own copy. These are the only keys it reads:
+branch reads its own copy.
+
+**`.wt.conf` is code.** `wt up` and `wt new` source it, so every line in it runs with your privileges, not only
+`WT_SETUP` and `WT_NEW_SETUP`; and `wt up` builds and starts the branch's compose file and Dockerfiles. Review
+`.wt.conf` like a build script, and run `wt` only on branches whose code you would run yourself: `wt new` on someone
+else's branch runs that branch's `.wt.conf` straight away.
+
+These are the only keys `wt` reads:
 
 | Key | Default | Meaning |
 |---|---|---|
-| `WT_ENV_BASE` | `.env.example` | The file `.env` is copied from. |
-| `WT_ENV` | none | `KEY=VALUE` pairs, separated by spaces or newlines, set in `.env`. A value cannot contain a space. |
+| `WT_ENV_BASE` | `.env.example` | The file `.env` is copied from. It must be a file git tracks, and not a symlink (`wt up` refuses any other), and hold no secrets. |
+| `WT_ENV` | none | `KEY=VALUE` pairs, separated by spaces or newlines, set in `.env`. A value cannot contain a space. Real credentials never go here: `.wt.conf` is committed. |
 | `WT_SEED_PROFILE` | none | The compose profile to run once, on a new stack. |
 | `WT_SETUP` | none | A command `wt up` runs once per stack, from the worktree's root, before the build. |
 | `WT_NEW_SETUP` | none | A command `wt new` runs in the new worktree, after creating it. |
@@ -142,7 +150,7 @@ Three environment variables, read when `wt` runs (they are not `.wt.conf` keys):
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `WT_STATE_DIR` | `~/.local/state/wt` | Where each stack keeps its state, in `<stack>/`: its slot, its worktree's path, its ports, the override, its images, and whether its setup and seed have run. Outside every repo. |
+| `WT_STATE_DIR` | `~/.local/state/wt` | Where each stack keeps its state, in `<stack>/`: its slot, its worktree's path, its ports, the override, its images, and whether its setup and seed have run. Keep it outside every repo: inside one, `git clean` or removing a worktree can delete a running stack's state, and `wt down` refuses a stack it holds no state for. |
 | `WT_MAX_STACKS` | `3` | How many stacks may exist at once. |
 | `WT_WAIT_SECONDS` | `300` | How long `wt up` waits for the services to be ready. |
 
@@ -152,6 +160,7 @@ Three environment variables, read when `wt` runs (they are not `.wt.conf` keys):
 |---|---|
 | No `.wt.conf` | Stops, before touching anything. |
 | A bad `WT_ENV` key or placeholder | Stops before building, and names it. |
+| `WT_ENV_BASE` names a file git does not track (gitignored, untracked, or outside the repo), or a symlink | Stops before writing `.env`, and names it. |
 | The stack limit is reached | Stops, and lists the stacks. |
 | The stack's name belongs to another worktree | Stops, and names that worktree. |
 | `WT_SETUP` fails | Stops before building, and says so. It runs again on the next `wt up`. |
@@ -162,10 +171,13 @@ Three environment variables, read when `wt` runs (they are not `.wt.conf` keys):
 ## Safety
 
 - **It refuses a main checkout,** so it never touches the stack you run from there.
-- **`.env` comes from the base file, never from your real `.env`,** so a stack holds no real secrets and cannot use
-  them to reach a real outside service.
+- **`.env` comes from a file git tracks, never from your real `.env`,** because `wt up` refuses any other base file,
+  and any symlink. Keep that file secret-free and real credentials out of `WT_ENV`, since both are committed: then a
+  stack holds no real secrets and cannot use them to reach a real outside service.
 - **Seed data only.** It never copies a real database.
 - **Ports bind to `127.0.0.1`.**
 - **`wt down` refuses any name that is not a `wt` stack's (`<project>-wt-<slug>`), and any stack it holds no state
   for,** so it cannot act on a real stack. It removes only the stack's own `wt-` image tags, never shared images such
   as `postgres:16`.
+- **`wt` is no sandbox.** It runs the branch's code (`.wt.conf`, the compose file, the Dockerfiles), so use it only on
+  branches you trust.

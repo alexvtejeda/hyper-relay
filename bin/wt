@@ -102,6 +102,9 @@ take_slot() {
 
 write_base_env() {
     [ -f "$ROOT/$ENV_BASE" ] || die "WT_ENV_BASE file not found: $ENV_BASE"
+    git -C "$ROOT" ls-files --error-unmatch -- "$ENV_BASE" >/dev/null 2>&1 ||
+        die "WT_ENV_BASE must be a file git tracks: $ENV_BASE"
+    [ ! -L "$ROOT/$ENV_BASE" ] || die "WT_ENV_BASE must not be a symlink: $ENV_BASE"
     if [ -e "$ROOT/.env" ] && [ ! -f "$STATE/env_created" ]; then
         die "$ROOT/.env already exists and wt did not create it; move it away first"
     fi
