@@ -16,8 +16,8 @@ It is a hard fork of [obra/superpowers](https://github.com/obra/superpowers) (v5
 working: an orchestrating session that you talk to, role agents that do the legwork, and a board that knows where
 everything stands.
 
-> **Status: 0.1.0.** The skills, the role agents, per-repo configuration and the orchestrator are in. Still to come:
-> several plans at once, a disposable stack per worktree and the docs' own folder (see [Roadmap](#roadmap)).
+> **Status: 0.1.0.** The skills, the role agents, per-repo configuration, the orchestrator and `wt` are in. Still to
+> come: several plans at once and the docs' own folder (see [Roadmap](#roadmap)).
 
 ## The relay
 
