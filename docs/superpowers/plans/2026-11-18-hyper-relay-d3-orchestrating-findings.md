@@ -1674,3 +1674,27 @@ git -C /home/noob_master/hyper-relay commit -m "docs: piece D.3 last-task record
 ```
 
 Push it with the next change of `main` (the owner's call).
+
+## Last-task record (Task 8)
+
+- **Before the merge:** acceptance reviewer 8/8 PASS, 0 blocking, 2 polish (stop rows against leg lists, wording);
+  fix rounds 1: at stop 4 the owner had proposed card b fixed on the branch instead of carded (`aeb39e5`: the `.envrc`
+  line keeps the whole token with `cut -d= -f2-`, and the exclude file is the one `git rev-parse --git-path
+  info/exclude` prints; spec D3.10, `f2fa96e`); code review: Ready, 0 Critical, 0 Important, 5 Minor; proposed cards:
+  b fixed on the branch, a and c dropped (owner: fix them later if they become a problem); token counts (output /
+  final context): executor 12,184 / 95,060, acceptance reviewer 8,536 / 87,686, code reviewer 4,788 / 83,365.
+  **Deviation (owner's addition):** `writing-skills` RED/GREEN pressure tests by the orchestrator, 6 scenarios on
+  `main`'s and the branch's skill text (12 Sonnet runs, 32,003 output): GREEN 6/6 PASS; RED failed as expected in 5,
+  while S6 (an old spec is offered, not planned) and S4's wait and tick parts did not discriminate. 0 fix rounds.
+- **Owner steps:** Step 9 agreed (the owner read `quartz.md` §2 after the fix: "Looks perfect"); Step 10 merge-tree
+  exit 0. Merged in `3faf926`.
+- **Reinstall, 2026-11-18:** marketplace clone at `f2fa96e`; `quartz.md` in the 0.1.0 cache: yes, with both D3.10
+  fixes.
+- **Probes:** (a) FAIL at its item 1, accepted by the owner: the session dispatched the planner before sending the
+  setup message, then sent it. The owner: having no Quartz configured shouldn't stop the work; setup can run with
+  the orchestrator while the agent works. D.2's skills plan changes `quartz.md` §2 to say so (setup never holds up a
+  leg). Items 2–4 passed (stop 3 and stop 4 questions first, stop 4 after every notification with the token counts
+  and no tick promise, the merge carried on without pulling; it fast-forwarded). Git rows 1–5 PASS; row 6 printed
+  `1`, the plan template's own header line ("checkbox (`- [ ]`) syntax"), a defect in the row, not the probe: every
+  step box was ticked. (b) PASS on every item and row; the `.envrc` row matched `cut -d= -f2-` (D3.10), not the
+  `-f2` written above. (c) PASS.
