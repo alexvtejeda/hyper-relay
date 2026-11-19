@@ -16,6 +16,11 @@ This is the phase gate between plan and execution: stop for the owner's answer. 
 the header of `main`'s facts file (`git show main:.hyper-relay/agents.md`, between its first two `---` lines), if the
 repo has one.
 
+**Branch is offered only for a plan that will run alone:** no other plan is in flight and none is approved to run
+beside it (`parallel.md` says what in flight means). Otherwise every plan runs in a worktree, and the question is
+`parallel.md` §1's: a line per plan, then a line per overlap its conflict check found. The forms below are for a plan
+that runs alone.
+
 - **`execute: branch`:** "Plan ready at `<path>` (N tasks). Running it on a **branch** (this repo's default). OK, or
   worktree?"
 - **`execute: worktree`:** "Plan ready at `<path>` (N tasks). Running it in a **worktree** (this repo's default). OK,
@@ -31,15 +36,15 @@ repo has one.
 Add each warning that applies:
 - Branch: task ticks arrive at the merge, not live.
 - Branch, in a repo with a `.wt.conf`: it runs on the owner's normal stack and database.
-- **While a branch run is active, Branch is not offered.** Say that one is active, and offer Worktree.
-
-The owner's answer is the go-ahead to dispatch this plan; do not ask again.
+The owner's answer is the go-ahead to dispatch the plan, or each plan the question names when `parallel.md` says it
+starts; do not ask again.
 
 ## 2. Preconditions
 
 - **Branch:** the main checkout is on `main`; `git rev-parse -q --verify MERGE_HEAD` prints nothing; and
   `git status --porcelain --untracked-files=no` prints nothing (untracked files are fine).
-- **Worktree:** the new worktree is cut from `main`. The main checkout may be on a branch run.
+- **Worktree:** the new worktree is cut from `main`, or from its base's branch for a stacked plan (`parallel.md` §3).
+  The main checkout may be on a branch run.
 - **The plan is committed on `main`:** `git log -1 --format=%h main -- <plan path>` prints a commit. A plan that is
   not (it is gitignored, or it was written during a branch run and held back) goes to the executor by its absolute
   path, and §4 never runs `quartz link-branch` for it: Quartz would link the main checkout's current branch,
@@ -56,8 +61,10 @@ The branch is the plan's file name without its date and `.md`:
 - **Worktree:** in the main checkout, `mkdir -p .worktrees`; then `git check-ignore -q .worktrees` must succeed.
   If it fails, `.worktrees/` is not ignored yet: add a `.worktrees/` line to `.gitignore` and commit just that file
   (`git add .gitignore`, then `git commit -m "chore: ignore .worktrees/" -- .gitignore`); during a branch run, add
-  the line to `.git/info/exclude` instead, which is not tracked. Then
-  `git worktree add .worktrees/<branch> -b <branch> main`.
+  the line to the file `git rev-parse --git-path info/exclude` prints instead, which is not tracked. Then cut the
+  worktree from `<base>`, which is `main`, or the base's branch for a stacked plan (`parallel.md` §3):
+  `git worktree add .worktrees/<branch> -b <branch> <base>`; in a repo with a `.wt.conf`,
+  `wt new <branch> --from <base>`, which makes the same worktree and runs the repo's worktree setup.
 
   Never enter the worktree: no `EnterWorktree` (so not `hyper-relay:using-git-worktrees`, which uses it), and no `cd`
   that outlives one command. Run commands there as `(cd <worktree> && …)` or `git -C <worktree> …`.
@@ -85,6 +92,7 @@ The prompt gives what `hyper-relay:executing-plans` lists under "The dispatch pr
 - the mode, `branch` or `worktree`;
 - the checkout's absolute path (the main checkout, or the worktree) and the branch;
 - the Claude-Session URL for its commit trailers, when your harness gives you one;
+- for a stacked plan: that its branch was cut from its base's branch, `<base branch>`, which has not merged yet;
 - anything unusual: `main` moved since the plan was written, a plan read by absolute path, a step you know is stale.
 
 Then tell the owner it is running, and carry on with other work. Where the harness cannot run a subagent in the
@@ -106,7 +114,8 @@ write specs and plans) by these rules:
 
 ## 7. Verify the hand-back
 
-Before relaying anything, where the branch is checked out:
+Before relaying anything, where the branch is checked out (for a stacked plan, only once its base has merged and any
+catch-up round is done: `parallel.md` §3):
 
 1. Rerun the gates the report names. Their counts must match the report's.
 2. Check the commits: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>`. Each of the executor's

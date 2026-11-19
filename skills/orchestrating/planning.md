@@ -13,7 +13,9 @@ go-ahead: do not ask again. Then tell the owner they are running, and carry on.
   gives its part (`-api`, `-web`), in the spec's order. Each plan's branch is its file name without the date and
   `.md` (`dispatching.md` §3). For example, the spec `2026-11-18-billing-design.md`, with one plan, written on
   2026-11-19: `docs/superpowers/plans/2026-11-19-billing.md`, on the branch `billing`.
-- **One planner per plan, in parallel:** the repo's `<project>-planner` (`.claude/agents/<project>-planner.md`).
+- **One planner per plan, in parallel:** the repo's `<project>-planner` (`.claude/agents/<project>-planner.md`),
+  except a stacked plan's (the spec's plans list says it builds on another): it is dispatched once its base's plan is
+  committed (`parallel.md` §1).
   Without generated agents (`SKILL.md`, Fallbacks): a general-purpose agent whose first instruction is "Invoke the
   `hyper-relay:writing-plans` skill and follow it. You may only read code and write your plan file." (In OpenCode:
   the `general` subagent, told to load the `writing-plans` skill first.)
@@ -21,6 +23,8 @@ go-ahead: do not ask again. Then tell the owner they are running, and carry on.
   - the spec's path (absolute when the spec is not committed on `main`);
   - the plan's path and its branch;
   - with sibling plans: their paths and branches, and that the spec's contract between them binds;
+  - for a stacked plan: its base plan's path, which its header names in a `**Builds on:**` line, and that it plans
+    against the files as the base plan leaves them;
   - the commit message for the plan, and the attribution lines your harness gives you, in one final paragraph;
   - the Claude-Session URL, when your harness gives you one;
   - whether the repo uses Quartz (`quartz.md` §1), and when it does not, "Run no `quartz` command.": a planner cannot
@@ -43,12 +47,15 @@ plan:
 3. **Trailers:** `grep -n -o 'Plan-Task: [^ "]*' <plan>` lists them. Each task with a commit step carries
    `Plan-Task: <plan path>#<N>` once, with its own number and the plan's own path.
 4. **Acceptance:** `grep -n '^### Task' <plan> | tail -n 1` names the last task, which is the acceptance task; each of
-   its steps says who runs it: `reviewer`, `owner` or `after merge`.
+   its steps says who runs it: `reviewer`, `owner`, `after merge` or `skill-test`.
 5. **Placeholders:** `grep -n -E 'TBD|TODO|implement later|fill in details|Similar to Task' <plan>` finds nothing
    outside quoted text.
 6. **Spec coverage:** `grep -n '^## ' <spec>` lists the spec's sections. The plan's **Spec coverage** table maps every
    one of them to at least one task.
 7. **Sibling plans:** their **Contract** sections are identical.
+8. **Stacked:** a plan the spec says builds on another has `**Builds on:** <base plan path>` in its header.
+9. **Several plans, or one joining a plan in flight:** `parallel.md` §2's conflict check. A numbered collision goes
+   back to the later plan's planner, like a failed check; shared files become lines in the handoff question.
 
 A failed check goes back to the planner before stop 3: resumed (`SKILL.md`, Fallbacks), or a fresh planner given the
 list.
@@ -59,7 +66,8 @@ One message, which ends there. It opens with its questions, numbered, in this or
 
 - each decision the owner must make;
 - "Want a plan review before you read it? A fresh agent on Sonnet reads the plan against the spec.";
-- the handoff question from `dispatching.md` §1, with its warnings, for the first plan to run.
+- the handoff question from `dispatching.md` §1, with its warnings: for several plans, or a plan joining one in
+  flight, a line per plan and a line per overlap (`parallel.md` §1 and §2).
 
 Then the report, short, one line per item:
 
@@ -69,7 +77,8 @@ Then the report, short, one line per item:
 
 The answer leads one of three ways:
 
-- **Approve, with a mode:** `dispatching.md` §2. The answer is the go-ahead: do not ask again.
+- **Approve, with a mode:** `dispatching.md` §2, for each plan that starts now (`parallel.md` §1 says when the others
+  start). The answer is the go-ahead: do not ask again.
 - **A plan review:** dispatch a general-purpose agent on Sonnet (`SKILL.md`, Fallbacks) with `writing-plans`'
   `plan-document-reviewer-prompt.md` (`../writing-plans/plan-document-reviewer-prompt.md` from this file), filled in
   with the plan's and the spec's paths. Its findings go to the planner, which revises the plan and commits it again.
@@ -86,5 +95,6 @@ commit just the spec while the main checkout is on `main` (`git add <spec>`, the
 
 ## 4. Several plans
 
-They run one after another, in the spec's order. After plan k merges (`reviewing.md` §5), plan k+1 gets its own
-stop-3 handoff question, and its branch is cut from the new `main`. Running them at once is not part of this skill.
+A spec with several plans, or a plan that would run beside another in flight, runs by `parallel.md`: the planners
+and the one stop 3 (`parallel.md` §1), the conflict check before each dispatch (`parallel.md` §2), a plan stacked on
+the one it builds on (`parallel.md` §3), and the order they land in (`parallel.md` §4).
