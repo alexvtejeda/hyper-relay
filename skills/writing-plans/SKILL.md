@@ -7,9 +7,7 @@ description: Use when dispatched as a planner to write an implementation plan fr
 
 ## Overview
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
-
-Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+Write implementation plans for an engineer who has not seen this codebase or this spec. They write idiomatic code in the project's language once they know the exact interface and the exact test, and they make a reasonable choice wherever the plan leaves one open. What they cannot know is what you decided: which files, which names and signatures, which values from the spec, which tests prove each task. Document those. DRY. YAGNI. TDD. Frequent commits.
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
@@ -45,9 +43,13 @@ Before defining tasks, map out which files will be created or modified and what 
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
 
-## Bite-Sized Task Granularity
+## Task Right-Sizing
 
-**Each step is one action (2-5 minutes):**
+A task is the smallest unit that carries its own test cycle and its own commit, with its `Plan-Task:` trailer. Fold setup, configuration, scaffolding and documentation into the task whose deliverable needs them. Split only where one task's result can be checked without its neighbour's. Each task ends with something testable on its own.
+
+## Step Granularity
+
+**Each step is one action with a checkable result:**
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -71,6 +73,14 @@ This structure informs the task decomposition. Each task should produce self-con
 
 ---
 ```
+
+## Execution notes
+
+A plan's **Execution notes** carry what is particular to it: a command not to run, a file's quirk, a suite that is the contract, the suites its full gates run. They also carry the spec's project-wide values (version floors, dependency limits, naming and copy rules, exact values), copied verbatim, one line each. They do not repeat the executor's standing rules, which `hyper-relay:executing-plans` holds: where it works, how it commits and with which trailers, its never list, and running each task's own checks with the full gates once at the end.
+
+## Review Focus
+
+After its header and before its first task, the plan carries a **Review Focus** section: up to five input classes or failure modes that the spec implies but no task's tests exercise, the ones most likely to bite a person using the software, most likely first. Each is one line, naming the input or condition and the behaviour a reasonable person would expect. The spec is a vision document: its silence on an input is not permission for that input to break the program. Add each line's test to the task that owns the code, in that task's own step style. An empty section means you checked and found none, not that you skipped the check.
 
 ## No Quartz steps in a plan
 
@@ -101,6 +111,10 @@ The orchestrator runs each scenario on both, after acceptance and beside the cod
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
 
+**Interfaces** (only when a later task uses what this one makes):
+- Consumes: [what this task uses from earlier tasks: exact names and signatures]
+- Produces: [what later tasks use: exact function names, parameters and return types]
+
 - [ ] **Step 1: Write the failing test**
 
 ```python
@@ -114,12 +128,9 @@ def test_specific_behavior():
 Run: `pytest tests/path/test.py::test_name -v`
 Expected: FAIL with "function not defined"
 
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **Step 3: Implement `function(input: InputType) -> ResultType` in `exact/path/to/file.py`**
 
-```python
-def function(input):
-    return expected
-```
+One line on the approach when the signature and the test leave a choice (which library call, which data structure); a code block only for an algorithm they do not determine.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -134,22 +145,21 @@ git commit -m "feat: add specific feature" -m "Plan-Task: docs/superpowers/plans
 ```
 ````
 
-## No Placeholders
+The **final** commit step of each task carries the plan's own path and the task's number as a git trailer, as above: `-m "Plan-Task: docs/superpowers/plans/<this plan>.md#<N>"`. Earlier commits in the same task and tasks with no commit step do not carry it.
 
-Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
-- "TBD", "TODO", "implement later", "fill in details"
-- "Add appropriate error handling" / "add validation" / "handle edge cases"
-- "Write tests for the above" (without actual test code)
-- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
-- Steps that describe what to do without showing how (code blocks required for code steps)
-- References to types, functions, or methods not defined in any task
+The executor reads the whole plan, so a task has an **Interfaces** block only when a later task uses its names or types. The later task's steps point to that block instead of repeating its code.
 
-## Remember
-- The **final** commit step of each task carries the plan's own path and the task's number as a git trailer: `-m "Plan-Task: docs/superpowers/plans/<this plan>.md#<N>"`. Earlier commits in the same task and tasks with no commit step do not carry it.
-- Exact file paths always
-- Complete code in every step — if a step changes code, show the code
-- Exact commands with expected output
-- DRY, YAGNI, TDD, frequent commits
+## What a Step Contains
+
+A step is done when the executor can write exactly one reasonable thing from it: unambiguous, not complete. Each kind of step carries what makes it unambiguous and nothing more:
+
+- **A test step:** the test's name and its assertions, as code, with the spec's exact values in them.
+- **A code step:** the exact signature (name, parameters, return type), the file it lives in, and the values the spec pins. The executor writes the body. A body appears only for an algorithm the signature and the tests do not determine.
+- **A text step:** the exact text, in full, and where it goes, wherever the words are the product: a skill file or a file beside it that agents read, a doc, a message a person or an agent reads, a config value. "Create X with exactly this content" and "Replace X with Y" are the forms for these.
+- **A verification step:** the command, and the output that means it passed.
+- **A reference to another task:** that task's Interfaces block, not a copy of its code.
+
+A plan is the set of decisions the executor cannot make alone. A plan longer than the code it describes has written the code instead. Lines that decide nothing ("TBD", "TODO", "implement later", "fill in details", "handle edge cases", "add appropriate validation", "write tests for the above", "Similar to Task N", a type or function no task defines) are the opposite failure. The self-review catches both.
 
 ## Self-Review
 
@@ -157,9 +167,13 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
 
-**2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+**2. Step scan:** Every step lets the executor write exactly one reasonable thing, and carries no more than that. A line that decides nothing is a gap; a body the signature and the tests already determine is a transcript. Fix both. Text steps keep their text in full.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+
+**4. Review Focus:** For each input class or failure mode the spec implies, a task's tests exercise it, or it is in Review Focus with its test added to the task that owns the code.
+
+**5. Proportion:** Compare the plan's length with the spec's. When code blocks are most of the plan, replace bodies with signatures, test names and assertions, and check that each step is still unambiguous. Text steps do not count against the plan here.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
