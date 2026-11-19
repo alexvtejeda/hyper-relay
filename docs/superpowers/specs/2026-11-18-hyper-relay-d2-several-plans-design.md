@@ -32,14 +32,14 @@ of a reinstall.
 | D2.7 | Skill tests | **A standing relay leg** (owner, during D.3): `writing-skills`' RED/GREEN pressure tests, run by the orchestrator after acceptance, beside the code review, whenever the plan has `skill-test` steps. D.2's own run does it by hand, since Plan 2 adds the leg. |
 | D2.8 | Quartz setup and the legs (D.3's probe (a), accepted by the owner) | **Setup never holds up a leg.** The leg's agent is dispatched first; the setup message follows while it works. Having no Quartz configured does not stop the work. |
 | D2.9 | Where the exit codes are handled | **`reviewing.md` §4,** because a lone plan's merge needs them too. `parallel.md` §4 keeps the landing order. |
-| D2.10 | D.2's own two plans | **They run at once, by hand,** in two worktrees: `CLAUDE.md` is all Plan 1's, `README.md` all Plan 2's, so they share no file. |
-| D2.11 | Releases | **After both plans merge, the version goes to 0.2.0** (tag `v0.2.0`, pushed). From then on every merge that changes what the plugin ships raises the version, the patch number unless the owner names another, so the owner updates with `claude plugin update` and `/reload-plugins` instead of reinstalling. This replaces the 2026-11-17 rule "0.1.0 until the initiative is finished". |
+| D2.10 | D.2's own two plans (owner, at stop 2) | **Planners at once, executors in sequence.** Both planners run on `main`: they only read code and commit their own plans. Then Plan 1 runs, lands, and its tests pass on `main`; only then does Plan 2's executor start, from the new `main`. `CLAUDE.md` is all Plan 1's and `README.md` all Plan 2's. |
+| D2.11 | Releases | **After both plans merge, the version goes to 0.2.0** (tag `v0.2.0`, pushed). From then on every merge that changes what the plugin ships raises the version, the patch number unless the owner names another (0.2.1 next; owner, at stop 2), so the owner updates with `claude plugin update` and `/reload-plugins` instead of reinstalling. This replaces the 2026-11-17 rule "0.1.0 until the initiative is finished". |
 
 ## The plans
 
 1. **Plan 1, `relay-merge`:** `docs/superpowers/plans/2026-11-18-hyper-relay-d2-relay-merge.md`. Builds on nothing.
 2. **Plan 2, the skills:** `docs/superpowers/plans/2026-11-18-hyper-relay-d2-parallel-skills.md`. Builds on nothing:
-   it depends only on Plan 1's contract (§1), which this spec fixes.
+   it depends only on Plan 1's contract (§1), which this spec fixes. It executes after Plan 1 has landed (D2.10).
 
 | Plan | Creates | Modifies |
 |---|---|---|
@@ -292,9 +292,9 @@ reported, not fixed.
 
 ## 11. Running D.2 itself
 
-Under today's skills, by hand (D2.10): both planners at once; one stop 3 for both plans; both executors at once, each
-in its own worktree, since the plans share no file; each lands through `finishing-a-development-branch` as today, or
-through `relay-merge` once Plan 1 has merged. Plan 2's after-merge steps wait for both merges.
+Under today's skills (D2.10): both planners at once, on `main`; one stop 3 for both plans. Then Plan 1's executor,
+review legs and merge, as today's skills run them, and the suites on the merged `main`. Only when they pass, Plan 2's
+handoff, from the new `main`. Plan 2's after-merge steps (§10) follow its own merge.
 
 ## 12. Out of scope
 
