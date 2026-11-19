@@ -675,7 +675,7 @@ Then `git ls-files -s tests/relay-merge/run-tests.sh` must print a line starting
 - Create: `bin/relay-merge`
 - Test: `tests/relay-merge/run-tests.sh`
 
-- [ ] **Step 1: Write the tool.** Create `bin/relay-merge` with exactly this content:
+- [x] **Step 1: Write the tool.** Create `bin/relay-merge` with exactly this content:
 
 ```sh
 #!/bin/sh
@@ -939,7 +939,7 @@ fi
 say "landed:$LANDED"
 ```
 
-- [ ] **Step 2: Mode and syntax.**
+- [x] **Step 2: Mode and syntax.**
 
 ```bash
 chmod 755 bin/relay-merge
@@ -950,7 +950,7 @@ chmod 755 bin/relay-merge
 | `dash -n bin/relay-merge` | silent, exit 0 |
 | `test -x bin/relay-merge && echo executable` | `executable` |
 
-- [ ] **Step 3: The suite passes.**
+- [x] **Step 3: The suite passes.**
 
 Run: `sh tests/relay-merge/run-tests.sh | tail -n 1`
 Expected: `107 passed, 0 failed`
@@ -958,7 +958,7 @@ Expected: `107 passed, 0 failed`
 If anything fails, run `sh tests/relay-merge/run-tests.sh | grep -A 1 '^FAIL'`, fix `bin/relay-merge` (never the
 suite), and run it again.
 
-- [ ] **Step 4: What the tool must never do, and what it may read.**
+- [x] **Step 4: What the tool must never do, and what it may read.**
 
 | Run | Expected |
 |---|---|
@@ -968,7 +968,7 @@ suite), and run it again.
 
 (`git grep --untracked` reads the new file before its commit.)
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add bin/relay-merge
