@@ -1253,7 +1253,7 @@ Each step is marked with who runs it:
 R12), not the text it writes: the new behaviour reaches a session only after the merge, the push and the owner's
 reinstall (Step 12). The version stays 0.1.0.
 
-- [ ] **Step 1 (`reviewer`): The guard.**
+- [x] **Step 1 (`reviewer`): The guard.**
 
 | Run | PASS |
 |---|---|
@@ -1262,7 +1262,7 @@ reinstall (Step 12). The version stays 0.1.0.
 | `dash -n tests/orchestrating/run-tests.sh` | silent, exit 0 |
 | `git ls-files -s tests/orchestrating/run-tests.sh` | one line starting `100644` |
 
-- [ ] **Step 2 (`reviewer`): The other suites, unchanged.**
+- [x] **Step 2 (`reviewer`): The other suites, unchanged.**
 
 | Run | PASS |
 |---|---|
@@ -1271,21 +1271,21 @@ reinstall (Step 12). The version stays 0.1.0.
 | `sh tests/add-card-line/run-tests.sh \| tail -n 1` | `85 passed, 0 failed` |
 | `git diff --stat main...HEAD -- bin hooks templates tests/hyper-relay-agents tests/add-card-line skills/brainstorming/scripts` | nothing (P18) |
 
-- [ ] **Step 3 (`reviewer`): The manifests and the skill count (P15).**
+- [x] **Step 3 (`reviewer`): The manifests and the skill count (P15).**
 
 | Run | PASS |
 |---|---|
 | `claude plugin validate .` | passes (exit 0); its warnings are exactly the root `CLAUDE.md` one, `ICON_MISSING` and, only when run in the main checkout (which holds the gitignored `.mcp.json`), `PRIVACY_URL_MISSING`; no other warning |
 | `git ls-files 'skills/*/SKILL.md' \| wc -l` | `17` |
 
-- [ ] **Step 4 (`reviewer`): Only the planned files changed (spec §1, §10).**
+- [x] **Step 4 (`reviewer`): Only the planned files changed (spec §1, §10).**
 
 | Run | PASS |
 |---|---|
 | `git diff --name-only main...HEAD` | exactly `CLAUDE.md`, `README.md`, `skills/brainstorming/SKILL.md`, `skills/orchestrating/SKILL.md`, `skills/orchestrating/dispatching.md`, `skills/orchestrating/planning.md`, `skills/orchestrating/quartz.md`, `skills/orchestrating/reviewing.md`, `skills/writing-plans/SKILL.md`, `tests/orchestrating/run-tests.sh` |
 | `git log --format=%B main..HEAD \| grep -c -i -w -e sat -e pentraze` | `0` |
 
-- [ ] **Step 5 (`reviewer`): One definition, and the wording fixes (spec §6, §7; P7, P17).**
+- [x] **Step 5 (`reviewer`): One definition, and the wording fixes (spec §6, §7; P7, P17).**
 
 | Run | PASS |
 |---|---|
@@ -1301,7 +1301,7 @@ reinstall (Step 12). The version stays 0.1.0.
 | `git grep -n 'CLAUDE_SKILL_DIR' -- skills/orchestrating skills/brainstorming/SKILL.md` | seven lines: five in `skills/orchestrating/SKILL.md` and two in `skills/brainstorming/SKILL.md`, each naming on the same line the same file relative to its skill; none in `quartz.md` (P9) |
 | `git grep -n -e 'Wait for every leg' -e 'promises a Quartz tick' -e 'add_note' -- skills/orchestrating/reviewing.md` | three lines: §2's `add_note`, then §4's wait and its tick promise |
 
-- [ ] **Step 6 (`reviewer`): `quartz.md` against spec §2.** Read `skills/orchestrating/quartz.md` in full, the spec's
+- [x] **Step 6 (`reviewer`): `quartz.md` against spec §2.** Read `skills/orchestrating/quartz.md` in full, the spec's
   §2 and its decision D3.9, and this plan's P1–P4, P8 and P9. Then `git diff main...HEAD -- skills/orchestrating/SKILL.md` for the duties
   that left `SKILL.md`. PASS, each point quoted:
   - §1's table has the spec's four rows in the spec's order, with its tests and results; "Uses Quartz" means row 3
@@ -1322,7 +1322,7 @@ reinstall (Step 12). The version stays 0.1.0.
     says the repo uses Quartz, and adds the status notes.
   - Nothing in `quartz.md` contradicts the spec. List any sentence that does as a FAIL, with its line.
 
-- [ ] **Step 7 (`reviewer`): The stops and resuming (spec §3, §4, §5; P5, P6).** Read
+- [x] **Step 7 (`reviewer`): The stops and resuming (spec §3, §4, §5; P5, P6).** Read
   `skills/orchestrating/SKILL.md` ("The stops", "Finding where work stands"), `planning.md` §3 and `reviewing.md`
   §1–§5. PASS:
   - "The stops" carries the spec's rule word for word, and rows 3 and 4 list the questions first;
@@ -1336,7 +1336,7 @@ reinstall (Step 12). The version stays 0.1.0.
     spec's four rows (with P5's MCP clause) and the fix-commit definition;
   - `reviewing.md` §5 ticks every committed task by hand where nothing else ticks them.
 
-- [ ] **Step 8 (`reviewer`): README and `CLAUDE.md` (spec §6, §8; P11, P14).**
+- [x] **Step 8 (`reviewer`): README and `CLAUDE.md` (spec §6, §8; P11, P14).**
 
 | Run | PASS |
 |---|---|
@@ -1346,13 +1346,13 @@ reinstall (Step 12). The version stays 0.1.0.
 | `git grep -n -F 'sh tests/orchestrating/run-tests.sh' -- CLAUDE.md` | one line, a Checks row expecting `0 failed` |
 | `git diff --numstat main...HEAD -- CLAUDE.md` | `2	1	CLAUDE.md` |
 
-- [ ] **Step 9 (`owner`): Read the setup.** Read
+- [x] **Step 9 (`owner`): Read the setup.** Read
   `git -C /home/noob_master/hyper-relay show hyper-relay-d3-orchestrating-findings:skills/orchestrating/quartz.md`, §2.
   PASS: the owner agrees with the setup message, the steps and the closing message as written, including D3.9's
   exclude lines for `.mcp.json` and `.envrc` and its token prompt (if not, the orchestrator records the change and it
   goes to the executor as a finding).
 
-- [ ] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
+- [x] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
   cleanly.**
 
 | Run | PASS |
@@ -1361,7 +1361,7 @@ reinstall (Step 12). The version stays 0.1.0.
 
 On exit 1 it names the conflicted files: tell the owner before merging.
 
-- [ ] **Step 11 (`after merge`): Re-check on `main`.**
+- [x] **Step 11 (`after merge`): Re-check on `main`.**
 
 | Run | PASS |
 |---|---|
@@ -1370,7 +1370,7 @@ On exit 1 it names the conflicted files: tell the owner before merging.
 | `cd /home/noob_master/hyper-relay && bin/hyper-relay-agents --check` | nothing, exit 0: no template changed, so no agent is regenerated (P18) |
 | `git -C /home/noob_master/hyper-relay status --short` | nothing |
 
-- [ ] **Step 12 (`after merge`): Push, then the owner reinstalls.** The version stays 0.1.0.
+- [x] **Step 12 (`after merge`): Push, then the owner reinstalls.** The version stays 0.1.0.
 
 ```bash
 git -C /home/noob_master/hyper-relay push origin main
@@ -1388,7 +1388,7 @@ for the probes: a running session keeps the copy it loaded.
 
 If a check fails, stop and tell the owner; do not delete or uninstall anything.
 
-- [ ] **Step 13 (`after merge`): Build the probe repos (P16).** Precondition: `command -v quartz` in the owner's shell
+- [x] **Step 13 (`after merge`): Build the probe repos (P16).** Precondition: `command -v quartz` in the owner's shell
   prints a path; if it prints nothing, probes (a) and (b) would meet §1's row 1 and prove nothing: stop and tell the
   owner. For each `<dir>` of `/tmp/hr-d3-probe-declined`, `/tmp/hr-d3-probe-setup` and `/tmp/hr-d3-probe-resume`:
 
@@ -1584,7 +1584,7 @@ git -C /tmp/hr-d3-probe-resume commit -q -m "fix: bye.sh names its argument"
 | `git -C /tmp/hr-d3-probe-resume log --format='%s%n%(trailers:key=Plan-Task)' main..toy-bye` | `fix: bye.sh names its argument` first, then `feat: bye.sh` with its `Plan-Task:` trailer |
 | `git -C /tmp/hr-d3-probe-resume config --get hyper-relay.quartz` | `off` |
 
-- [ ] **Step 14 (`after merge`): The live probes (spec §9).** Each is a new Claude Code session, started by the owner
+- [x] **Step 14 (`after merge`): The live probes (spec §9).** Each is a new Claude Code session, started by the owner
   after Step 12, in its repo. Quartz's own session hooks may print a warning about a token in probe (b): not a FAIL.
 
 **(a) Declined, through the loop.** The owner runs `cd /tmp/hr-d3-probe-declined && claude` (accepting the trust
@@ -1643,7 +1643,7 @@ PASS: no setup message (the repo is declined); it asks which review legs ran, na
 `fix: bye.sh names its argument`), and dispatches no agent and runs no gate before the owner answers. The owner ends the
 session there.
 
-- [ ] **Step 15 (`after merge`): Clean up; anything failed?**
+- [x] **Step 15 (`after merge`): Clean up; anything failed?**
 
 ```bash
 rm -rf /tmp/hr-d3-probe-declined /tmp/hr-d3-probe-setup /tmp/hr-d3-probe-resume
@@ -1652,7 +1652,7 @@ rm -rf /tmp/hr-d3-probe-declined /tmp/hr-d3-probe-setup /tmp/hr-d3-probe-resume
 A failed step: fix it on a branch through the usual spec and plan, merge, push, reinstall (Step 12), and repeat the
 step.
 
-- [ ] **Step 16 (`after merge`): Record (P12).** Append to this plan, in the main checkout (on `main`):
+- [x] **Step 16 (`after merge`): Record (P12).** Append to this plan, in the main checkout (on `main`):
 
 ```markdown
 ## Last-task record (Task 8)
