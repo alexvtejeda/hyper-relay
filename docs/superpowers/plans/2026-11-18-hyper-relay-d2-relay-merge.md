@@ -1254,7 +1254,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `CLAUDE.md:19-23` (Layout), `:52-64` (How a change reaches the owner), `:75` (Checks)
 - Modify: `.hyper-relay/agents.md:20-23` (`## planner/execution-notes`)
 
-- [ ] **Step 1: `CLAUDE.md`'s Layout names the tool, its doc, its suite and the gates.** In `CLAUDE.md`, replace:
+- [x] **Step 1: `CLAUDE.md`'s Layout names the tool, its doc, its suite and the gates.** In `CLAUDE.md`, replace:
 
 ```text
 - `bin/wt`: `wt`, a disposable Docker Compose stack for each git worktree (POSIX shell, run by dash). `docs/wt.md` is
@@ -1278,7 +1278,7 @@ with:
   tests `relay-merge`, on temporary git repos with a fake `wt`.
 ```
 
-- [ ] **Step 2: The release rule replaces "0.1.0 until the initiative is finished" (D2.11, spec §9; P14).** In
+- [x] **Step 2: The release rule replaces "0.1.0 until the initiative is finished" (D2.11, spec §9; P14).** In
   `CLAUDE.md`, replace:
 
 ```text
@@ -1326,7 +1326,7 @@ with:
   `bin/relay-merge`, as `wt`'s is: a change reaches it as soon as it merges.
 ```
 
-- [ ] **Step 3: The Checks row.** In `CLAUDE.md`, replace:
+- [x] **Step 3: The Checks row.** In `CLAUDE.md`, replace:
 
 ```text
 | wt | `sh tests/wt/run-tests.sh` | `0 failed` |
@@ -1339,7 +1339,7 @@ with:
 | relay-merge | `sh tests/relay-merge/run-tests.sh` | `0 failed` |
 ```
 
-- [ ] **Step 4: The planner's facts gain the release steps (spec §9).** In `.hyper-relay/agents.md`, replace:
+- [x] **Step 4: The planner's facts gain the release steps (spec §9).** In `.hyper-relay/agents.md`, replace:
 
 ```text
 - Also the owner's or the orchestrator's: anything that touches `~/.claude/`, `~/.config/opencode/` or the home
@@ -1362,7 +1362,7 @@ with:
   `~/.claude/plugins/cache/hyper-relay/hyper-relay/<x.y.z>/`.
 ```
 
-- [ ] **Step 5: Check the edits.**
+- [x] **Step 5: Check the edits.**
 
 | Run | Expected |
 |---|---|
@@ -1375,7 +1375,7 @@ with:
 | `sh tests/hyper-relay-agents/run-tests.sh \| tail -n 1` | `153 passed, 0 failed` (it generates agents from this repo's facts file) |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `24 passed, 0 failed` (it reads `CLAUDE.md`) |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add CLAUDE.md .hyper-relay/agents.md
@@ -1384,7 +1384,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 7: The full gates, once.**
+- [x] **Step 7: The full gates, once.**
 
 | Run | Expected |
 |---|---|
