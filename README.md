@@ -22,9 +22,10 @@ everything stands.
 ## The relay
 
 ```
- voice-to-specs ─▶ brainstorming ─▶ spec ─▶ writing-plans ─▶ execute ─▶ review ─▶ you ─▶ merge
-   (optional)        (you + the        (committed)   (one plan per    (isolated)  (clicks,   (anchor
-                      orchestrator)                    subsystem)                  not tests)   leg)
+ voice-to-specs ─▶ brainstorming ─▶ spec ─▶ plan ─▶ execute ─▶ review ─▶ you ─▶ merge
+   (optional)      (you + the       (committed)     (isolated) (clicks,  (anchor leg)
+                   orchestrator)            (a planner agent)  not tests)
+                                    └──────────────── orchestrating ────────────────┘
 ```
 
 | Leg | Skill | Hands over |
@@ -67,6 +68,10 @@ With Quartz connected:
 
 Without Quartz, nothing breaks. Every Quartz step falls back to plain Markdown, and the skills work on their own. But
 the board is half the point: it is what lets a long-running, multi-agent pipeline stay legible.
+
+When the `quartz` CLI is installed but a repo is not connected yet, the relay sets the repo up itself and asks you
+only for the steps that are yours: a project, a token and the repo's name. `git config hyper-relay.quartz off` turns
+that off in a repo, and `git config --unset hyper-relay.quartz` turns it back on.
 
 ## Install
 

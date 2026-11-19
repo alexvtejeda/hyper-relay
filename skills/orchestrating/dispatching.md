@@ -42,7 +42,7 @@ The owner's answer is the go-ahead to dispatch this plan; do not ask again.
 - **Worktree:** the new worktree is cut from `main`. The main checkout may be on a branch run.
 - **The plan is committed on `main`:** `git log -1 --format=%h main -- <plan path>` prints a commit. A plan that is
   not (it is gitignored, or it was written during a branch run and held back) goes to the executor by its absolute
-  path, and step 4 never runs `quartz link-branch` for it: Quartz would link the main checkout's current branch,
+  path, and §4 never runs `quartz link-branch` for it: Quartz would link the main checkout's current branch,
   which during a branch run is the other plan's. Move its cards by hand.
 
 If a precondition fails, tell the owner which one, and stop.
@@ -70,7 +70,7 @@ The branch is the plan's file name without its date and `.md`:
 - **A plan that is not committed, or a link that fails:** move the cards to In progress through the Quartz MCP, and
   say so.
 
-Without Quartz, skip this step.
+When the repo does not use Quartz (`quartz.md` §1), skip this step.
 
 ## 5. Dispatch
 
@@ -101,7 +101,7 @@ write specs and plans) by these rules:
   `hyper-relay:brainstorming` and `hyper-relay:writing-plans` keep to this themselves.
 - **No git writes:** no `switch`, `checkout`, `stash`, `reset`, `add`, `commit` or `merge`. Run read-only git as
   `GIT_OPTIONAL_LOCKS=0 git …`, so a `git status` never holds `index.lock` while the executor commits.
-- **A second plan runs only in a worktree** (step 1).
+- **A second plan runs only in a worktree** (§1).
 - **Code you read meanwhile may be the branch's half-finished work.** Read `main`'s with `git show main:<path>`.
 
 ## 7. Verify the hand-back

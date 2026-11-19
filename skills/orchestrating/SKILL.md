@@ -20,11 +20,13 @@ leg. You dispatch it, check what it hands back, and stop for the owner where thi
 | Handoff and executor | `dispatching.md` | a verified hand-back (no stop) |
 | Review, click-through, merge | `reviewing.md` | stop 4, then the merge |
 
-The three leg files are beside this SKILL.md. Read each one when the loop reaches its leg, not before:
+The three leg files and `quartz.md` are beside this SKILL.md. Read each leg file when the loop reaches its leg, not
+before, and `quartz.md` at the start of every leg (Quartz duties, below):
 
 - `${CLAUDE_SKILL_DIR}/planning.md` (`planning.md` beside this SKILL.md);
 - `${CLAUDE_SKILL_DIR}/dispatching.md` (`dispatching.md` beside this SKILL.md);
-- `${CLAUDE_SKILL_DIR}/reviewing.md` (`reviewing.md` beside this SKILL.md).
+- `${CLAUDE_SKILL_DIR}/reviewing.md` (`reviewing.md` beside this SKILL.md);
+- `${CLAUDE_SKILL_DIR}/quartz.md` (`quartz.md` beside this SKILL.md).
 
 ## The stops
 
@@ -32,8 +34,12 @@ The three leg files are beside this SKILL.md. Read each one when the loop reache
 |---|---|---|
 | 1. Design | The design, section by section (`brainstorming`) | the spec |
 | 2. Spec | The written spec (`brainstorming`) | the planner leg: approval is the go-ahead, no second ask |
-| 3. Plan ready | The hand-back check's result, the planner's deviations, the decisions the owner must make, the plan-review offer, the handoff question (`planning.md` §3) | execution, a plan review, or plan changes |
-| 4. Ready to merge | Gate and acceptance results, fixes made, Critical findings fixed or dropped, proposed cards (`reviewing.md` §4) | the click-through and the merge |
+| 3. Plan ready | Its questions first: the decisions the owner must make, the plan-review offer, the handoff question. Then the hand-back check's result and the planner's deviations (`planning.md` §3) | execution, a plan review, or plan changes |
+| 4. Ready to merge | Its questions first: the proposed cards, the steps that are the owner's, where to click through. Then gate and acceptance results, fixes made, Critical findings fixed or dropped (`reviewing.md` §4) | the click-through and the merge |
+
+A stop that asks anything opens with its questions, numbered, before any report: every question, and every decision
+the owner must make. The report follows, short: one line per item, and nothing the board shows. No question comes
+after the report.
 
 A stop ends the message: the next leg never starts in the message that reaches a stop. Between stop 3 and stop 4 the
 loop runs on its own, except for a gap in the spec or plan and a second failed fix round, which go to the owner
@@ -46,11 +52,26 @@ column is a cross-check.
 
 | State | Leg |
 |---|---|
-| A spec that no plan's `**Spec:**` line names | The planner leg, once the owner has approved the spec: their asking to pick it up is that approval. Never brainstorm it again. |
+| A spec that no plan's `**Spec:**` line names | **Offer** the planner leg: name the spec and ask whether to plan it; the owner's yes is the approval. When the owner asked to pick up that spec, the request is the yes. Never brainstorm it again. |
 | A plan with no branch of its name, and no `Plan-Task:` commits for it on `main` | Stop 3 (the owner has not approved it yet) or the handoff, by what the owner says |
 | A plan's branch with some of its tasks committed, and no executor report in this session | **Ask the owner** whether its executor is still running elsewhere. Two executors on one branch collide. |
-| A plan's branch with all its executor tasks committed | `dispatching.md` §7 (verify), then `reviewing.md` |
+| A plan's branch with all its executor tasks committed | By its review status (below) |
 | The branch merged, with an `after merge` step of the plan's acceptance task left (that task is not ticked) | `reviewing.md` §5 |
+
+**A branch with all its executor tasks committed** goes by its review status. In a repo that uses Quartz, with its MCP
+loaded (`quartz.md` §1 and §2), that is the current status note on the plan's cards (`get_task`), counted only when it
+names this plan's path (`reviewing.md` §2 and §3 post it). Otherwise the last row applies.
+
+| Review status | Leg |
+|---|---|
+| None, and no fix commits on the branch | `dispatching.md` §7 (verify), then `reviewing.md` §1 |
+| "acceptance done" | `reviewing.md` §3 |
+| "code review done" | Stop 4 (`reviewing.md` §4) |
+| The repo does not use Quartz or its MCP is not loaded, or no status but fix commits | **Ask the owner** which review legs ran, naming the fix commits. Rerun nothing on your own. |
+
+A fix commit is a commit on `main..<branch>` with no `Plan-Task:` trailer, after the branch's last `Plan-Task:`
+commit: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>` lists the branch's commits, newest
+first, and the fix commits are those above the newest one with a trailer.
 
 The branch name comes from the plan's file name (`dispatching.md` §3). To read the state:
 `git grep -l -F '<spec file name>' -- docs/superpowers/plans` finds the spec's plans; `git branch --list <branch>`
@@ -62,23 +83,8 @@ hold-back rules bind you, in every leg.
 
 ## Quartz duties
 
-Each falls back to plain Markdown and git without Quartz.
-
-- Every spec and plan carries its card line in its header, above its first `---` or `## `:
-  ``**Card:** <title> (`<uuid>`)``, or `**Cards:**` with several, comma-separated. Card ids are full UUIDs only.
-  Write the line with brainstorming's script, `${CLAUDE_SKILL_DIR}/../brainstorming/scripts/add-card-line.sh` (`../brainstorming/scripts/add-card-line.sh` from this SKILL.md).
-  A plan with no card line inherits its spec's cards through its `**Spec:**` line.
-- A spec or plan is committed only while the main checkout is on `main`. During a branch run, `quartz link-doc <path>`
-  puts it on its cards, and it is committed after the merge (`reviewing.md` §5).
-- `quartz link-branch` at dispatch and `quartz review` after verifying the hand-back (`dispatching.md` §4 and §7).
-- Plan tasks tick themselves: a task's final commit carries its `Plan-Task:` trailer, and a hook ticks the task. Tick
-  by hand only when a `quartz:` line says to, or when a task has no commit: tick its checkboxes on `main` and commit
-  just the plan, with the message `docs: plan progress, task N of M`.
-- In a repo new to Quartz, run `quartz install-git-hook` once.
-- A `quartz:` line printed by a commit is the only Quartz output to act on: do what it says.
-- **Don't report what the board shows:** never list done tasks, tick counts or per-task commits. Report failures, gate
-  results, deviations and the decisions the owner must make.
-- The proposed cards the owner keeps are added through the Quartz MCP (`reviewing.md` §4).
+Read `quartz.md` beside this file (`${CLAUDE_SKILL_DIR}/quartz.md`) at the start of every leg. Every Quartz step runs
+only when its §1 says the repo uses Quartz.
 
 ## Fallbacks
 

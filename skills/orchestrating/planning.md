@@ -23,10 +23,12 @@ go-ahead: do not ask again. Then tell the owner they are running, and carry on.
   - with sibling plans: their paths and branches, and that the spec's contract between them binds;
   - the commit message for the plan, and the attribution lines your harness gives you, in one final paragraph;
   - the Claude-Session URL, when your harness gives you one;
+  - whether the repo uses Quartz (`quartz.md` §1), and when it does not, "Run no `quartz` command.": a planner cannot
+    run the check itself, and in a declined repo that is still connected its `quartz link-doc` would upload;
   - anything unusual;
   - **during a branch run:** read `main`'s code with `git show main:<path>`; the plan will not be committed (the
-    planner's own check refuses), so the planner puts it on its cards with `quartz link-doc` and you commit it after
-    the merge (`reviewing.md` §5).
+    planner's own check refuses), so the planner puts it on its cards with `quartz link-doc` (when the repo uses
+    Quartz) and you commit it after the merge (`reviewing.md` §5).
 
 ## 2. Check the hand-back
 
@@ -34,7 +36,8 @@ Inline, with git and grep, before the owner sees anything. You do not read the w
 plan:
 
 1. **Committed:** `git log -1 --format=%h main -- <plan>` prints a commit. During a branch run: the file exists, and
-   the planner ran `quartz link-doc` on it (without Quartz, the file exists).
+   the planner's report says it ran `quartz link-doc`; with the Quartz MCP, `get_task` on the card lists the plan
+   among its docs. When the repo does not use Quartz (`quartz.md` §1), the file exists.
 2. **Card line:** when the spec names a card, the plan's header (above its first `---` or `## `) has a `**Card:**` or
    `**Cards:**` line, or a `**Spec:**` line naming the spec, through which it inherits the spec's cards.
 3. **Trailers:** `grep -n -o 'Plan-Task: [^ "]*' <plan>` lists them. Each task with a commit step carries
@@ -52,14 +55,17 @@ list.
 
 ## 3. Stop 3
 
-One message, which ends there:
+One message, which ends there. It opens with its questions, numbered, in this order (`SKILL.md`, The stops):
+
+- each decision the owner must make;
+- "Want a plan review before you read it? A fresh agent on Sonnet reads the plan against the spec.";
+- the handoff question from `dispatching.md` §1, with its warnings, for the first plan to run.
+
+Then the report, short, one line per item:
 
 - the plan paths and their task counts;
 - the planner's deviations and ambiguities, with its resolutions;
-- the external facts it re-verified, and any differences;
-- the decisions the owner must make;
-- then two questions: "Want a plan review before you read it? A fresh agent on Sonnet reads the plan against the
-  spec." and the handoff question from `dispatching.md` §1, for the first plan to run.
+- the external facts it re-verified, and any differences.
 
 The answer leads one of three ways:
 
@@ -67,7 +73,8 @@ The answer leads one of three ways:
 - **A plan review:** dispatch a general-purpose agent on Sonnet (`SKILL.md`, Fallbacks) with `writing-plans`'
   `plan-document-reviewer-prompt.md` (`../writing-plans/plan-document-reviewer-prompt.md` from this file), filled in
   with the plan's and the spec's paths. Its findings go to the planner, which revises the plan and commits it again.
-  Then §2, and a short stop 3: what changed, and the handoff question again.
+  Then §2, and a short stop 3 in the same order: any new decision and the handoff question again, then what
+  changed.
 - **Changes:** the planner revises the plan (resumed, or fresh with the owner's list) and commits it again. Then §2
   and stop 3.
 
