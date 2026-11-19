@@ -1698,7 +1698,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Create: `docs/benchmarks/README.md`
 
-- [ ] **Step 1: Write the runbook.** Create `docs/benchmarks/README.md` with exactly this content:
+- [x] **Step 1: Write the runbook.** Create `docs/benchmarks/README.md` with exactly this content:
 
 ````markdown
 # G.2: a superpowers baseline on SAT
@@ -2015,7 +2015,7 @@ them with it. Card G takes its numbers from it. This repo is public: the results
 numbers, one-line findings and commit hashes, never SAT's code, data or secrets.
 ````
 
-- [ ] **Step 2: The runbook names what exists.**
+- [x] **Step 2: The runbook names what exists.**
 
 | Run | Expected |
 |---|---|
@@ -2025,7 +2025,7 @@ numbers, one-line findings and commit hashes, never SAT's code, data or secrets.
 | `grep -c -F 'SAT=${SAT:?' docs/benchmarks/README.md` | `1` (P14: the owner supplies the path) |
 | `grep -r -n -F 'sat.pentraze' docs/benchmarks` | nothing (P14: no path for SAT's checkout anywhere in `docs/benchmarks/`) |
 
-- [ ] **Step 3: Commit.**
+- [x] **Step 3: Commit.**
 
 ```bash
 git add docs/benchmarks/README.md
