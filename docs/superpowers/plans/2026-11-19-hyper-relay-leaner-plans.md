@@ -350,7 +350,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/writing-plans/plan-document-reviewer-prompt.md:23` (Placeholders), `:27-29` (Execution notes,
   Buildability, new rows), `:33-34` (calibration)
 
-- [ ] **Step 1: Step contents.** Replace:
+- [x] **Step 1: Step contents.** Replace:
 
 ```text
     | Placeholders | "TBD", "TODO", "implement later", "fill in details", "Similar to Task N", or a step that says what to do without the code or text to do it. |
@@ -362,7 +362,7 @@ with:
     | Step contents | A step that decides nothing ("TBD", "TODO", "implement later", "fill in details", "handle edge cases", "Similar to Task N", a name no task defines); a code body that the step's signature and tests already determine; a text step (a skill, a doc, a message) that does not give its text in full. |
 ```
 
-- [ ] **Step 2: Execution notes, Buildability, and the two advisory rows.** Replace:
+- [x] **Step 2: Execution notes, Buildability, and the two advisory rows.** Replace:
 
 ```text
     | Execution notes | Present: how to commit, what is not the executor's, the full gates. |
@@ -380,7 +380,7 @@ with:
     | Proportion (advisory) | The plan's length against the spec's (`wc -l` on both), and the share of its lines inside code blocks. Text steps (skill text, docs, messages) do not count against it. |
 ```
 
-- [ ] **Step 3: The calibration.** Replace:
+- [x] **Step 3: The calibration.** Replace:
 
 ```text
     An issue **blocks execution** when an executor would build the wrong thing or get
@@ -395,7 +395,7 @@ with:
     have" are advisory.
 ```
 
-- [ ] **Step 4: Check it.**
+- [x] **Step 4: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -405,7 +405,7 @@ with:
 | `grep -c -F 'not marked advisory' skills/writing-plans/plan-document-reviewer-prompt.md` | `1` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `26 passed, 0 failed` |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/writing-plans/plan-document-reviewer-prompt.md
