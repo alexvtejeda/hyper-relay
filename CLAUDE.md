@@ -65,7 +65,7 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
   until then, a merge reaches Claude Code by pushing `main` and reinstalling with
   `claude plugin install hyper-relay@hyper-relay`, which refreshes the installed copy from `main`'s HEAD on GitHub (seen
   2026-11-17). From 0.2.0 on, a merge that changes a file the plugin loads (under `skills/`, `bin/`, `templates/`,
-  `hooks/` or `.claude-plugin/`) raises the version: the patch number (0.2.1 next), unless the owner names another. A
+  `hooks/` or `.claude-plugin/`) raises the version: the patch number (0.2.2 next), unless the owner names another. A
   release, on `main` after the merge: `scripts/bump-version.sh <x.y.z>` (it sets `package.json` and
   `.claude-plugin/plugin.json`), a commit of just those two files, `chore: release v<x.y.z>`, the tag `v<x.y.z>`, then
   push `main` and the tag. A plan that ships such a change ends its acceptance task with these as `after merge` steps.
