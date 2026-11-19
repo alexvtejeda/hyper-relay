@@ -454,7 +454,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Create: `skills/orchestrating/quartz.md`
 - Modify: `skills/orchestrating/SKILL.md:23-27` (the leg files), `:63-81` (Quartz duties)
 
-- [ ] **Step 1: Create `skills/orchestrating/quartz.md`** with exactly this content:
+- [x] **Step 1: Create `skills/orchestrating/quartz.md`** with exactly this content:
 
 ````markdown
 # Quartz in the relay
@@ -609,7 +609,7 @@ Each runs only when §1 says the repo uses Quartz.
 - The proposed cards the owner keeps are added through the Quartz MCP (`reviewing.md` §4).
 ````
 
-- [ ] **Step 2: `SKILL.md` names `quartz.md` among the files beside it (spec §2.4).** In
+- [x] **Step 2: `SKILL.md` names `quartz.md` among the files beside it (spec §2.4).** In
   `skills/orchestrating/SKILL.md`, replace:
 
 ```text
@@ -632,7 +632,7 @@ before, and `quartz.md` at the start of every leg (Quartz duties, below):
 - `${CLAUDE_SKILL_DIR}/quartz.md` (`quartz.md` beside this SKILL.md).
 ```
 
-- [ ] **Step 3: The Quartz duties become a pointer (spec §2.4).** In `skills/orchestrating/SKILL.md`, replace the
+- [x] **Step 3: The Quartz duties become a pointer (spec §2.4).** In `skills/orchestrating/SKILL.md`, replace the
   whole section, from its heading to the line before `## Fallbacks`:
 
 ```text
@@ -666,7 +666,7 @@ Read `quartz.md` beside this file (`${CLAUDE_SKILL_DIR}/quartz.md`) at the start
 only when its §1 says the repo uses Quartz.
 ```
 
-- [ ] **Step 4: The guard passes now.**
+- [x] **Step 4: The guard passes now.**
 
 | Run | Expected |
 |---|---|
@@ -678,7 +678,7 @@ only when its §1 says the repo uses Quartz.
 (`git grep` searches tracked files only, and `quartz.md` is new: run `git add skills/orchestrating/quartz.md` before
 these greps.)
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/orchestrating/quartz.md skills/orchestrating/SKILL.md
