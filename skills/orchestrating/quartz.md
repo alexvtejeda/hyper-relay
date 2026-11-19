@@ -45,7 +45,9 @@ can, and ask the owner only for the steps only they can do.
 
 ### Not connected (§1, row 4)
 
-Send this as a message of its own, and wait for the answer:
+Send this as a message of its own. **Setup never holds up a leg:** when the leg dispatches an agent (a planner, an
+executor, a reviewer), dispatch it first, then send this while the agent works; the steps below run alongside it. At
+`brainstorming`'s step 1, send it before brainstorming's first question.
 
 > This repo isn't on a Quartz board yet, so I'll connect it. Three steps are yours, in Quartz's web app:
 > 1. Create a project (or pick one), and add this repo to it by name.
@@ -56,8 +58,8 @@ Send this as a message of its own, and wait for the answer:
 
 - **A no:** run `git config hyper-relay.quartz off`, reply in one line that names the undo
   (`git config --unset hyper-relay.quartz`), and carry on with no Quartz.
-- **Neither** (for example "not now"): carry on with no Quartz for this session. The offer comes again in the next
-  session, not at the next leg.
+- **Neither** (for example "not now", or a reply that does not answer it): carry on with no Quartz for this session.
+  The offer comes again in the next session, not at the next leg.
 - **A repo name:** the steps below, in the main checkout, without asking again.
 
 1. `.mcp.json`: add this `quartz` server, with the owner's URL when they gave one, keeping any other servers; create
