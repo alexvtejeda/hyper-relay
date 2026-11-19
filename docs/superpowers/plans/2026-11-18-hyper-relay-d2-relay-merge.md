@@ -1418,7 +1418,7 @@ Each step is marked with who runs it:
 **This plan's run follows the installed relay** (today's `orchestrating`): it merges with
 `finishing-a-development-branch` (P18), and the version stays 0.1.0.
 
-- [ ] **Step 1 (`reviewer`): The suite, the syntax and the modes.**
+- [x] **Step 1 (`reviewer`): The suite, the syntax and the modes.**
 
 | Run | PASS |
 |---|---|
@@ -1427,7 +1427,7 @@ Each step is marked with who runs it:
 | `git ls-files -s bin/relay-merge tests/relay-merge/run-tests.sh` | `100755` for the tool, `100644` for the suite |
 | `git grep -n -E -e '--force\|reset\|branch -D\|push -f\|--hard' -- bin/relay-merge` | nothing |
 
-- [ ] **Step 2 (`reviewer`): The tool against spec §1 and the Contract.** Read `bin/relay-merge` in full, spec §1 and
+- [x] **Step 2 (`reviewer`): The tool against spec §1 and the Contract.** Read `bin/relay-merge` in full, spec §1 and
   this plan's Contract and P1–P11. PASS, each point quoted with its line:
   - it is `#!/bin/sh` with `set -eu`, and uses no `[[`, `local`, arrays or `function`;
   - before any `git merge`, it refuses with exit 1: options, no branch, not the main checkout, not on `main`, a merge in
@@ -1444,7 +1444,7 @@ Each step is marked with who runs it:
     `git worktree remove` and `git branch -d` with no force; a failed push or cleanup only warns;
   - the exit codes are the Contract's. Nothing contradicts spec §1; list any line that does as a FAIL.
 
-- [ ] **Step 3 (`reviewer`): A scratch clone of this repo, with its `merge.conf` on `main`.** Run, from the
+- [x] **Step 3 (`reviewer`): A scratch clone of this repo, with its `merge.conf` on `main`.** Run, from the
   checkout's top:
 
 ```bash
@@ -1462,7 +1462,7 @@ git -C <evidence folder>/clone branch -q --set-upstream-to=origin/main main
 | `git -C <evidence folder>/clone show main:.hyper-relay/merge.conf \| head -n 1` | `# hyper-relay's merge gates, for bin/relay-merge (docs/relay-merge.md). relay-merge reads` |
 | `git -C <evidence folder>/clone status --short` | nothing |
 
-- [ ] **Step 4 (`reviewer`): A branch touching `tests/wt/` lands with exit 0, only the `wt` suite's gate runs, and
+- [x] **Step 4 (`reviewer`): A branch touching `tests/wt/` lands with exit 0, only the `wt` suite's gate runs, and
   the merge commit carries the trailers (spec §10).**
 
 ```bash
@@ -1483,7 +1483,7 @@ cd <evidence folder>/clone && PUSH=0 XDG_STATE_HOME=<evidence folder>/state RELA
 | `git -C <evidence folder>/origin.git rev-parse main` | `<PRE>`: not pushed (`PUSH=0`) |
 | `git -C <evidence folder>/clone show-ref --verify --quiet refs/heads/probe/wt; echo $?` | `1`: cleaned up |
 
-- [ ] **Step 5 (`reviewer`): A gate broken on purpose gives exit 3, with the merge left on `main`, unpushed (spec
+- [x] **Step 5 (`reviewer`): A gate broken on purpose gives exit 3, with the merge left on `main`, unpushed (spec
   §10).**
 
 ```bash
@@ -1507,7 +1507,7 @@ Note the short hash the fifth command prints: `<BEFORE>`.
 | `git -C <evidence folder>/clone show-ref --verify --quiet refs/heads/probe/broken; echo $?` | `0`: kept |
 | `ls <evidence folder>/state/relay-merge` | two logs: `clone-<stamp>-probe-wt.log` and `clone-<stamp>-probe-broken.log` |
 
-- [ ] **Step 6 (`reviewer`): This repo's `merge.conf` maps its paths to its suites (P12).** Read
+- [x] **Step 6 (`reviewer`): This repo's `merge.conf` maps its paths to its suites (P12).** Read
   `.hyper-relay/merge.conf` beside `CLAUDE.md`'s Checks table.
 
 | Run | PASS |
@@ -1516,7 +1516,7 @@ Note the short hash the fifth command prints: `<BEFORE>`.
 | Task 3 Step 3's loop | its 13 lines, each starting `0 ` |
 | Reading both files | every suite row of the Checks table (add-card-line, voice-to-specs ×2, role agents ×2, visual-companion, wt, relay-merge, relay skills) is a `test` gate under the paths that suite reads; `claude plugin validate .` is a `build` gate under `.claude-plugin/`, `skills/` and `hooks/`; each tool in `bin/` has a `dash -n` `build` gate |
 
-- [ ] **Step 7 (`reviewer`): `docs/relay-merge.md` says what the tool does (spec §1 Docs; P17).**
+- [x] **Step 7 (`reviewer`): `docs/relay-merge.md` says what the tool does (spec §1 Docs; P17).**
 
 | Run | PASS |
 |---|---|
@@ -1526,7 +1526,7 @@ Note the short hash the fifth command prints: `<BEFORE>`.
 | `git grep -n -F '](wt.md)' -- docs/relay-merge.md`, then `test -f docs/wt.md && echo found` | one line, then `found` |
 | Read `docs/relay-merge.md` in full | each claim matches `bin/relay-merge` as Step 2 read it; list any that does not as a FAIL |
 
-- [ ] **Step 8 (`reviewer`): `CLAUDE.md`, the planner's facts, the manifests, and only the planned files (spec §1
+- [x] **Step 8 (`reviewer`): `CLAUDE.md`, the planner's facts, the manifests, and only the planned files (spec §1
   Docs, §9).**
 
 | Run | PASS |
@@ -1539,13 +1539,13 @@ Note the short hash the fifth command prints: `<BEFORE>`.
 | `git grep -n -E 'https?://\|session_' -- bin/relay-merge docs/relay-merge.md .hyper-relay/merge.conf`, then `git log --format=%B main..HEAD \| grep -v '^Claude-Session: ' \| grep -c -E 'https?://'` | nothing, then `0` |
 | Read the six changed files and the branch's commit messages (`git log --format=%B main..HEAD`) | none names another project, or its folders, hosts or sessions (this repo is public) |
 
-- [ ] **Step 9 (`owner`): Read what users and planners will read.** `git -C /home/noob_master/hyper-relay show
+- [x] **Step 9 (`owner`): Read what users and planners will read.** `git -C /home/noob_master/hyper-relay show
   hyper-relay-d2-relay-merge:docs/relay-merge.md`, and the "How a change reaches the owner" section of
   `git -C /home/noob_master/hyper-relay show hyper-relay-d2-relay-merge:CLAUDE.md`. PASS: the owner agrees that they
   describe `relay-merge` as it works and the release rule as decided, and answers P14 (keep "anything outside `docs/`
   and `tests/`" literal, or narrow it). A change goes to the executor as a finding.
 
-- [ ] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
+- [x] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
   cleanly.**
 
 | Run | PASS |
@@ -1554,7 +1554,7 @@ Note the short hash the fifth command prints: `<BEFORE>`.
 
 On exit 1 it names the conflicted files: tell the owner before merging.
 
-- [ ] **Step 11 (`after merge`): The suites pass on the merged `main` (D2.10, spec §11).** Plan 2's executor starts
+- [x] **Step 11 (`after merge`): The suites pass on the merged `main` (D2.10, spec §11).** Plan 2's executor starts
   only after this step passes.
 
 | Run | PASS |
@@ -1567,7 +1567,7 @@ On exit 1 it names the conflicted files: tell the owner before merging.
 | `git -C /home/noob_master/hyper-relay show main:.claude-plugin/plugin.json` | `"version": "0.1.0"`: Plan 1 does not release |
 | `git -C /home/noob_master/hyper-relay status --short` | nothing |
 
-- [ ] **Step 12 (`after merge`; the owner runs the `ln`, which is the owner's shell setup): The symlink (spec §10).**
+- [x] **Step 12 (`after merge`; the owner runs the `ln`, which is the owner's shell setup): The symlink (spec §10).**
   First, `test -e /home/noob_master/.local/bin/relay-merge || test -L /home/noob_master/.local/bin/relay-merge; echo $?`
   must print `1` (nothing there yet); if it prints `0`, stop and ask the owner. Then the owner runs:
 
@@ -1582,7 +1582,7 @@ ln -sfn /home/noob_master/hyper-relay/bin/relay-merge /home/noob_master/.local/b
 | `relay-merge; echo "exit $?"`, in the owner's shell | the `usage: relay-merge <branch>...` line, then `exit 1` |
 | `RELAY_MERGE_BIN=/home/noob_master/.local/bin/relay-merge sh /home/noob_master/hyper-relay/tests/relay-merge/run-tests.sh` (last line) | `107 passed, 0 failed` |
 
-- [ ] **Step 13 (`after merge`): This repo's agents, regenerated for the planner's new facts (P15).**
+- [x] **Step 13 (`after merge`): This repo's agents, regenerated for the planner's new facts (P15).**
 
 | Run | PASS |
 |---|---|
@@ -1592,7 +1592,7 @@ ln -sfn /home/noob_master/hyper-relay/bin/relay-merge /home/noob_master/.local/b
 
 A running session keeps the agent definitions it loaded: the next planner dispatched from a new session gets them.
 
-- [ ] **Step 14 (`after merge`, only when the owner says so at stop 4): Push `main`.** Otherwise 0.2.0's release, in
+- [x] **Step 14 (`after merge`, only when the owner says so at stop 4): Push `main`.** Otherwise 0.2.0's release, in
   Plan 2's after-merge steps, pushes it.
 
 ```bash
@@ -1603,7 +1603,7 @@ git -C /home/noob_master/hyper-relay push origin main
 |---|---|
 | `git -C /home/noob_master/hyper-relay rev-parse origin/main`, then `git -C /home/noob_master/hyper-relay rev-parse main` | the same hash |
 
-- [ ] **Step 15 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
+- [x] **Step 15 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
 
 ```markdown
 ## Last-task record (Task 6)
