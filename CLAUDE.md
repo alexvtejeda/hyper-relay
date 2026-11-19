@@ -31,6 +31,10 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
   upstream's guide to them.
 - `scripts/check-import.sh`: piece A's proof that moving the skills in changed nothing. It compares against the loose
   copies in `~/.claude/skills/`, so it stops working once those are deleted. `scripts/bump-version.sh`: version bumps.
+- `scripts/benchmark/`: piece G.2's tools for a baseline against upstream superpowers. `superpowers-env.sh` builds a
+  separate Claude Code config folder for the upstream run, and `run-usage.sh` (with `run-usage.jq` and `prices.tsv`)
+  reads a run's transcripts into a usage table. `tests/benchmark/` tests both, with a fake `claude` and fixture
+  transcripts. `docs/benchmarks/` holds the protocol's fixed prompts, its run-log template and its runbook.
 - `docs/superpowers/`: hyper-relay's own specs and plans, which Quartz's git hooks upload. Upstream's are in
   `docs/upstream/` and `docs/plans/`.
 
@@ -87,5 +91,6 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 | visual-companion | `bash skills/visual-companion/scripts/run-tests.sh` | every case `ok`, exit 0 |
 | wt | `sh tests/wt/run-tests.sh` | `0 failed` |
 | relay-merge | `sh tests/relay-merge/run-tests.sh` | `0 failed` |
+| benchmark | `sh tests/benchmark/run-tests.sh` | `0 failed` |
 | Relay skills | `sh tests/orchestrating/run-tests.sh` | `0 failed` |
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |
