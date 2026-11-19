@@ -220,11 +220,11 @@ plan relies on Plan 1 only through the Contract below); any `.mcp.json`, `.env` 
 - Modify: `tests/orchestrating/run-tests.sh:2-7` (header), `:81-86` (the folder check), `:153-155` (the check list),
   `:211` and `:231-233` (the broken cases)
 
-- [ ] **Step 0: Plan 1 is on `main`.** Run
+- [x] **Step 0: Plan 1 is on `main`.** Run
   `test -f bin/relay-merge && test -f docs/relay-merge.md && test -f .hyper-relay/merge.conf && echo plan1`. Expected:
   `plan1`. Otherwise stop and report (Execution notes).
 
-- [ ] **Step 1: The header.** In `tests/orchestrating/run-tests.sh`, replace:
+- [x] **Step 1: The header.** In `tests/orchestrating/run-tests.sh`, replace:
 
 ```text
 # POSIX guard for the relay skills (hyper-relay D.3): D1's gates, the orchestrating
@@ -247,7 +247,7 @@ with:
 # Usage: sh tests/orchestrating/run-tests.sh      Expect: "26 passed, 0 failed"
 ```
 
-- [ ] **Step 2: The folder holds `parallel.md`.** Replace:
+- [x] **Step 2: The folder holds `parallel.md`.** Replace:
 
 ```text
 # --- 2. The folder holds exactly the map, the three leg files and quartz.md.
@@ -267,7 +267,7 @@ orchestrating_folder() (
     want='SKILL.md dispatching.md parallel.md planning.md quartz.md reviewing.md '
 ```
 
-- [ ] **Step 3: The new check.** Replace:
+- [x] **Step 3: The new check.** Replace:
 
 ```text
 CHECKS='no_old_dispatching_pointer dispatching_pointers_name_orchestrating old_dispatching_gone
@@ -291,7 +291,7 @@ no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_
 no_finishing_branch_in_orchestrating'
 ```
 
-- [ ] **Step 4: The broken cases.** Replace:
+- [x] **Step 4: The broken cases.** Replace:
 
 ```text
 broken "a sixth file in skills/orchestrating"
@@ -323,12 +323,12 @@ printf '\nMerge with `hyper-relay:finishing-a-development-branch`.\n' >> "$CASE/
 expect_fail no_finishing_branch_in_orchestrating
 ```
 
-- [ ] **Step 5: Syntax.**
+- [x] **Step 5: Syntax.**
 
 Run: `dash -n tests/orchestrating/run-tests.sh`
 Expected: silent, exit 0.
 
-- [ ] **Step 6: Run it; exactly two checks fail, because `parallel.md` does not exist yet and `reviewing.md` still
+- [x] **Step 6: Run it; exactly two checks fail, because `parallel.md` does not exist yet and `reviewing.md` still
   merges through `finishing-a-development-branch`.**
 
 Run: `sh tests/orchestrating/run-tests.sh | grep -A 1 -e '^FAIL' -e 'passed, '`
@@ -345,7 +345,7 @@ FAIL no_finishing_branch_in_orchestrating
 Also run `sh tests/orchestrating/run-tests.sh | grep -c '^ok   .* can fail: '`: expected `14`. If anything else
 fails, stop and report: the tree differs from the one this plan read.
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add tests/orchestrating/run-tests.sh
