@@ -20,18 +20,21 @@ Agent tool (general-purpose, model: sonnet):
     | Check | What to look for |
     |---|---|
     | Spec coverage | Every requirement in the spec has a task that implements it. The plan's **Spec coverage** table maps every `## ` section of the spec to at least one task, and those tasks do that section's work. |
-    | Placeholders | "TBD", "TODO", "implement later", "fill in details", "Similar to Task N", or a step that says what to do without the code or text to do it. |
+    | Step contents | A step that decides nothing ("TBD", "TODO", "implement later", "fill in details", "handle edge cases", "Similar to Task N", a name no task defines); a code body that the step's signature and tests already determine; a text step (a skill, a doc, a message) that does not give its text in full. |
     | Consistent names | A file, function, flag, heading or section named one way in one task and another way in a later one. |
     | `Plan-Task:` trailers | Each task with a commit step: its final commit carries `Plan-Task: <this plan's path>#<N>` once, with its own task number and this plan's own path. |
     | The acceptance task | It is the last task. Each of its steps says who runs it (`reviewer`, `owner`, `after merge` or `skill-test`), with its command or action and the result that counts as PASS; a `skill-test` step gives a situation, what GREEN must do and what RED is expected to do. |
-    | Execution notes | Present: how to commit, what is not the executor's, the full gates. |
+    | Execution notes | Present. They carry what is particular to this plan and the spec's project-wide values, copied verbatim, and do not repeat the executor's standing rules (where it works, how it commits and its trailers, its never list, running each task's checks and the full gates once). |
     | External facts | Each fact the spec asks to re-verify is cited with its URL and the date it was checked; a difference is listed as a deviation. |
-    | Buildability | Could an executor follow every step without getting stuck or guessing? |
+    | Buildability | Could an executor follow every step without getting stuck, or guessing a fact the plan should give (a value, a behaviour, a name another task uses)? A choice the plan leaves open, such as how to write a body, is the executor's. |
+    | Review Focus (advisory) | The section is present, after the header and before the first task, with up to five lines; each line's test is in the task that owns the code. |
+    | Proportion (advisory) | The plan's length against the spec's (`wc -l` on both), and the share of its lines inside code blocks. Text steps (skill text, docs, messages) do not count against it. |
 
     ## Calibration
 
     An issue **blocks execution** when an executor would build the wrong thing or get
-    stuck, or when a check above fails. Wording, style and "nice to have" are advisory.
+    stuck, or when a check above not marked advisory fails. Wording, style and "nice to
+    have" are advisory.
 
     ## Output Format
 
