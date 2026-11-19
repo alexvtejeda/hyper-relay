@@ -547,7 +547,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/executing-plans/SKILL.md:33-34` (step 2), `:36` (step 3), `:59` (step 7)
 
-- [ ] **Step 1: Process step 2.** Replace:
+- [x] **Step 1: Process step 2.** Replace:
 
 ```text
 2. **No review gate.** The plan is approved: do not re-plan it or ask about it. A step that is unclear or impossible
@@ -563,7 +563,7 @@ with:
    value, a behaviour, a name another task uses), or cannot be done.
 ```
 
-- [ ] **Step 2: Process step 3.** Replace:
+- [x] **Step 2: Process step 3.** Replace:
 
 ```text
    - Follow its steps exactly, transcribing the plan's code.
@@ -576,7 +576,7 @@ with:
      to the step's signature, by the algorithm its code block gives when it gives one, and make its tests pass.
 ```
 
-- [ ] **Step 3: The report.** Replace:
+- [x] **Step 3: The report.** Replace:
 
 ```text
    - every deviation from the plan, and why;
@@ -589,7 +589,7 @@ with:
    - the calls you made where the plan left a choice open, one line each;
 ```
 
-- [ ] **Step 4: Check it.**
+- [x] **Step 4: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -598,7 +598,7 @@ with:
 | `grep -c -F 'leaves open' skills/executing-plans/SKILL.md` | `1` (step 2) |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `26 passed, 0 failed` |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/executing-plans/SKILL.md
