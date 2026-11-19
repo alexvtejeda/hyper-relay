@@ -734,7 +734,7 @@ In a command inside a table cell, `\|` is a plain `|`, as in the Execution notes
 **This plan's run follows the installed relay** (0.2.0's `orchestrating`, `executing-plans` and planner), not the text
 it writes: the new behaviour reaches a session only after the release and the owner's update (Steps 18–19).
 
-- [ ] **Step 1 (`reviewer`): The suites and the manifest.**
+- [x] **Step 1 (`reviewer`): The suites and the manifest.**
 
 | Run | PASS |
 |---|---|
@@ -745,7 +745,7 @@ it writes: the new behaviour reaches a session only after the release and the ow
 | `git ls-files 'skills/*/SKILL.md' \| wc -l` | `17` |
 | `git show HEAD:.claude-plugin/plugin.json \| grep -F '"version"'` | `"version": "0.2.0",` (the release is after the merge) |
 
-- [ ] **Step 2 (`reviewer`): Only the planned files (spec §1, §10; P1).**
+- [x] **Step 2 (`reviewer`): Only the planned files (spec §1, §10; P1).**
 
 | Run | PASS |
 |---|---|
@@ -754,7 +754,7 @@ it writes: the new behaviour reaches a session only after the release and the ow
 | `git diff main...HEAD -- skills templates \| grep -c -i -E '^\+.*subagent-driven'` | `0` |
 | `git log --format=%B main..HEAD \| grep -c -i -w -e sat -e pentraze` | `0` |
 
-- [ ] **Step 3 (`reviewer`): The planner renders (spec §4).** In the evidence folder, never in the checkout:
+- [x] **Step 3 (`reviewer`): The planner renders (spec §4).** In the evidence folder, never in the checkout:
 
 ```bash
 mkdir -p <evidence>/render
@@ -773,7 +773,7 @@ git init -q <evidence>/render
 | `grep -c '{{' <evidence>/render/.claude/agents/relay-planner.md` | `0` |
 | `git status --short` | nothing new: the render wrote only under `<evidence>` |
 
-- [ ] **Step 4 (`reviewer`): `writing-plans` against spec §2 (P2, P14).** Read `skills/writing-plans/SKILL.md` in full
+- [x] **Step 4 (`reviewer`): `writing-plans` against spec §2 (P2, P14).** Read `skills/writing-plans/SKILL.md` in full
   and `git diff main...HEAD -- skills/writing-plans/SKILL.md`. PASS, each point quoted with its line:
   - the Overview's reader is §2.1's (not seen the codebase or the spec; idiomatic code once given the interface and the
     test; a reasonable choice where the plan leaves one; the plan documents the files, names and signatures, the spec's
@@ -790,13 +790,13 @@ git init -q <evidence>/render
   - the diff touches none of §2.8's sections. Any sentence that contradicts the spec beyond the P-notes is a FAIL, with
     its line.
 
-- [ ] **Step 5 (`reviewer`): The reviewer prompt against spec §3 (P3).** Read
+- [x] **Step 5 (`reviewer`): The reviewer prompt against spec §3 (P3).** Read
   `git diff main...HEAD -- skills/writing-plans/plan-document-reviewer-prompt.md`. PASS: Placeholders became Step
   contents with §3's three cases; Review Focus and Proportion are marked advisory with §3's contents; Execution notes
   checks what is particular and the spec's values, not the standing rules; the only other changes are P3's two (the
   calibration's "not marked advisory", Buildability's fact the plan should give); the output format is unchanged.
 
-- [ ] **Step 6 (`reviewer`): The template, the slot and the slot table against spec §4 (P4).** Read
+- [x] **Step 6 (`reviewer`): The template, the slot and the slot table against spec §4 (P4).** Read
   `git diff main...HEAD -- templates/agents/planner.md .hyper-relay/agents.md skills/agents/SKILL.md`. PASS: "How this
   was checked" is one line (the commit, read-only, nothing run); tasks follow "What a Step Contains"; the older-plans
   guard is in the template and in the `planner/plan-format` slot; External facts quote only what decides something;
@@ -804,14 +804,14 @@ git init -q <evidence>/render
   the executor's branch is not the executor's" and the slot; the slot table's cell says "Every plan"; plus P4's Review
   Focus; nothing else changed.
 
-- [ ] **Step 7 (`reviewer`): `executing-plans`, `orchestrating` and README against spec §5, §6 (P1, P5).** Read
+- [x] **Step 7 (`reviewer`): `executing-plans`, `orchestrating` and README against spec §5, §6 (P1, P5).** Read
   `git diff main...HEAD -- skills/executing-plans/SKILL.md skills/orchestrating README.md`. PASS: step 2 makes an open
   choice the executor's, reported, and stops only on §5's three cases; step 3 writes a step's text exactly and code to
   its signature and tests (P5's algorithm clause); step 7's report lists the calls; `planning.md` §3's report has "plan
   N lines for an M-line spec" from `wc -l`; `dispatching.md` §7 weighs every call like a deviation; README's Plan row
   is P1's; nothing else in those files changed.
 
-- [ ] **Step 8 (`skill-test`): S1, a planner writes a code task.**
+- [x] **Step 8 (`skill-test`): S1, a planner writes a code task.**
 
 Situation:
 
@@ -847,7 +847,7 @@ its commands).
 
 RED is expected to: give `branch_name`'s body in full in a code block.
 
-- [ ] **Step 9 (`skill-test`): S2, a planner changes a skill's process step (LP2).**
+- [x] **Step 9 (`skill-test`): S2, a planner changes a skill's process step (LP2).**
 
 Situation:
 
@@ -880,7 +880,7 @@ in `skills/greeting/SKILL.md`, or the file's whole new content), not a descripti
 RED is expected to: do the same. This is LP2's guard: it is not expected to discriminate, and a GREEN that describes the
 text instead of giving it is a fix round.
 
-- [ ] **Step 10 (`skill-test`): S3, a spec silent on an empty input (§2.3).**
+- [x] **Step 10 (`skill-test`): S3, a spec silent on an empty input (§2.3).**
 
 Situation:
 
@@ -913,7 +913,7 @@ besides the spec's.
 
 RED is expected to: have no Review Focus section and no test for an empty transcript.
 
-- [ ] **Step 11 (`skill-test`): S4, a planner writes Execution notes (§2.6, §4; LP5; P7, P13).** First make the two
+- [x] **Step 11 (`skill-test`): S4, a planner writes Execution notes (§2.6, §4; LP5; P7, P13).** First make the two
   agent files (after the renders in this task's preamble):
 
 ```bash
@@ -963,7 +963,7 @@ works (branch or worktree), staging named files / never `git add -A`, the `Plan-
 RED is expected to: repeat the commit, `Plan-Task:`, attribution and `pgrep` rules, which `main`'s agent file lists
 under "Every plan's Execution notes carry".
 
-- [ ] **Step 12 (`skill-test`): S5, an executor meets an open choice (§5; LP4).**
+- [x] **Step 12 (`skill-test`): S5, an executor meets an open choice (§5; LP4).**
 
 Situation:
 
@@ -1000,7 +1000,7 @@ the trailer and the attribution lines, and carry on to its gates and report, who
 RED is expected to: stop at Step 1 and report it as unclear, since `main`'s step 2 says "A step that is unclear or
 impossible means stop and report, never guess".
 
-- [ ] **Step 13 (`skill-test`): S6, stop 3 for a long plan (§6).**
+- [x] **Step 13 (`skill-test`): S6, stop 3 for a long plan (§6).**
 
 Situation:
 
@@ -1034,7 +1034,7 @@ without the plan's path before them).
 RED is expected to: report the plan's path, its 6 tasks and P1, with no line setting the plan's length against the
 spec's.
 
-- [ ] **Step 14 (`skill-test`): The G.2 probe (spec §8; P6–P10, P15).** Run it before 2026-12-18: D1's transcripts
+- [x] **Step 14 (`skill-test`): The G.2 probe (spec §8; P6–P10, P15).** Run it before 2026-12-18: D1's transcripts
   expire then. RED is not run: it is G.2's own run, already measured (below). Commands run one per line, in order;
   `<E>` is this task's evidence folder, which holds `green/` and `render-green/` from the preamble.
 
@@ -1210,13 +1210,13 @@ calls, its deviations and the calls it lists. They go into stop 4's report, and 
 rows. A failed probe, or a voided one, goes to the owner at stop 4, with (e)–(g)'s evidence: it is not a fix round
 unless the owner makes it one.
 
-- [ ] **Step 15 (`owner`): Read the new text.** Read
+- [x] **Step 15 (`owner`): Read the new text.** Read
   `git -C /home/noob_master/hyper-relay show hyper-relay-leaner-plans:skills/writing-plans/SKILL.md` and
   `git -C /home/noob_master/hyper-relay diff main...hyper-relay-leaner-plans -- skills/executing-plans/SKILL.md templates/agents/planner.md`,
   with stop 4's skill-test and probe results. PASS: the owner agrees with them as written. A change goes to the executor
   as a finding.
 
-- [ ] **Step 16 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
+- [x] **Step 16 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
   cleanly.**
 
 | Run | PASS |
@@ -1226,7 +1226,7 @@ unless the owner makes it one.
 On exit 1 it names the conflicted files: tell the owner before merging. The merge runs as the installed relay says:
 `relay-merge` from the main checkout on `main`.
 
-- [ ] **Step 17 (`after merge`): Re-check on `main`.**
+- [x] **Step 17 (`after merge`): Re-check on `main`.**
 
 | Run | PASS |
 |---|---|
@@ -1236,7 +1236,7 @@ On exit 1 it names the conflicted files: tell the owner before merging. The merg
 | `cd /home/noob_master/hyper-relay && claude plugin validate .` | passes; warnings the root `CLAUDE.md` one, `ICON_MISSING` and `PRIVACY_URL_MISSING` |
 | `git -C /home/noob_master/hyper-relay status --porcelain --untracked-files=no` | nothing |
 
-- [ ] **Step 18 (`after merge`): The release, 0.2.1 (spec §9; `.hyper-relay/agents.md`, Releases, (1) and (2)).** The
+- [x] **Step 18 (`after merge`): The release, 0.2.1 (spec §9; `.hyper-relay/agents.md`, Releases, (1) and (2)).** The
   owner approves this push at stop 4: it also takes `main`'s earlier unpushed commits (about 20), which is expected. In
   the main checkout on `main` (no `MERGE_HEAD`), one command per Bash call:
 
@@ -1263,7 +1263,7 @@ git -C /home/noob_master/hyper-relay push origin main v0.2.1
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v0.2.1` | one line |
 
-- [ ] **Step 19 (`after merge`): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [x] **Step 19 (`after merge`): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session).
 
@@ -1277,7 +1277,7 @@ If the update says it is already at the latest version, the owner runs `claude p
 and the update again, and the record says so. If a check still fails, stop and tell the owner; delete or uninstall
 nothing.
 
-- [ ] **Step 20 (`after merge`): The agents, regenerated here and in SAT (spec §9; P12).** With the installed 0.2.1
+- [x] **Step 20 (`after merge`): The agents, regenerated here and in SAT (spec §9; P12).** With the installed 0.2.1
   generator, so the agents match the installed plugin:
 
 | Run | PASS |
@@ -1297,7 +1297,7 @@ owner first (P12).
 A `refused` line (a hand-edited agent) stops the step: tell the owner. The new agents load in a new session. SAT's
 `.hyper-relay/agents.md` is left alone (spec §4).
 
-- [ ] **Step 21 (`after merge`): The token log.** Append to
+- [x] **Step 21 (`after merge`): The token log.** Append to
   `/home/noob_master/.claude/projects/-home-noob-master-hyper-relay/memory/relay-token-measurements.md`, below its last
   row, Step 14 (g)'s numbers:
 
@@ -1309,7 +1309,7 @@ A `refused` line (a hand-edited agent) stops the step: tell the owner. The new a
 The next real planner run, the brainstorming card's (`a5a66906`), is the first measured in use: its row goes into the
 log as every planner's does.
 
-- [ ] **Step 22 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
+- [x] **Step 22 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
 
 ```markdown
 ## Last-task record (Task 7)
