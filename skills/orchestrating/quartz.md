@@ -77,10 +77,10 @@ Send this as a message of its own, and wait for the answer:
 
    ```sh
    watch_file .env
-   export QUARTZ_TOKEN=$(grep '^QUARTZ_TOKEN=' .env 2>/dev/null | cut -d= -f2)
+   export QUARTZ_TOKEN=$(grep '^QUARTZ_TOKEN=' .env 2>/dev/null | cut -d= -f2-)
    ```
 
-3. `.env` ignored: `git check-ignore -q .env` succeeds, or add a `.env` line to `.git/info/exclude`. Do the same for
+3. `.env` ignored: `git check-ignore -q .env` succeeds, or add a `.env` line to the file `git rev-parse --git-path info/exclude` prints (run in the main checkout). Do the same for
    `.mcp.json` and `.envrc` when git does not track them, so they stay out of a branch run's clean-tree checks.
 4. Run §1 again. It now gives row 3, so run the checks below (they install the hooks).
 5. Then one message. When the token check (below) failed, it opens with the prompt for the token: create it in the
