@@ -984,7 +984,7 @@ Then `git ls-files -s bin/relay-merge` must print a line starting `100755`.
 **Files:**
 - Create: `.hyper-relay/merge.conf`
 
-- [ ] **Step 1: Write the gates.** Create `.hyper-relay/merge.conf` with exactly this content:
+- [x] **Step 1: Write the gates.** Create `.hyper-relay/merge.conf` with exactly this content:
 
 ```text
 # hyper-relay's merge gates, for bin/relay-merge (docs/relay-merge.md). relay-merge reads
@@ -1043,7 +1043,7 @@ CLAUDE.md                       test   sh tests/orchestrating/run-tests.sh
 tests/orchestrating/            test   sh tests/orchestrating/run-tests.sh
 ```
 
-- [ ] **Step 2: Which gates a change runs.** Each row prints the lines whose prefix starts the path, as `relay-merge`
+- [x] **Step 2: Which gates a change runs.** Each row prints the lines whose prefix starts the path, as `relay-merge`
   matches them.
 
 | Run | Expected |
@@ -1054,7 +1054,7 @@ tests/orchestrating/            test   sh tests/orchestrating/run-tests.sh
 | `awk -v f=skills/orchestrating/SKILL.md 'NF >= 3 && $1 !~ /^#/ && index(f, $1) == 1' .hyper-relay/merge.conf` | two lines: `claude plugin validate .` (build) and `sh tests/orchestrating/run-tests.sh` (test) |
 | `awk -v f=docs/relay-merge.md 'NF >= 3 && $1 !~ /^#/ && index(f, $1) == 1' .hyper-relay/merge.conf` | nothing |
 
-- [ ] **Step 3: Every command passes on this branch.** Run, from the checkout's top:
+- [x] **Step 3: Every command passes on this branch.** Run, from the checkout's top:
 
 ```sh
 grep -v -E '^[[:space:]]*(#|$)' .hyper-relay/merge.conf | awk '{ $1 = ""; $2 = ""; sub(/^ +/, ""); print }' | LC_ALL=C sort -u | while IFS= read -r cmd; do sh -c "$cmd" < /dev/null > /dev/null 2>&1; echo "$? $cmd"; done
@@ -1081,7 +1081,7 @@ Expected, exactly these 13 lines:
 A line that does not start with `0 ` is a command that fails here: run it alone, and report its output. Do not change
 `merge.conf` to make it pass.
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add .hyper-relay/merge.conf
