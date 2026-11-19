@@ -71,7 +71,7 @@ a section is left out, and so is a `## ` or `### ` heading left with nothing und
 |---|---|---|
 | `planner/before-writing` | planner, "Before writing" | where a migration number comes from; which external facts specs usually cite |
 | `planner/plan-format` | planner, after the plan-format line | extra header lines; a contract between paired plans |
-| `planner/execution-notes` | planner, "Every plan's Execution notes carry" | the full gates; how stacks may be started; owner-only steps |
+| `planner/execution-notes` | planner, "Every plan" | the full gates; how stacks may be started; owner-only steps |
 | `planner/report` | planner, end of "Report" | extra report items |
 | `executor/setup` | executor, "Setup" | an install step a worktree needs |
 | `executor/gates` (**required**) | executor, "Full gates" | build, lint and test commands, and when the slow ones run |
