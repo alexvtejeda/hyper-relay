@@ -422,7 +422,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/agents/SKILL.md:74` (the slot table)
 - Test: `tests/hyper-relay-agents/run-tests.sh` (renders the templates and this repo's facts file)
 
-- [ ] **Step 1: The plan-format bullet.** In `templates/agents/planner.md`, replace:
+- [x] **Step 1: The plan-format bullet.** In `templates/agents/planner.md`, replace:
 
 ```text
 - Plan format: a header with the **Card:** line (from the spec) and a **Spec:** line (the spec's repo-relative
@@ -442,7 +442,7 @@ with:
   take their header and acceptance task as models, never their steps.
 ```
 
-- [ ] **Step 2: How you work.** In `templates/agents/planner.md`, replace:
+- [x] **Step 2: How you work.** In `templates/agents/planner.md`, replace:
 
 ```text
 - **External facts** the spec says to re-verify: check them with WebFetch/WebSearch, cite URL + date in the plan,
@@ -460,7 +460,7 @@ with:
   "What a Step Contains" says.
 ```
 
-- [ ] **Step 3: "Every plan".** In `templates/agents/planner.md`, replace:
+- [x] **Step 3: "Every plan".** In `templates/agents/planner.md`, replace:
 
 ```text
 ## Every plan's Execution notes carry
@@ -494,7 +494,7 @@ with:
 
 (The `{{slot planner/execution-notes}}` line after it stays.)
 
-- [ ] **Step 4: The relay's slot.** In `.hyper-relay/agents.md`, replace:
+- [x] **Step 4: The relay's slot.** In `.hyper-relay/agents.md`, replace:
 
 ```text
 - The model is the newest hyper-relay plan in `docs/superpowers/plans/`; upstream's older plans in `docs/upstream/`
@@ -508,7 +508,7 @@ with:
   steps; upstream's older plans in `docs/upstream/` and `docs/plans/` are not.
 ```
 
-- [ ] **Step 5: The slot table.** In `skills/agents/SKILL.md`, replace:
+- [x] **Step 5: The slot table.** In `skills/agents/SKILL.md`, replace:
 
 ```text
 | `planner/execution-notes` | planner, "Every plan's Execution notes carry" | the full gates; how stacks may be started; owner-only steps |
@@ -520,7 +520,7 @@ with:
 | `planner/execution-notes` | planner, "Every plan" | the full gates; how stacks may be started; owner-only steps |
 ```
 
-- [ ] **Step 6: Check it.**
+- [x] **Step 6: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -533,7 +533,7 @@ with:
 | `sh tests/hyper-relay-agents/run-tests.sh \| tail -n 1` | `153 passed, 0 failed` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `26 passed, 0 failed` |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add templates/agents/planner.md .hyper-relay/agents.md skills/agents/SKILL.md
