@@ -223,7 +223,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Delete: `skills/brainstorming/spec-document-reviewer-prompt.md`, `tests/claude-code/test-document-review-system.sh`
 - Test: `tests/orchestrating/run-tests.sh` (Task 1's check)
 
-- [ ] **Step 1: The check fails on upstream's raw text.** One command per line:
+- [x] **Step 1: The check fails on upstream's raw text.** One command per line:
 
 ```bash
 git show v7.0.2:skills/brainstorming/SKILL.md > skills/brainstorming/SKILL.md
@@ -235,7 +235,7 @@ Expected: `FAIL no_superpowers_skill_names`, followed by `skills/brainstorming/S
 superpowers:writing-plans skill.` and `skills/brainstorming/SKILL.md:282:superpowers:writing-plans and no other
 skill.`; then `27 passed, 1 failed`. (Step 2 overwrites the file.)
 
-- [ ] **Step 2: The new `SKILL.md`.** Create `skills/brainstorming/SKILL.md` with exactly this content:
+- [x] **Step 2: The new `SKILL.md`.** Create `skills/brainstorming/SKILL.md` with exactly this content:
 
 ````markdown
 ---
@@ -660,7 +660,7 @@ markup and do not conclude from them that click capture is "what is
 deployed here". The `visual-companion` skill is the only implementation.
 ````
 
-- [ ] **Step 3: The builder check's prompt (§3).** Create `skills/brainstorming/builder-check-prompt.md` with exactly
+- [x] **Step 3: The builder check's prompt (§3).** Create `skills/brainstorming/builder-check-prompt.md` with exactly
   this content:
 
 ````markdown
@@ -689,13 +689,13 @@ If nothing important is left, say "nothing important left".
 ```
 ````
 
-- [ ] **Step 4: The spec-document reviewer and its live test go (BR4).**
+- [x] **Step 4: The spec-document reviewer and its live test go (BR4).**
 
 ```bash
 git rm skills/brainstorming/spec-document-reviewer-prompt.md tests/claude-code/test-document-review-system.sh
 ```
 
-- [ ] **Step 5: Check it.**
+- [x] **Step 5: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -712,7 +712,7 @@ git rm skills/brainstorming/spec-document-reviewer-prompt.md tests/claude-code/t
 | `grep -r -n -F -e '/home/' -e '~/' -e '/Users/' -e '/tmp/' skills/brainstorming` | nothing |
 | `git grep -n -e spec-document-reviewer-prompt -e test-document-review-system -- . ':!docs' ':!RELEASE-NOTES.md'` | nothing (P3) |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/brainstorming/SKILL.md skills/brainstorming/builder-check-prompt.md
