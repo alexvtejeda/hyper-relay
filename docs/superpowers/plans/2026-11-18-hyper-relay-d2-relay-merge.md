@@ -1626,3 +1626,20 @@ git -C /home/noob_master/hyper-relay commit -m "docs: piece D.2 plan 1 last-task
 ```
 
 Then Plan 2's handoff, from the new `main` (spec §11).
+
+## Last-task record (Task 6)
+
+- **Before the merge:** acceptance reviewer 8/8 PASS, 0 blocking (both live runs on a scratch clone: exit 0 with only
+  the `wt` gate, exit 3 with the merge left on `main`, unpushed, although `PUSH=1`); fix rounds 0. **Deviation
+  (owner, at stop 3, D2.12):** the release rule names the folders the plugin loads (`skills/`, `bin/`, `templates/`,
+  `hooks/`, `.claude-plugin/`) instead of "anything outside `docs/` and `tests/`"; sent to the executor mid-run and
+  folded into Task 5's commit. Code review: Ready, 0 Critical, 0 Important, 5 Minor; proposed cards (`merge.conf`
+  gates for `scripts/` and itself; three edge cases for `docs/relay-merge.md`) dropped by the owner. Output tokens:
+  executor 10,362, acceptance reviewer 12,506, code reviewer 5,124.
+- **Owner steps:** Step 9 agreed (read after Plan 2 landed, by the owner's choice; P14 narrowed); Step 10 merge-tree
+  exit 0. Merged in `cfbab80` (`git merge --no-ff`, P18).
+- **After merge:** suites on `main` 107/0, 153/0, 51/0, 24/0, `validate` its three warnings, version 0.1.0; symlink
+  `readlink` → `/home/noob_master/hyper-relay/bin/relay-merge`, `command -v relay-merge` →
+  `/home/noob_master/.local/bin/relay-merge`, the suite through it 107/0; agents regenerated (`relay-planner.md`
+  written); `main` pushed: not on its own (the owner's choice), with 0.2.0's release push (`9b2cff1`). Plan 2 then
+  landed through this tool (`4882d27`), its first real use: three gates on the merged result, exit 0.
