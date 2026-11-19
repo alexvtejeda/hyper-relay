@@ -1,11 +1,12 @@
 #!/bin/sh
 # POSIX guard for the relay skills (hyper-relay D.3, D.2): D1's gates, the orchestrating
 # folder, no machine paths in it, references that resolve, `quartz install-git-hook`
-# named only in quartz.md, and no orchestrating file naming finishing-a-development-branch
-# (the relay lands branches with relay-merge). It reads the working tree, not git's index,
-# so an untracked new file counts and it runs the same in a worktree. Each check also runs
-# on a copy of the tree broken on purpose, where it must fail.
-# Usage: sh tests/orchestrating/run-tests.sh      Expect: "26 passed, 0 failed"
+# named only in quartz.md, no orchestrating file naming finishing-a-development-branch
+# (the relay lands branches with relay-merge), and no upstream `superpowers:<skill>` name
+# under skills/. It reads the working tree, not git's index, so an untracked new file
+# counts and it runs the same in a worktree. Each check also runs on a copy of the tree
+# broken on purpose, where it must fail.
+# Usage: sh tests/orchestrating/run-tests.sh      Expect: "28 passed, 0 failed"
 set -u
 LC_ALL=C
 export LC_ALL
@@ -158,10 +159,17 @@ no_finishing_branch_in_orchestrating() (
     none -F 'finishing-a-development-branch' skills/orchestrating
 )
 
+# --- 7. Every skill is named hyper-relay:<name>: no upstream superpowers:<skill> name is
+# left under skills/ (docs/superpowers/ paths do not match).
+no_superpowers_skill_names() (
+    cd "$1" || exit 2
+    none -E 'superpowers:[A-Za-z]' skills
+)
+
 CHECKS='no_old_dispatching_pointer dispatching_pointers_name_orchestrating old_dispatching_gone
 no_subagent_driven code_review_not_per_task brainstorming_never_invokes_writing_plans orchestrating_folder
 no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_in_quartz_md
-no_finishing_branch_in_orchestrating'
+no_finishing_branch_in_orchestrating no_superpowers_skill_names'
 
 # --- the repo's tree passes every check
 for check in $CHECKS; do
@@ -244,6 +252,10 @@ expect_fail install_git_hook_only_in_quartz_md
 broken "finishing-a-development-branch in skills/orchestrating"
 printf '\nMerge with `hyper-relay:finishing-a-development-branch`.\n' >> "$CASE/skills/orchestrating/reviewing.md"
 expect_fail no_finishing_branch_in_orchestrating
+
+broken "brainstorming invoking superpowers:writing-plans"
+printf '\nInvoke the superpowers:writing-plans skill.\n' >> "$CASE/skills/brainstorming/SKILL.md"
+expect_fail no_superpowers_skill_names
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]
