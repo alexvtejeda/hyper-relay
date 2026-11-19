@@ -1,0 +1,14 @@
+# Published API prices for run-usage.sh, in US dollars per million tokens.
+# Taken 2026-11-19 from https://platform.claude.com/docs/en/about-claude/pricing (Model pricing).
+# Global routing: a US-only inference_geo costs 1.1x. Web searches ($10 per 1,000) are not here:
+# Claude Code runs them in side calls that no transcript holds.
+# Columns, tab-separated: model; over (the row prices a call whose prompt, its input, cache reads and
+# cache writes together, is over this many tokens; 0 for every call); input; output; cache read;
+# 5-minute cache write; 1-hour cache write.
+claude-opus-5-5	0	4	20	0.20	5	8
+claude-sonnet-5-5	0	2	10	0.10	2.50	4
+claude-haiku-5-5	0	0.10	0.50	0.01	0.125	0.20
+claude-haiku-5-5	100000	0.50	2.50	0.05	0.625	1
+claude-opus-5	0	5	25	0.50	6.25	10
+claude-sonnet-5	0	2	10	0.20	2.50	4
+claude-haiku-4-5	0	1	5	0.10	1.25	2
