@@ -34,6 +34,7 @@ of a reinstall.
 | D2.9 | Where the exit codes are handled | **`reviewing.md` §4,** because a lone plan's merge needs them too. `parallel.md` §4 keeps the landing order. |
 | D2.10 | D.2's own two plans (owner, at stop 2) | **Planners at once, executors in sequence.** Both planners run on `main`: they only read code and commit their own plans. Then Plan 1 runs, lands, and its tests pass on `main`; only then does Plan 2's executor start, from the new `main`. `CLAUDE.md` is all Plan 1's and `README.md` all Plan 2's. |
 | D2.11 | Releases | **After both plans merge, the version goes to 0.2.0** (tag `v0.2.0`, pushed). From then on every merge that changes what the plugin ships raises the version, the patch number unless the owner names another (0.2.1 next; owner, at stop 2), so the owner updates with `claude plugin update` and `/reload-plugins` instead of reinstalling. This replaces the 2026-11-17 rule "0.1.0 until the initiative is finished". |
+| D2.12 | The owner's stop-3 answers (2026-11-18) | **The release rule names the folders the plugin loads:** a merge that changes a file under `skills/`, `bin/`, `templates/`, `hooks/` or `.claude-plugin/` releases; `docs/`, `tests/`, `scripts/`, `.hyper-relay/`, `package.json`, `README.md` and `CLAUDE.md` alone do not (§9 follows it; Plan 1's `CLAUDE.md` and planner facts carry it). Plan 1 is not pushed on its own: 0.2.0's push carries it. Plan 2 lands through `relay-merge`. The plans' other resolutions stand as written (Plan 1's P1, P4; Plan 2's P7, P17, P20). At Plan 1's stop 4 the owner dropped both proposed cards and moved the click-through to after Plan 2 lands. |
 
 ## The plans
 
@@ -242,9 +243,10 @@ the main checkout back with `git switch main`. When the worktree has a `wt` stac
 - **The owner updates** with `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in a running
   session (or starts a new one), instead of uninstalling and reinstalling.
 - **From then on** (Plan 1, in `CLAUDE.md`'s "How a change reaches the owner" and the planner's facts in
-  `.hyper-relay/agents.md`): every hyper-relay plan that changes what the plugin ships (anything outside `docs/` and
-  `tests/`) ends its acceptance task with `after merge` steps that raise the version (the patch number unless the
-  owner names another) with `scripts/bump-version.sh`, commit, tag and push it, then the owner's update and reload.
+  `.hyper-relay/agents.md`): every hyper-relay plan that changes a file the plugin loads (under `skills/`, `bin/`,
+  `templates/`, `hooks/` or `.claude-plugin/`; D2.12) ends its acceptance task with `after merge` steps that raise
+  the version (the patch number unless the owner names another) with `scripts/bump-version.sh`, commit, tag and push
+  it, then the owner's update and reload.
 
 ## 10. Testing and acceptance
 
