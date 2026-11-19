@@ -232,7 +232,7 @@ words (none).
 **Files:**
 - Create: `tests/benchmark/run-tests.sh`
 
-- [ ] **Step 1: Write the suite.** Create `tests/benchmark/run-tests.sh` with exactly this content:
+- [x] **Step 1: Write the suite.** Create `tests/benchmark/run-tests.sh` with exactly this content:
 
 ```sh
 #!/bin/sh
@@ -708,12 +708,12 @@ printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]
 ```
 
-- [ ] **Step 2: Syntax.**
+- [x] **Step 2: Syntax.**
 
 Run: `dash -n tests/benchmark/run-tests.sh`
 Expected: silent, exit 0.
 
-- [ ] **Step 3: Run it; it fails, because the tools do not exist yet.**
+- [x] **Step 3: Run it; it fails, because the tools do not exist yet.**
 
 | Run | Expected |
 |---|---|
@@ -723,7 +723,7 @@ Expected: silent, exit 0.
 If the counts do not add up to 90, a case did not run to its assertions: stop and report the output. (jq prints
 "Could not open file" lines while the tools are missing: that is expected.)
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add tests/benchmark/run-tests.sh
