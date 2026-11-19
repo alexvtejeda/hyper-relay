@@ -928,7 +928,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/orchestrating/reviewing.md:19` (§1), `:52-54` (§2), `:68` (§3), `:72-84` (§4), `:94-99` (§5)
 
-- [ ] **Step 1: §1: no `reviewer` steps still posts the status.** In `skills/orchestrating/reviewing.md`, replace:
+- [x] **Step 1: §1: no `reviewer` steps still posts the status.** In `skills/orchestrating/reviewing.md`, replace:
 
 ```text
 When the plan has no `reviewer` steps, skip the dispatch and say so at stop 4.
@@ -941,7 +941,7 @@ When the plan has no `reviewer` steps, skip the dispatch, say so at stop 4, and 
 `` `<plan path>`: acceptance done, no reviewer steps. ``
 ```
 
-- [ ] **Step 2: §2: the fix check names its checks; the status note after the loop.** Replace:
+- [x] **Step 2: §2: the fix check names its checks; the status note after the loop.** Replace:
 
 ```text
 After a fix, verify it as `dispatching.md` §7 does: the gates, the new commits, a clean tree. Then the reviewer,
@@ -967,7 +967,7 @@ one, which is enough: the code review runs only after acceptance. A resumed orch
 Finding where work stands). A note that fails is reported once, in one line (`quartz.md` §2).
 ```
 
-- [ ] **Step 3: §3: the status note after the code review.** Replace:
+- [x] **Step 3: §3: the status note after the code review.** Replace:
 
 ```text
 - **Important and Minor:** proposed cards (§4).
@@ -983,7 +983,7 @@ When the code review and its Critical fixes are done, post the status note as §
 `` `<plan path>`: code review done, C Critical (x fixed, y dropped), I Important, m Minor. At stop 4. ``
 ```
 
-- [ ] **Step 4: §4: wait for every leg's usage; questions first; the tick promise.** Replace:
+- [x] **Step 4: §4: wait for every leg's usage; questions first; the tick promise.** Replace:
 
 ```text
 One report, which ends the message:
@@ -1029,7 +1029,7 @@ initiative, each body naming the plan, the file and the evidence. When the repo 
 they stay listed in stop 4.
 ```
 
-- [ ] **Step 5: §5: queued ticks only where hooks tick; the hand ticks.** Replace:
+- [x] **Step 5: §5: queued ticks only where hooks tick; the hand ticks.** Replace:
 
 ```text
 upload them. Task ticks queued during the run drain at the next stop.
@@ -1049,7 +1049,7 @@ acceptance task by hand if no commit ticked it; where nothing ticks a committed 
 with a `Plan-Task:` commit in the same edit. When the spec has another plan, its handoff follows (`planning.md` §4).
 ```
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1059,7 +1059,7 @@ with a `Plan-Task:` commit in the same edit. When the spec has another plan, its
 | `git grep -n -e 'add_note' -e 'checks 1–4' -e 'Wait for every leg' -e 'promises a Quartz tick' -- skills/orchestrating/reviewing.md` | four lines |
 | `git grep -n -i 'without Quartz' -- skills/orchestrating/reviewing.md` | nothing |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/orchestrating/reviewing.md
