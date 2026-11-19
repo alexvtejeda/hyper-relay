@@ -3,12 +3,12 @@
 Part of `orchestrating` (`SKILL.md` beside this file is the map). Quartz is the project board the relay keeps in step
 with its specs, plans and commits. This file says when a repo uses it (§1), how a repo gets set up (§2), what ticks a
 plan's tasks (§3), and the Quartz duties (§4). `orchestrating` reads it at the start of every leg, and
-`hyper-relay:brainstorming` runs §1 and §2 at its step 1, before any other leg.
+`hyper-relay:brainstorming` runs §1 and §2 before its first message, before any other leg.
 
 ## 1. Does this repo use Quartz?
 
-Read it from files and git every time, never from memory: at `brainstorming`'s step 1, and whenever `orchestrating`
-starts or resumes a leg. Run the tests in this order; **the first match decides**:
+Read it from files and git every time, never from memory: before `brainstorming`'s first message, and whenever
+`orchestrating` starts or resumes a leg. Run the tests in this order; **the first match decides**:
 
 | # | State | Test | Result |
 |---|---|---|---|
@@ -47,7 +47,7 @@ can, and ask the owner only for the steps only they can do.
 
 Send this as a message of its own. **Setup never holds up a leg:** when the leg dispatches an agent (a planner, an
 executor, a reviewer), dispatch it first, then send this while the agent works; the steps below run alongside it. At
-`brainstorming`'s step 1, send it before brainstorming's first question.
+`brainstorming`'s start, send it before brainstorming's first message.
 
 > This repo isn't on a Quartz board yet, so I'll connect it. Three steps are yours, in Quartz's web app:
 > 1. Create a project (or pick one), and add this repo to it by name.
@@ -107,13 +107,13 @@ Run each check below. One that cannot complete is a failure (below); the rest st
   (`[ -n "${QUARTZ_TOKEN:-}" ]`). Never print it.
 - **MCP:** the Quartz MCP tools (in Claude Code, `mcp__quartz__…`) are among your tools or deferred tools; load a
   deferred one with ToolSearch before calling it. In OpenCode they also need the server in OpenCode's own config.
-- **Card** (at `brainstorming`'s step 1, with the MCP): the card the owner names; otherwise one in Needs brainstorming
-  that matches the work (`list_tasks`); otherwise a new one through `add_tasks`, titled with the work's topic, kind
-  `bug` or `change` when one fits, in the initiative the owner names, if any. Say so in one line, with its id. Then
-  `tick_brain` with its id.
-- **Card lines:** as `brainstorming`'s Documentation says. A card that arrives after its spec was written (the MCP
-  loaded late) gets its line then, with brainstorming's script (§4); a spec already committed gets it in a commit of
-  just the spec, while the main checkout is on `main`.
+- **Card** (before `brainstorming`'s first message, with the MCP): the card the owner names; otherwise one in Needs
+  brainstorming that matches the work (`list_tasks`); otherwise a new one through `add_tasks`, titled with the work's
+  topic, kind `bug` or `change` when one fits, in the initiative the owner names, if any. Say so in one line, with its
+  id. Then `tick_brain` with its id.
+- **Card lines:** as `brainstorming` says under The Written Design. A card that arrives after its spec was written
+  (the MCP loaded late) gets its line then, with brainstorming's script (§4); a spec already committed gets it in a
+  commit of just the spec, while the main checkout is on `main`.
 
 **A step that fails** (no token, no MCP in this session, `install-git-hook` refused because `core.hooksPath` is set,
 an MCP call that errors): report it once in the session, in one line saying what the owner can do, and carry on.

@@ -1,12 +1,15 @@
 # The planner leg
 
 The planner leg of `orchestrating` (`SKILL.md` beside this file is the map). It starts when the owner approves the
-written spec (stop 2) and ends at stop 3. You do not write the plan: a planner does, in its own context.
+written spec (stop 2), or when `brainstorming` hands over a spec written from a short design the owner approved in its
+first message, which stands for stop 2. It ends at stop 3. You do not write the plan: a planner does, in its own
+context.
 
 ## 1. Dispatch
 
-Straight after the owner approves the written spec, dispatch the planners in the background. The approval is the
-go-ahead: do not ask again. Then tell the owner they are running, and carry on.
+Straight after the owner approves the written spec, or `brainstorming` hands over a spec written from a short design
+the owner approved, dispatch the planners in the background. The approval is the go-ahead: do not ask again. Then tell
+the owner they are running, and carry on.
 
 - **Plan paths.** You name them: `docs/superpowers/plans/<today>-<topic>.md`, where `<topic>` is the spec's file name
   without its date and `-design`. A spec with a `**Plans:** <n>` line gets n paths, each with the suffix the spec

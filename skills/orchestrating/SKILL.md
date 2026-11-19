@@ -34,8 +34,8 @@ its leg, not before; `parallel.md` whenever a second plan would be in flight or 
 
 | Stop | What the owner gets | The owner's answer starts |
 |---|---|---|
-| 1. Design | The design, section by section (`brainstorming`) | the spec |
-| 2. Spec | The written spec (`brainstorming`) | the planner leg: approval is the go-ahead, no second ask |
+| 1. Design | The approaches, then the design played back part by part (`brainstorming`) | the spec |
+| 2. Spec | The written spec (`brainstorming`); skipped when the owner approved a short design in brainstorming's first message, which covers stops 1 and 2 | the planner leg: approval is the go-ahead, no second ask |
 | 3. Plan ready | Its questions first: the decisions the owner must make, the plan-review offer, the handoff question. Then the hand-back check's result and the planner's deviations (`planning.md` §3) | execution, a plan review, or plan changes |
 | 4. Ready to merge | Its questions first: the proposed cards, the steps that are the owner's, where to click through. Then gate, acceptance and skill-test results, fixes made, Critical findings fixed or dropped (`reviewing.md` §4) | the click-through and the merge |
 
