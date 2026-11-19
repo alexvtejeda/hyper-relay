@@ -129,7 +129,7 @@ generated.
 - Modify: `tests/orchestrating/run-tests.sh:2-8` (header), `:156-159` (a new check after it), `:164` (`CHECKS`),
   `:246` (a new broken case after it)
 
-- [ ] **Step 1: The header.** Replace:
+- [x] **Step 1: The header.** Replace:
 
 ```text
 # POSIX guard for the relay skills (hyper-relay D.3, D.2): D1's gates, the orchestrating
@@ -154,7 +154,7 @@ with:
 # Usage: sh tests/orchestrating/run-tests.sh      Expect: "28 passed, 0 failed"
 ```
 
-- [ ] **Step 2: The check.** Replace:
+- [x] **Step 2: The check.** Replace:
 
 ```sh
 no_finishing_branch_in_orchestrating() (
@@ -182,7 +182,7 @@ no_superpowers_skill_names() (
 Then, in `CHECKS`, replace `no_finishing_branch_in_orchestrating'` with
 `no_finishing_branch_in_orchestrating no_superpowers_skill_names'`.
 
-- [ ] **Step 3: Its broken case.** Replace:
+- [x] **Step 3: Its broken case.** Replace:
 
 ```sh
 expect_fail no_finishing_branch_in_orchestrating
@@ -198,7 +198,7 @@ printf '\nInvoke the superpowers:writing-plans skill.\n' >> "$CASE/skills/brains
 expect_fail no_superpowers_skill_names
 ```
 
-- [ ] **Step 4: Run it.**
+- [x] **Step 4: Run it.**
 
 | Run | Expected |
 |---|---|
@@ -206,7 +206,7 @@ expect_fail no_superpowers_skill_names
 | `sh tests/orchestrating/run-tests.sh \| grep -F no_superpowers_skill_names` | `ok   no_superpowers_skill_names` and `ok   no_superpowers_skill_names can fail: brainstorming invoking superpowers:writing-plans` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` (today's tree has no such name; Task 2 Step 1 shows the check failing on upstream's text) |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add tests/orchestrating/run-tests.sh
