@@ -1157,7 +1157,7 @@ Then `git ls-files -s scripts/benchmark` must print `100644` for `prices.tsv` an
 - Create: `scripts/benchmark/superpowers-env.sh`
 - Test: `tests/benchmark/run-tests.sh`
 
-- [ ] **Step 1: Write the script.** Create `scripts/benchmark/superpowers-env.sh` with exactly this content:
+- [x] **Step 1: Write the script.** Create `scripts/benchmark/superpowers-env.sh` with exactly this content:
 
 ```sh
 #!/bin/sh
@@ -1333,26 +1333,26 @@ fi
 say "next (the owner): from a scratch folder, CLAUDE_CONFIG_DIR=$TARGET claude, then /login and the checks of docs/benchmarks/README.md, step 1"
 ```
 
-- [ ] **Step 2: Mode and syntax.**
+- [x] **Step 2: Mode and syntax.**
 
 | Run | Expected |
 |---|---|
 | `chmod +x scripts/benchmark/superpowers-env.sh` | silent |
 | `dash -n scripts/benchmark/superpowers-env.sh` | silent, exit 0 |
 
-- [ ] **Step 3: The suite passes.**
+- [x] **Step 3: The suite passes.**
 
 Run: `sh tests/benchmark/run-tests.sh | tail -n 1`
 Expected: `90 passed, 0 failed`
 
-- [ ] **Step 4: What the script never does.** Each must print nothing:
+- [x] **Step 4: What the script never does.** Each must print nothing:
 
 | Run | Expected |
 |---|---|
 | `grep -n -e 'rm -r' -e 'rm -f' -e '> "\$SRC' -e '>> "\$SRC' -e '> "\$HOME/.claude' scripts/benchmark/superpowers-env.sh \| grep -v -F "trap 'rm -rf \"\$WORK\"'"` | nothing: the only removal is its own temporary folder, and it never writes `~/.claude` or `~/.claude.json` |
 | `grep -n -i -w -e sat -e pentraze scripts/benchmark/superpowers-env.sh scripts/benchmark/run-usage.sh scripts/benchmark/run-usage.jq tests/benchmark/run-tests.sh` | nothing |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add scripts/benchmark/superpowers-env.sh
