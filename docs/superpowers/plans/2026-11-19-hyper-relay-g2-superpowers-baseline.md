@@ -2040,7 +2040,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `CLAUDE.md:32-33` (Layout), `:89` (Checks)
 - Modify: `.hyper-relay/merge.conf:45-47` (gates)
 
-- [ ] **Step 1: The Layout line.** In `CLAUDE.md`, replace:
+- [x] **Step 1: The Layout line.** In `CLAUDE.md`, replace:
 
 ```text
 - `scripts/check-import.sh`: piece A's proof that moving the skills in changed nothing. It compares against the loose
@@ -2058,7 +2058,7 @@ with:
   transcripts. `docs/benchmarks/` holds the protocol's fixed prompts, its run-log template and its runbook.
 ```
 
-- [ ] **Step 2: The Checks row.** In `CLAUDE.md`, replace:
+- [x] **Step 2: The Checks row.** In `CLAUDE.md`, replace:
 
 ```text
 | relay-merge | `sh tests/relay-merge/run-tests.sh` | `0 failed` |
@@ -2071,7 +2071,7 @@ with:
 | benchmark | `sh tests/benchmark/run-tests.sh` | `0 failed` |
 ```
 
-- [ ] **Step 3: The gates.** In `.hyper-relay/merge.conf`, replace:
+- [x] **Step 3: The gates.** In `.hyper-relay/merge.conf`, replace:
 
 ```text
 # relay-merge.
@@ -2093,7 +2093,7 @@ scripts/benchmark/              test   sh tests/benchmark/run-tests.sh
 tests/benchmark/                test   sh tests/benchmark/run-tests.sh
 ```
 
-- [ ] **Step 4: Check the edits.**
+- [x] **Step 4: Check the edits.**
 
 | Run | Expected |
 |---|---|
@@ -2102,7 +2102,7 @@ tests/benchmark/                test   sh tests/benchmark/run-tests.sh
 | `awk '$1 ~ /benchmark/ { print ((NF >= 3) ? "ok" : "short") }' .hyper-relay/merge.conf \| sort \| uniq -c` | one line: `4 ok` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `26 passed, 0 failed` (it reads `CLAUDE.md`) |
 
-- [ ] **Step 5: Each new gate passes once.** From the checkout's top, run each command of the four new `merge.conf`
+- [x] **Step 5: Each new gate passes once.** From the checkout's top, run each command of the four new `merge.conf`
   lines:
 
 | Run | Expected |
@@ -2111,7 +2111,7 @@ tests/benchmark/                test   sh tests/benchmark/run-tests.sh
 | `dash -n scripts/benchmark/run-usage.sh; echo $?` | `0` |
 | `sh tests/benchmark/run-tests.sh > /dev/null; echo $?` | `0` |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add CLAUDE.md .hyper-relay/merge.conf
@@ -2120,7 +2120,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 7: The full gates, once.**
+- [x] **Step 7: The full gates, once.**
 
 | Run | Expected |
 |---|---|
