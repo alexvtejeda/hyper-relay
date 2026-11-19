@@ -730,7 +730,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/orchestrating/SKILL.md:37-38` (the stops table)
 - Modify: `skills/orchestrating/planning.md:3-4`, `:8-9`
 
-- [ ] **Step 1: `quartz.md`, the four pointers and P2's line.** Replace each X with its Y.
+- [x] **Step 1: `quartz.md`, the four pointers and P2's line.** Replace each X with its Y.
 
 X1:
 
@@ -804,7 +804,7 @@ Y5:
   commit of just the spec, while the main checkout is on `main`.
 ```
 
-- [ ] **Step 2: `SKILL.md`, the stops table.** Replace:
+- [x] **Step 2: `SKILL.md`, the stops table.** Replace:
 
 ```text
 | 1. Design | The design, section by section (`brainstorming`) | the spec |
@@ -818,7 +818,7 @@ with:
 | 2. Spec | The written spec (`brainstorming`); skipped when the owner approved a short design in brainstorming's first message, which covers stops 1 and 2 | the planner leg: approval is the go-ahead, no second ask |
 ```
 
-- [ ] **Step 3: `planning.md`, its opening and §1.** Replace:
+- [x] **Step 3: `planning.md`, its opening and §1.** Replace:
 
 ```text
 The planner leg of `orchestrating` (`SKILL.md` beside this file is the map). It starts when the owner approves the
@@ -849,7 +849,7 @@ the owner approved, dispatch the planners in the background. The approval is the
 the owner they are running, and carry on.
 ```
 
-- [ ] **Step 4: Check it.**
+- [x] **Step 4: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -860,7 +860,7 @@ the owner they are running, and carry on.
 | `grep -c -F 'short design' skills/orchestrating/SKILL.md skills/orchestrating/planning.md` | `skills/orchestrating/SKILL.md:1`, `skills/orchestrating/planning.md:2` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/orchestrating/quartz.md skills/orchestrating/SKILL.md skills/orchestrating/planning.md
