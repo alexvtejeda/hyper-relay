@@ -801,7 +801,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/orchestrating/reviewing.md:63-65` (§2), `:79-83` (§3), `:87-89` and `:99-103` (§4's wait and
   report), `:111-115` (§4's merge), `:126` (§5)
 
-- [ ] **Step 1: §2, cut a stacked plan when its base's fix loop ends (P26).** In
+- [x] **Step 1: §2, cut a stacked plan when its base's fix loop ends (P26).** In
   `skills/orchestrating/reviewing.md`, replace:
 
 ```text
@@ -820,7 +820,7 @@ Finding where work stands). A note that fails is reported once, in one line (`qu
 When the fix loop ends and a plan is stacked on this one, cut and dispatch it now (`parallel.md` §3).
 ```
 
-- [ ] **Step 2: §3, the skill tests beside the code review (spec §8; P11, P12).** Replace:
+- [x] **Step 2: §3, the skill tests beside the code review (spec §8; P11, P12).** Replace:
 
 ```text
 - **Important and Minor:** proposed cards (§4).
@@ -867,7 +867,7 @@ The skill tests' part counts the S scenarios and the G whose GREEN passed; a pla
 "; skill tests G/S GREEN".
 ```
 
-- [ ] **Step 3: §4, stop 4 waits for the skill-test runs and reports them (spec §8; P13).** Replace:
+- [x] **Step 3: §4, stop 4 waits for the skill-test runs and reports them (spec §8; P13).** Replace:
 
 ```text
 **Wait for every leg's usage first.** Before writing stop 4, wait for the completion notification of every agent this
@@ -906,7 +906,7 @@ with:
   your harness reports them ("not reported" where it reports none), until the owner says they have seen enough.
 ```
 
-- [ ] **Step 4: §4, the merge is `relay-merge`, read by its exit code (spec §6; D2.3, D2.9; P7–P10).** Replace:
+- [x] **Step 4: §4, the merge is `relay-merge`, read by its exit code (spec §6; D2.3, D2.9; P7–P10).** Replace:
 
 ```text
 The owner clicks through: after a branch run, on the normal stack, once the executor's "On a branch" acceptance steps
@@ -960,7 +960,7 @@ of its own. Nothing else lands until the owner decides:
 Plans in flight keep executing in their worktrees meanwhile.
 ```
 
-- [ ] **Step 5: §5, what follows a landing (spec §6).** Replace:
+- [x] **Step 5: §5, what follows a landing (spec §6).** Replace:
 
 ```text
 with a `Plan-Task:` commit in the same edit. When the spec has another plan, its handoff follows (`planning.md` §4).
@@ -973,7 +973,7 @@ with a `Plan-Task:` commit in the same edit. A plan stacked on this one, or wait
 (`parallel.md` §4).
 ```
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 | Run | Expected |
 |---|---|
@@ -987,7 +987,7 @@ with a `Plan-Task:` commit in the same edit. A plan stacked on this one, or wait
 | `grep -n -F 'skill tests G/S GREEN' skills/orchestrating/reviewing.md` | two lines: the status note and the sentence after it |
 | `grep -n -F 'each skill-test run' skills/orchestrating/reviewing.md` | one line, §4's wait |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/orchestrating/reviewing.md
