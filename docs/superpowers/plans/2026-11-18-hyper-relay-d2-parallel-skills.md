@@ -1468,7 +1468,7 @@ Each step is marked with who runs it:
 **This plan's run follows the installed relay** (0.1.0's `orchestrating`), not the text it writes: the new behaviour
 reaches a session only after the release and the owner's update (Steps 21–22).
 
-- [ ] **Step 1 (`reviewer`): The guard.**
+- [x] **Step 1 (`reviewer`): The guard.**
 
 | Run | PASS |
 |---|---|
@@ -1477,7 +1477,7 @@ reaches a session only after the release and the owner's update (Steps 21–22).
 | `dash -n tests/orchestrating/run-tests.sh` | silent, exit 0 |
 | `git ls-files -s tests/orchestrating/run-tests.sh` | one line starting `100644` |
 
-- [ ] **Step 2 (`reviewer`): The other suites, and Plan 1's files untouched.**
+- [x] **Step 2 (`reviewer`): The other suites, and Plan 1's files untouched.**
 
 | Run | PASS |
 |---|---|
@@ -1486,7 +1486,7 @@ reaches a session only after the release and the owner's update (Steps 21–22).
 | `sh tests/relay-merge/run-tests.sh \| tail -n 1` | ends `0 failed` (Plan 1's suite, a regression check) |
 | `git diff --stat main...HEAD -- CLAUDE.md .hyper-relay bin hooks docs/relay-merge.md tests/relay-merge tests/hyper-relay-agents tests/add-card-line templates/agents/planner.md templates/agents/reviewer-commands.md templates/agents/reviewer-browser.md` | nothing |
 
-- [ ] **Step 3 (`reviewer`): The manifests and the skill count.**
+- [x] **Step 3 (`reviewer`): The manifests and the skill count.**
 
 | Run | PASS |
 |---|---|
@@ -1494,14 +1494,14 @@ reaches a session only after the release and the owner's update (Steps 21–22).
 | `git ls-files 'skills/*/SKILL.md' \| wc -l` | `17` |
 | `git show HEAD:.claude-plugin/plugin.json \| grep -F '"version"'` | `"version": "0.1.0",` (the release is after the merge) |
 
-- [ ] **Step 4 (`reviewer`): Only the planned files changed.**
+- [x] **Step 4 (`reviewer`): Only the planned files changed.**
 
 | Run | PASS |
 |---|---|
 | `git diff --name-only main...HEAD` | exactly the thirteen files of Task 8 Step 9 |
 | `git log --format=%B main..HEAD \| grep -c -i -w -e sat -e pentraze` | `0` |
 
-- [ ] **Step 5 (`reviewer`): The wording, by grep.**
+- [x] **Step 5 (`reviewer`): The wording, by grep.**
 
 | Run | PASS |
 |---|---|
@@ -1517,7 +1517,7 @@ reaches a session only after the release and the owner's update (Steps 21–22).
 | `git grep -n -e '/home/' -e '~/' -e '/Users/' -e '/tmp/' -- skills/orchestrating skills/brainstorming/SKILL.md skills/writing-plans` | nothing |
 | `git diff main...HEAD -- skills/executing-plans/SKILL.md \| grep -c -e '^+.*~/' -e '^+.*/home/' -e '^+.*/tmp/'` | `0` (its never list already names `~/.claude/`, unchanged) |
 
-- [ ] **Step 6 (`reviewer`): `parallel.md` against the spec (§2–§6).** Read `skills/orchestrating/parallel.md` in
+- [x] **Step 6 (`reviewer`): `parallel.md` against the spec (§2–§6).** Read `skills/orchestrating/parallel.md` in
   full, the spec's §2–§6 and decisions D2.2, D2.4, D2.5, and this plan's P1–P6 and P27. PASS, each point quoted:
   - it is read only when another plan is in flight or a spec has several plans, and it defines "in flight";
   - §1 has the spec's §2 rules (a spec's plans without `**Builds on:**` at once, in the spec's order; plans from
@@ -1538,7 +1538,7 @@ reaches a session only after the release and the owner's update (Steps 21–22).
     its base lands;
   - nothing in `parallel.md` contradicts the spec. List any sentence that does as a FAIL, with its line.
 
-- [ ] **Step 7 (`reviewer`): `reviewing.md` against the spec (§6, §8) and the Contract.** Read
+- [x] **Step 7 (`reviewer`): `reviewing.md` against the spec (§6, §8) and the Contract.** Read
   `skills/orchestrating/reviewing.md` §2–§5 and `git diff main...HEAD -- skills/orchestrating/reviewing.md`. PASS:
   - §4's merge runs `relay-merge` from the main checkout on `main` with `PUSH=0` and `RELAY_MERGE_TRAILERS`, after
     `git switch main` following a branch run and `wt down` when a stack is up, and names no
@@ -1554,7 +1554,7 @@ reaches a session only after the release and the owner's update (Steps 21–22).
   - §4 waits for every skill-test run's notification and reports the verdicts and the runs' token counts;
   - §5 ends pointing at `parallel.md` §4, and §2 cuts a stacked plan when the fix loop ends.
 
-- [ ] **Step 8 (`reviewer`): The other files against spec §7.** Read
+- [x] **Step 8 (`reviewer`): The other files against spec §7.** Read
   `git diff main...HEAD -- skills/orchestrating/SKILL.md skills/orchestrating/planning.md skills/orchestrating/dispatching.md skills/orchestrating/quartz.md skills/executing-plans/SKILL.md templates/agents/executor.md skills/brainstorming/SKILL.md skills/writing-plans README.md`.
   PASS, each point quoted:
   - `SKILL.md` lists `parallel.md` beside the leg files, read when a second plan would be in flight or a spec has
@@ -1573,7 +1573,7 @@ reaches a session only after the release and the owner's update (Steps 21–22).
   - README names `relay-merge` and its doc, `parallel.md` and the skill tests, and updating by
     `claude plugin update hyper-relay@hyper-relay` then `/reload-plugins`.
 
-- [ ] **Step 9 (`skill-test`): S1, a spec's two independent plans are approved.**
+- [x] **Step 9 (`skill-test`): S1, a spec's two independent plans are approved.**
 
 Situation:
 
@@ -1600,7 +1600,7 @@ no overlap, and offers no Branch, although the repo's default is `branch`; after
 RED is expected to: hand off one plan at a time ("one after another"): a handoff question for the first plan only,
 offering Branch as the repo's default, with the second plan waiting for the first to merge.
 
-- [ ] **Step 10 (`skill-test`): S2, a second plan shares `greet.sh` with one in flight.**
+- [x] **Step 10 (`skill-test`): S2, a second plan shares `greet.sh` with one in flight.**
 
 Situation:
 
@@ -1624,7 +1624,7 @@ Branch; create no branch or worktree and dispatch nothing.
 RED is expected to: offer to run the loud plan now (Branch as the repo's default, or a worktree), with no shared file
 named.
 
-- [ ] **Step 11 (`skill-test`): S3, two plans both create `000097_*` migrations.**
+- [x] **Step 11 (`skill-test`): S3, two plans both create `000097_*` migrations.**
 
 Situation:
 
@@ -1648,7 +1648,7 @@ plan again, before stop 3 and before any dispatch.
 
 RED is expected to: find no shared path and go straight to stop 3, offering to run the coupons plan as it is.
 
-- [ ] **Step 12 (`skill-test`): S4, a stacked plan's base passes acceptance.**
+- [x] **Step 12 (`skill-test`): S4, a stacked plan's base passes acceptance.**
 
 Situation:
 
@@ -1675,7 +1675,7 @@ changes its branch lacks.
 RED is expected to: not stack: plan 2 waits for plan 1's merge and is then cut from `main`; or, if cut early, its
 review starts at once.
 
-- [ ] **Step 13 (`skill-test`): S5, `relay-merge` exits 2.**
+- [x] **Step 13 (`skill-test`): S5, `relay-merge` exits 2.**
 
 Situation:
 
@@ -1700,7 +1700,7 @@ anything itself in the main checkout.
 RED is expected to: give no conflict round: resolve the conflict itself, merge another way, or ask the owner how to
 go on.
 
-- [ ] **Step 14 (`skill-test`): S6, `relay-merge` exits 3.**
+- [x] **Step 14 (`skill-test`): S6, `relay-merge` exits 3.**
 
 Situation:
 
@@ -1724,7 +1724,7 @@ unpushed merge or fix forward on a new branch; land nothing else meanwhile (no m
 RED is expected to: handle it without the owner: dispatch a fix to the shout executor, reset or revert `main`
 itself, or carry on with `toy-greet-polite`'s stop 4 and merge.
 
-- [ ] **Step 15 (`skill-test`): S7, Quartz is not connected when a spec is approved.**
+- [x] **Step 15 (`skill-test`): S7, Quartz is not connected when a spec is approved.**
 
 Situation:
 
@@ -1745,7 +1745,7 @@ while the planner works.
 RED is expected to: send the setup message first and wait for the answer before dispatching the planner. (It may not
 discriminate: D.3's probe (a) saw `main`'s text dispatch first.)
 
-- [ ] **Step 16 (`skill-test`): S8, an executor gets a catch-up round.**
+- [x] **Step 16 (`skill-test`): S8, an executor gets a catch-up round.**
 
 Situation:
 
@@ -1768,7 +1768,7 @@ nothing.
 RED is expected to: refuse: `executing-plans` forbids every merge ("Switch branches, stash, reset, rebase, merge, push
 or tag"), so it stops and reports that it may not merge.
 
-- [ ] **Step 17 (`skill-test`): S9, a planner gets a spec whose plan 2 builds on plan 1 and changes a skill.**
+- [x] **Step 17 (`skill-test`): S9, a planner gets a spec whose plan 2 builds on plan 1 and changes a skill.**
 
 Situation:
 
@@ -1791,13 +1791,13 @@ GREEN must: put `**Builds on:** docs/superpowers/plans/2026-11-18-toy-counter-sc
 
 RED is expected to: write neither: no `**Builds on:**` line, and only `reviewer`, `owner` and `after merge` steps.
 
-- [ ] **Step 18 (`owner`): Read the parallel rules and the merge.** Read
+- [x] **Step 18 (`owner`): Read the parallel rules and the merge.** Read
   `git -C /home/noob_master/hyper-relay show hyper-relay-d2-parallel-skills:skills/orchestrating/parallel.md`, and §4
   of the same branch's `skills/orchestrating/reviewing.md` (the merge and its exit codes). PASS: the owner agrees with
   them as written, including P7's undo commands (if not, the orchestrator records the change and it goes to the
   executor as a finding).
 
-- [ ] **Step 19 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
+- [x] **Step 19 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
   cleanly.**
 
 | Run | PASS |
@@ -1808,7 +1808,7 @@ On exit 1 it names the conflicted files: tell the owner before merging. The merg
 says (P24); the owner may choose `relay-merge` instead, from the main checkout on `main`:
 `PUSH=0 RELAY_MERGE_TRAILERS='<the committing session's attribution lines>' relay-merge hyper-relay-d2-parallel-skills`.
 
-- [ ] **Step 20 (`after merge`): Re-check on `main`.**
+- [x] **Step 20 (`after merge`): Re-check on `main`.**
 
 | Run | PASS |
 |---|---|
@@ -1819,7 +1819,7 @@ says (P24); the owner may choose `relay-merge` instead, from the main checkout o
 | `cd /home/noob_master/hyper-relay && claude plugin validate .` | passes; warnings the root `CLAUDE.md` one, `ICON_MISSING` and `PRIVACY_URL_MISSING` |
 | `git -C /home/noob_master/hyper-relay status --porcelain --untracked-files=no` | nothing |
 
-- [ ] **Step 21 (`after merge`): The release, 0.2.0 (spec §9; D2.11; P21).** The owner has approved this push. In
+- [x] **Step 21 (`after merge`): The release, 0.2.0 (spec §9; D2.11; P21).** The owner has approved this push. In
   order, one command per Bash call:
 
 | Run | PASS |
@@ -1845,7 +1845,7 @@ git -C /home/noob_master/hyper-relay push origin v0.2.0
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v0.2.0` | one line |
 
-- [ ] **Step 22 (`after merge`): The owner updates and reloads (spec §10 item 1; P22, P25).** The owner runs, in a
+- [x] **Step 22 (`after merge`): The owner updates and reloads (spec §10 item 1; P22, P25).** The owner runs, in a
   shell:
 
 ```bash
@@ -1870,7 +1870,7 @@ session, where the same check must pass.
 
 If a check fails, stop and tell the owner; do not delete or uninstall anything.
 
-- [ ] **Step 23 (`after merge`): This repo's agents, regenerated (spec §10 item 2).**
+- [x] **Step 23 (`after merge`): This repo's agents, regenerated (spec §10 item 2).**
 
 | Run | PASS |
 |---|---|
@@ -1879,7 +1879,7 @@ If a check fails, stop and tell the owner; do not delete or uninstall anything.
 
 The new executor definition loads in a new session.
 
-- [ ] **Step 24 (`after merge`): Build the probe repos (spec §10 item 3; P23).** For each `<dir>` of
+- [x] **Step 24 (`after merge`): Build the probe repos (spec §10 item 3; P23).** For each `<dir>` of
   `/tmp/hr-d2-probe-parallel` and `/tmp/hr-d2-probe-conflict`:
 
 ```bash
@@ -2151,7 +2151,7 @@ git -C /tmp/hr-d2-probe-conflict/.worktrees/toy-greet-polite commit -q -m "feat:
 | `git -C /tmp/hr-d2-probe-conflict branch --show-current` | `main` |
 | `git -C /tmp/hr-d2-probe-parallel config --get hyper-relay.quartz` and the same for `/tmp/hr-d2-probe-conflict` | `off`, twice |
 
-- [ ] **Step 25 (`after merge`): The live probes (spec §10 item 3).** Each is a new Claude Code session, started by the
+- [x] **Step 25 (`after merge`): The live probes (spec §10 item 3).** Each is a new Claude Code session, started by the
   owner after Step 22, in its repo, accepting the trust prompt. The owner watches the session; the orchestrator runs
   the git rows afterwards.
 
@@ -2200,7 +2200,7 @@ and offers no Branch. The owner ends the session there.
 | `git -C /tmp/hr-d2-probe-conflict worktree list` | still the two lines of Step 24 |
 | `git -C /tmp/hr-d2-probe-conflict branch --list toy-greet-loud` | nothing |
 
-- [ ] **Step 26 (`after merge`): Clean up; anything failed?**
+- [x] **Step 26 (`after merge`): Clean up; anything failed?**
 
 ```bash
 rm -rf /tmp/hr-d2-probe-parallel /tmp/hr-d2-probe-conflict
@@ -2209,7 +2209,7 @@ rm -rf /tmp/hr-d2-probe-parallel /tmp/hr-d2-probe-conflict
 A failed step: fix it on a branch through the usual spec and plan, merge, release the next patch version (D2.11),
 update, and repeat the step.
 
-- [ ] **Step 27 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
+- [x] **Step 27 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
 
 ```markdown
 ## Last-task record (Task 9)
