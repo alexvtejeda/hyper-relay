@@ -1001,7 +1001,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/orchestrating/quartz.md:48` (the setup message's lead-in), `:59-60` (Neither)
 
-- [ ] **Step 1: The setup message no longer waits.** In `skills/orchestrating/quartz.md`, replace:
+- [x] **Step 1: The setup message no longer waits.** In `skills/orchestrating/quartz.md`, replace:
 
 ```text
 Send this as a message of its own, and wait for the answer:
@@ -1015,7 +1015,7 @@ executor, a reviewer), dispatch it first, then send this while the agent works; 
 `brainstorming`'s step 1, send it before brainstorming's first question.
 ```
 
-- [ ] **Step 2: A reply that ignores it counts as neither.** Replace:
+- [x] **Step 2: A reply that ignores it counts as neither.** Replace:
 
 ```text
 - **Neither** (for example "not now"): carry on with no Quartz for this session. The offer comes again in the next
@@ -1029,7 +1029,7 @@ with:
   The offer comes again in the next session, not at the next leg.
 ```
 
-- [ ] **Step 3: Check.**
+- [x] **Step 3: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1038,7 +1038,7 @@ with:
 | `grep -n -F 'Setup never holds up a leg' skills/orchestrating/quartz.md` | one line, in §2 |
 | `grep -n -F 'or a reply that does not answer it' skills/orchestrating/quartz.md` | one line |
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add skills/orchestrating/quartz.md
