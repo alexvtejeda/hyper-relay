@@ -578,7 +578,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/orchestrating/dispatching.md:15-17` and `:31-36` (§1), `:42` (§2), `:56-60` (§3), `:86-87` (§5),
   `:109` (§7)
 
-- [ ] **Step 1: `planning.md` §1, a stacked plan's planner waits for its base's plan (spec §4).** In
+- [x] **Step 1: `planning.md` §1, a stacked plan's planner waits for its base's plan (spec §4).** In
   `skills/orchestrating/planning.md`, replace:
 
 ```text
@@ -607,7 +607,7 @@ with:
     against the files as the base plan leaves them;
 ```
 
-- [ ] **Step 2: `planning.md` §2, the step kinds and two new checks (spec §3, §5, §8; P1, P17).** Replace:
+- [x] **Step 2: `planning.md` §2, the step kinds and two new checks (spec §3, §5, §8; P1, P17).** Replace:
 
 ```text
    its steps says who runs it: `reviewer`, `owner` or `after merge`.
@@ -634,7 +634,7 @@ with:
    back to the later plan's planner, like a failed check; shared files become lines in the handoff question.
 ```
 
-- [ ] **Step 3: `planning.md` §3, one stop 3 for several plans (spec §4).** Replace:
+- [x] **Step 3: `planning.md` §3, one stop 3 for several plans (spec §4).** Replace:
 
 ```text
 - the handoff question from `dispatching.md` §1, with its warnings, for the first plan to run.
@@ -660,7 +660,7 @@ with:
   start). The answer is the go-ahead: do not ask again.
 ```
 
-- [ ] **Step 4: `planning.md` §4 points to `parallel.md` (spec §4, §7).** Replace:
+- [x] **Step 4: `planning.md` §4 points to `parallel.md` (spec §4, §7).** Replace:
 
 ```text
 They run one after another, in the spec's order. After plan k merges (`reviewing.md` §5), plan k+1 gets its own
@@ -675,7 +675,7 @@ and the one stop 3 (`parallel.md` §1), the conflict check before each dispatch 
 the one it builds on (`parallel.md` §3), and the order they land in (`parallel.md` §4).
 ```
 
-- [ ] **Step 5: `dispatching.md` §1, Branch only for a plan that runs alone (spec §7; D2.2; P27).** In
+- [x] **Step 5: `dispatching.md` §1, Branch only for a plan that runs alone (spec §7; D2.2; P27).** In
   `skills/orchestrating/dispatching.md`, replace:
 
 ```text
@@ -712,7 +712,7 @@ The owner's answer is the go-ahead to dispatch the plan, or each plan the questi
 starts; do not ask again.
 ```
 
-- [ ] **Step 6: `dispatching.md` §2 and §3, a worktree cut from `main` or the base's branch, `wt new`, and the exclude
+- [x] **Step 6: `dispatching.md` §2 and §3, a worktree cut from `main` or the base's branch, `wt new`, and the exclude
   file git names (spec §7; D3.10).** Replace:
 
 ```text
@@ -744,7 +744,7 @@ with:
   `wt new <branch> --from <base>`, which makes the same worktree and runs the repo's worktree setup.
 ```
 
-- [ ] **Step 7: `dispatching.md` §5 and §7, a stacked plan's dispatch and its hand-back (spec §5).** Replace:
+- [x] **Step 7: `dispatching.md` §5 and §7, a stacked plan's dispatch and its hand-back (spec §5).** Replace:
 
 ```text
 - the Claude-Session URL for its commit trailers, when your harness gives you one;
@@ -772,7 +772,7 @@ Before relaying anything, where the branch is checked out (for a stacked plan, o
 catch-up round is done: `parallel.md` §3):
 ```
 
-- [ ] **Step 8: Check.**
+- [x] **Step 8: Check.**
 
 | Run | Expected |
 |---|---|
@@ -786,7 +786,7 @@ catch-up round is done: `parallel.md` §3):
 | `grep -n -F 'git rev-parse --git-path info/exclude' skills/orchestrating/dispatching.md` | one line, in §3 |
 | `grep -n -F 'wt new <branch> --from <base>' skills/orchestrating/dispatching.md` | one line, in §3 |
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 git add skills/orchestrating/planning.md skills/orchestrating/dispatching.md
