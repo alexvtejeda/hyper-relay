@@ -1295,7 +1295,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `README.md:19-20` (status), `:37-38` (the relay table), `:40-42` (after it), `:88-90` (updating),
   `:126-127` (after `wt`), `:134-138` (the roadmap)
 
-- [ ] **Step 1: The status line (P20).** In `README.md`, replace:
+- [x] **Step 1: The status line (P20).** In `README.md`, replace:
 
 ```text
 > **Status: 0.1.0.** The skills, the role agents, per-repo configuration, the orchestrator and `wt` are in. Still to
@@ -1310,7 +1310,7 @@ with:
 > [Roadmap](#roadmap)).
 ```
 
-- [ ] **Step 2: The relay table gains the skill tests and `relay-merge` (spec §7).** Replace:
+- [x] **Step 2: The relay table gains the skill tests and `relay-merge` (spec §7).** Replace:
 
 ```text
 | Review | the acceptance reviewer agent, `requesting-code-review` (one review per branch), `receiving-code-review`, `verification-before-completion` | Evidence that it works: the plan's acceptance steps, one code review of the whole branch, then your click-through |
@@ -1324,7 +1324,7 @@ with:
 | Finish | `relay-merge`, run by the orchestrator (`finishing-a-development-branch` for work outside the relay) | A `--no-ff` merge into `main`, gated by the repo's `.hyper-relay/merge.conf`, on your call |
 ```
 
-- [ ] **Step 3: Several plans and the skill tests, under the table (spec §7).** Replace:
+- [x] **Step 3: Several plans and the skill tests, under the table (spec §7).** Replace:
 
 ```text
 `orchestrating` runs the legs from an approved spec to the merge: it dispatches the planner, the executor and the
@@ -1347,7 +1347,7 @@ beside the code review: each pressure scenario on `main`'s skills (RED) and on t
 `writing-skills` teaches.
 ```
 
-- [ ] **Step 4: Updating is an update and a reload (D2.11).** Replace:
+- [x] **Step 4: Updating is an update and a reload (D2.11).** Replace:
 
 ```text
 - **Updates follow the version.** `plugin.json` pins it, so `claude plugin update hyper-relay@hyper-relay` brings a new
@@ -1364,7 +1364,7 @@ with:
   if you turn on auto-update for it (`/plugin`, then **Marketplaces**).
 ```
 
-- [ ] **Step 5: `relay-merge` and its doc (spec §7).** Replace:
+- [x] **Step 5: `relay-merge` and its doc (spec §7).** Replace:
 
 ```text
 Each project that uses it commits a short `.wt.conf`. [docs/wt.md](docs/wt.md) says what to put in it, what `wt`
@@ -1390,7 +1390,7 @@ ln -sfn /path/to/hyper-relay/bin/relay-merge ~/.local/bin/relay-merge
 [docs/relay-merge.md](docs/relay-merge.md) says what goes in `merge.conf` and what each exit code means.
 ````
 
-- [ ] **Step 6: The roadmap (P20).** Replace:
+- [x] **Step 6: The roadmap (P20).** Replace:
 
 ```text
 | B | **Role agents generated per repo:** a planner, an executor and a reviewer built from hyper-relay's templates and one small committed facts file per repo (`.hyper-relay/agents.md`), with a session-start notice when they fall out of date | on `main` |
@@ -1410,7 +1410,7 @@ with:
 | E | **`wt`:** a disposable Docker Compose stack for each worktree (its own containers, database, ports and seed data), so a branch can be clicked through without touching your real stack. Each repo adds a short `.wt.conf` | 0.2.0 |
 ```
 
-- [ ] **Step 7: README checks.**
+- [x] **Step 7: README checks.**
 
 | Run | Expected |
 |---|---|
@@ -1422,7 +1422,7 @@ with:
 | `grep -c -F '\| 0.2.0 \|' README.md` | `5` |
 | `grep -n -F 'Updates follow the version' README.md` | nothing |
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add README.md
@@ -1431,7 +1431,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 9: The full gates, once.**
+- [x] **Step 9: The full gates, once.**
 
 | Run | Expected |
 |---|---|
