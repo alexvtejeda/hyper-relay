@@ -171,7 +171,7 @@ hooks`. Read outside the repo, read-only: `.git/config`, `.git/hooks/post-commit
   steps"), `:102` (Interfaces), `:117-122` (Step 3), `:137-152` ("No Placeholders", "Remember"), `:160-162`
   (self-review)
 
-- [ ] **Step 1: The reader (§2.1).** Replace:
+- [x] **Step 1: The reader (§2.1).** Replace:
 
 ```text
 Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
@@ -185,7 +185,7 @@ with:
 Write implementation plans for an engineer who has not seen this codebase or this spec. They write idiomatic code in the project's language once they know the exact interface and the exact test, and they make a reasonable choice wherever the plan leaves one open. What they cannot know is what you decided: which files, which names and signatures, which values from the spec, which tests prove each task. Document those. DRY. YAGNI. TDD. Frequent commits.
 ```
 
-- [ ] **Step 2: Sizing (§2.2).** Replace:
+- [x] **Step 2: Sizing (§2.2).** Replace:
 
 ```text
 ## Bite-Sized Task Granularity
@@ -207,7 +207,7 @@ A task is the smallest unit that carries its own test cycle and its own commit, 
 
 (The five example lines under it stay.)
 
-- [ ] **Step 3: Execution notes and Review Focus (§2.6, §2.3).** Replace:
+- [x] **Step 3: Execution notes and Review Focus (§2.6, §2.3).** Replace:
 
 ```text
 ## No Quartz steps in a plan
@@ -227,7 +227,7 @@ After its header and before its first task, the plan carries a **Review Focus** 
 ## No Quartz steps in a plan
 ```
 
-- [ ] **Step 4: The Interfaces block (§2.4; LP7).** Replace:
+- [x] **Step 4: The Interfaces block (§2.4; LP7).** Replace:
 
 ```text
 - Test: `tests/exact/path/to/test.py`
@@ -243,7 +243,7 @@ with:
 - Produces: [what later tasks use: exact function names, parameters and return types]
 ```
 
-- [ ] **Step 5: The example's Step 3 (§2.4).** This X starts mid-line, after the line's `- [ ] `. Replace:
+- [x] **Step 5: The example's Step 3 (§2.4).** This X starts mid-line, after the line's `- [ ] `. Replace:
 
 ````text
 **Step 3: Write minimal implementation**
@@ -262,7 +262,7 @@ with:
 One line on the approach when the signature and the test leave a choice (which library call, which data structure); a code block only for an algorithm they do not determine.
 ```
 
-- [ ] **Step 6: The trailer beside the example, and What a Step Contains (§2.4, §2.5; LP2).** Replace:
+- [x] **Step 6: The trailer beside the example, and What a Step Contains (§2.4, §2.5; LP2).** Replace:
 
 ```text
 ## No Placeholders
@@ -303,7 +303,7 @@ A step is done when the executor can write exactly one reasonable thing from it:
 A plan is the set of decisions the executor cannot make alone. A plan longer than the code it describes has written the code instead. Lines that decide nothing ("TBD", "TODO", "implement later", "fill in details", "handle edge cases", "add appropriate validation", "write tests for the above", "Similar to Task N", a type or function no task defines) are the opposite failure. The self-review catches both.
 ```
 
-- [ ] **Step 7: The self-review (§2.7).** Replace:
+- [x] **Step 7: The self-review (§2.7).** Replace:
 
 ```text
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
@@ -323,7 +323,7 @@ with:
 **5. Proportion:** Compare the plan's length with the spec's. When code blocks are most of the plan, replace bodies with signatures, test names and assertions, and check that each step is still unambiguous. Text steps do not count against the plan here.
 ```
 
-- [ ] **Step 8: Check it.**
+- [x] **Step 8: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -335,7 +335,7 @@ with:
 | `git diff main -- skills/writing-plans/SKILL.md \| grep -c -E '^[-+](---\|name:\|description:\|\*\*Announce\|\*\*Context:\|\*\*Save plans)'` | `0` (the frontmatter, the announce line, Context and Save plans to are untouched) |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `26 passed, 0 failed` |
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 git add skills/writing-plans/SKILL.md
