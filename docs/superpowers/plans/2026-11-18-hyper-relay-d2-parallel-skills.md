@@ -361,7 +361,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/orchestrating/SKILL.md:23-29` (the files beside it), `:38` (stop 4's row), `:58` (the state table),
   `:96-98` (Fallbacks, Models)
 
-- [ ] **Step 1: Create `skills/orchestrating/parallel.md`** with exactly this content:
+- [x] **Step 1: Create `skills/orchestrating/parallel.md`** with exactly this content:
 
 ````markdown
 # Several plans at once
@@ -482,7 +482,7 @@ Every landing is `reviewing.md` §4's: `relay-merge` from the main checkout on `
   its review legs (§3), and a plan waiting for it is dispatched (§2).
 ````
 
-- [ ] **Step 2: `SKILL.md` lists `parallel.md` beside the leg files (spec §7).** In `skills/orchestrating/SKILL.md`,
+- [x] **Step 2: `SKILL.md` lists `parallel.md` beside the leg files (spec §7).** In `skills/orchestrating/SKILL.md`,
   replace:
 
 ```text
@@ -509,7 +509,7 @@ its leg, not before; `parallel.md` whenever a second plan would be in flight or 
 - `${CLAUDE_SKILL_DIR}/quartz.md` (`quartz.md` beside this SKILL.md).
 ```
 
-- [ ] **Step 3: Stop 4 reports the skill tests (spec §8).** Replace:
+- [x] **Step 3: Stop 4 reports the skill tests (spec §8).** Replace:
 
 ```text
 | 4. Ready to merge | Its questions first: the proposed cards, the steps that are the owner's, where to click through. Then gate and acceptance results, fixes made, Critical findings fixed or dropped (`reviewing.md` §4) | the click-through and the merge |
@@ -521,7 +521,7 @@ with:
 | 4. Ready to merge | Its questions first: the proposed cards, the steps that are the owner's, where to click through. Then gate, acceptance and skill-test results, fixes made, Critical findings fixed or dropped (`reviewing.md` §4) | the click-through and the merge |
 ```
 
-- [ ] **Step 4: The stacked row (spec §7; P26).** Replace:
+- [x] **Step 4: The stacked row (spec §7; P26).** Replace:
 
 ```text
 | A plan's branch with all its executor tasks committed | By its review status (below) |
@@ -534,7 +534,7 @@ with:
 | A plan's branch with all its executor tasks committed | By its review status (below) |
 ```
 
-- [ ] **Step 5: The skill-test runs are on Sonnet (spec §8).** Replace:
+- [x] **Step 5: The skill-test runs are on Sonnet (spec §8).** Replace:
 
 ```text
 - **Models:** the generated agents carry their own. The plan reviewer and the code reviewer run on Sonnet: in Claude
@@ -550,7 +550,7 @@ with:
   per agent and not per dispatch, the `general` subagent's configured model.
 ```
 
-- [ ] **Step 6: Check.**
+- [x] **Step 6: Check.**
 
 | Run | Expected |
 |---|---|
@@ -561,7 +561,7 @@ with:
 | `grep -n -F '**Builds on:**' skills/orchestrating/SKILL.md` | one line, the state table's new row |
 | `grep -n -F 'skill-test' skills/orchestrating/SKILL.md` | two lines: stop 4's row and the Models fallback |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/orchestrating/parallel.md skills/orchestrating/SKILL.md
