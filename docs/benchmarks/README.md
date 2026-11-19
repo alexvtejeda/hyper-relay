@@ -68,6 +68,10 @@ G.2's acceptance) and `~/.claude/settings.json`, `~/.claude/CLAUDE.md` or the MC
 have changed since, move both aside (`mv ~/.claude-superpowers ~/.claude-superpowers.old`, the same for
 `~/.claude-neutral`) and build them again.
 
+The folders link the owner's own `~/.claude/skills`, `agents`, `commands`, `rules`, `hooks` and `bin`, and copy
+its `settings.json`, so every other hook stays: `ccs` and the rest still write to `~/.claude/session-state`
+from either run. That is harmless, and the same in both runs.
+
 Then log in to each and check it, from a scratch folder, so nothing about SAT lands in either:
 
 ```sh
@@ -77,7 +81,10 @@ CLAUDE_CONFIG_DIR=~/.claude-superpowers claude
 
 In that session: `/login`; `/plugin` lists superpowers, frontend-design, gopls-lsp and ui-ux-pro-max as
 installed, and no hyper-relay; typing `/` offers `superpowers:` skills and no `hyper-relay:` one; `/mcp`
-lists codebase-memory-mcp, context7 and playwright, and no Quartz; `/memory` shows no auto-memory notes.
+lists codebase-memory-mcp, context7 and playwright, and no Quartz (that check is about `/mcp` alone);
+`/memory` shows no auto-memory notes. A user-level skill from `~/.claude/skills`, such as
+`quartz-import-roadmap`, also shows in `/` in both folders: it is the owner's own skill, present in the relay
+run's environment too, so it is expected. The skill check is only that no `hyper-relay:` skill appears.
 Then `/exit`, and the same with `CLAUDE_CONFIG_DIR=~/.claude-neutral claude`, which has neither superpowers
 nor hyper-relay.
 
@@ -221,17 +228,21 @@ list does not count, and the results say so.
 **b. Usage.** `usage-c1.md` and `usage-c2.md`, each from its final log. Read each one's Cross-check line: a
 gap outside its tolerance is explained in the results, never ignored.
 
-**c. In-process catches.** Write `$BENCH/catches-input.md`, one line per transcript, `<run> <role> <path>`:
-every reviewer role's subagent transcripts, the executor's or implementers', and each run's main sessions
-(role `main`). A row `agent <id>` of session `<session>` is the file
+**c. In-process catches.** The counter reads only copies of the run's own transcripts, never a whole
+`projects` tree. Write `$BENCH/catches-input.md`, one line per transcript, `<run> <role> <path>`: every
+reviewer role's subagent transcripts, the executor's or implementers', and each run's main sessions (role
+`main`). A row `agent <id>` of session `<session>` is the file
 `<config>/projects/*/<session>/subagents/agent-<id>.jsonl`; a main session is
-`<config>/projects/*/<session>.jsonl`. Then:
+`<config>/projects/*/<session>.jsonl`. Copy each listed file into `$BENCH/transcripts/` as
+`<run>-<its file name>` (`c1` or `c2`), list those copies as the `<path>`s, and give the counter that folder
+alone:
 
 ```sh
+mkdir -p "$BENCH/transcripts"
 cd "$BENCH"
 cat "$HR/docs/benchmarks/catches-prompt.md" "$BENCH/catches-input.md" \
   | CLAUDE_CONFIG_DIR=~/.claude-neutral claude -p --model claude-opus-5-5 --no-session-persistence \
-      --permission-mode dontAsk --add-dir ~/.claude/projects --add-dir ~/.claude-superpowers/projects \
+      --permission-mode dontAsk --add-dir "$BENCH/transcripts" \
       --allowedTools Read "Bash(jq *)" "Bash(grep *)" > "$BENCH/catches.md"
 ```
 
