@@ -1074,7 +1074,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/brainstorming/SKILL.md:18` (the anti-pattern), `:28` (checklist step 1), `:121` (Documentation)
 - Modify: `skills/writing-plans/SKILL.md:152`
 
-- [ ] **Step 1: Checklist step 1 (spec §7).** In `skills/brainstorming/SKILL.md`, replace:
+- [x] **Step 1: Checklist step 1 (spec §7).** In `skills/brainstorming/SKILL.md`, replace:
 
 ```text
 1. **Tick Brain** — when the work has a Quartz card, call the Quartz MCP's `tick_brain` with the card id. The tick moves the card to the brainstorming column. With no card, skip this. If it fails, report the failure and carry on
@@ -1086,7 +1086,7 @@ with:
 1. **Quartz** — run `hyper-relay:orchestrating`'s Quartz check (`${CLAUDE_SKILL_DIR}/../orchestrating/quartz.md`, §1 and §2; `../orchestrating/quartz.md` from this SKILL.md). When the repo uses Quartz and the work has a card, call `tick_brain` with its id. If it fails, report the failure and carry on
 ```
 
-- [ ] **Step 2: The anti-pattern no longer reads against the off-ramp (spec §6).** Replace:
+- [x] **Step 2: The anti-pattern no longer reads against the off-ramp (spec §6).** Replace:
 
 ```text
 A todo list, a single-function utility, a config change — all of them.
@@ -1098,7 +1098,7 @@ with:
 A todo list, a single-function utility, a multi-line config change — all of them.
 ```
 
-- [ ] **Step 3: Documentation's `link-doc` condition (P7).** Replace:
+- [x] **Step 3: Documentation's `link-doc` condition (P7).** Replace:
 
 ```text
 (it puts an uncommitted doc on its cards; skip it without Quartz)
@@ -1110,7 +1110,7 @@ with:
 (it puts an uncommitted doc on its cards; skip it when step 1 found that the repo does not use Quartz)
 ```
 
-- [ ] **Step 4: `writing-plans` (spec §7).** In `skills/writing-plans/SKILL.md`, replace:
+- [x] **Step 4: `writing-plans` (spec §7).** In `skills/writing-plans/SKILL.md`, replace:
 
 ```text
 (it puts an uncommitted doc on its cards; skip it without Quartz)
@@ -1122,7 +1122,7 @@ with:
 (it puts an uncommitted doc on its cards; skip it when your dispatch prompt says the repo does not use Quartz)
 ```
 
-- [ ] **Step 5: Check.**
+- [x] **Step 5: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1132,7 +1132,7 @@ with:
 | `git grep -n -i 'without Quartz' -- skills/brainstorming skills/writing-plans` | nothing |
 | `git grep -n -F 'your dispatch prompt says the repo does not use Quartz' -- skills/writing-plans/SKILL.md` | one line |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/brainstorming/SKILL.md skills/writing-plans/SKILL.md
