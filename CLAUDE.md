@@ -18,9 +18,13 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 - `.hyper-relay/agents.md`: this repo's own facts, for its `relay-*` agents.
 - `bin/wt`: `wt`, a disposable Docker Compose stack for each git worktree (POSIX shell, run by dash). `docs/wt.md` is
   its user reference. Claude Code puts the plugin's `bin/` on the Bash tool's `PATH`, so skills call it by name.
+- `bin/relay-merge`: `relay-merge`, which lands branches on `main` one at a time, each as a merge commit whose merged
+  result must pass the repo's gates (POSIX shell, run by dash). `docs/relay-merge.md` is its user reference. This
+  repo's gates are `.hyper-relay/merge.conf`, which maps its paths to the Checks table below.
 - `tests/add-card-line/` tests brainstorming's `scripts/add-card-line.sh`. `skills/voice-to-specs/tests/` and
   `skills/visual-companion/scripts/run-tests.sh` test those skills' scripts. `tests/hyper-relay-agents/` tests the
-  generator, its hook and the guard. `tests/wt/` tests `wt`, with a fake `docker` and `ss`.
+  generator, its hook and the guard. `tests/wt/` tests `wt`, with a fake `docker` and `ss`. `tests/relay-merge/`
+  tests `relay-merge`, on temporary git repos with a fake `wt`.
 - `tests/claude-code/`, `tests/explicit-skill-requests/`, `tests/skill-triggering/`:
   upstream's live suites. They run real `claude -p` sessions with `--plugin-dir`, which spends usage and loads the
   directory in place: run them from a worktree, never from a checkout that holds a `.mcp.json`. `docs/testing.md` is
@@ -51,17 +55,26 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
   `branch`), and merge to `main`.
 - **Claude Code** installs from GitHub (`alexvtejeda/hyper-relay`), never from a local path: a local-directory
   marketplace loads gitignored files too, and this checkout's `.mcp.json` would load as the plugin's own MCP server.
-  `plugin.json` pins `version`, so `claude plugin update` and auto-update change nothing until the version does. The
-  version stays 0.1.0 until the hyper-relay initiative is finished (owner, 2026-11-17). Meanwhile: merge, push
-  `main`, and reinstall with `claude plugin install hyper-relay@hyper-relay`, which refreshes the installed copy from
-  `main`'s HEAD on GitHub (seen 2026-11-17); a new session loads it. A release raises the version with
-  `scripts/bump-version.sh <x.y.z>`, then merge, push `main`, and tag `v<x.y.z>`.
+  `plugin.json` pins `version`, so `claude plugin update` and auto-update change nothing until the version does.
+- **Every merge that changes what the plugin ships is released** (owner, 2026-11-18; this replaces the 2026-11-17 rule
+  "0.1.0 until the initiative is finished"). The first release is 0.2.0, once both of piece D.2's plans have merged;
+  until then, a merge reaches Claude Code by pushing `main` and reinstalling with
+  `claude plugin install hyper-relay@hyper-relay`, which refreshes the installed copy from `main`'s HEAD on GitHub (seen
+  2026-11-17). From 0.2.0 on, a merge that changes a file the plugin loads (under `skills/`, `bin/`, `templates/`,
+  `hooks/` or `.claude-plugin/`) raises the version: the patch number (0.2.1 next), unless the owner names another. A
+  release, on `main` after the merge: `scripts/bump-version.sh <x.y.z>` (it sets `package.json` and
+  `.claude-plugin/plugin.json`), a commit of just those two files, `chore: release v<x.y.z>`, the tag `v<x.y.z>`, then
+  push `main` and the tag. A plan that ships such a change ends its acceptance task with these as `after merge` steps.
+- **The owner updates** with `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in a running
+  session (or a new session), instead of uninstalling and reinstalling.
 - **Role agents** in a repo change only when its orchestrator reruns `hyper-relay-agents` there; the `SessionStart`
   check says when they are out of date.
 - **OpenCode** reads `skills/` in this main checkout, so it sees a change as soon as it merges, and during a branch
   run it sees that branch's skills.
 - **`wt`** in the owner's shell is `~/.local/bin/wt`, a symlink to this main checkout's `bin/wt`: a change reaches it
   as soon as it merges, and during a branch run the shell runs that branch's `wt`.
+- **`relay-merge`** in the owner's shell is `~/.local/bin/relay-merge`, a symlink to this main checkout's
+  `bin/relay-merge`, as `wt`'s is: a change reaches it as soon as it merges.
 
 ## Checks
 
@@ -73,5 +86,6 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 | Role agents | `sh tests/hyper-relay-agents/run-tests.sh` and `sh tests/hyper-relay-agents/guard-test.sh` | `0 failed` from each |
 | visual-companion | `bash skills/visual-companion/scripts/run-tests.sh` | every case `ok`, exit 0 |
 | wt | `sh tests/wt/run-tests.sh` | `0 failed` |
+| relay-merge | `sh tests/relay-merge/run-tests.sh` | `0 failed` |
 | Relay skills | `sh tests/orchestrating/run-tests.sh` | `0 failed` |
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |

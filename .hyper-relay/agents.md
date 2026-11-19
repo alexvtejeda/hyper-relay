@@ -21,6 +21,15 @@ the generator (the hyper-relay:agents skill). The generator ignores everything b
 - The full gates: the test suites the plan touches (the Checks table in `CLAUDE.md`), plus `claude plugin validate .`.
 - Also the owner's or the orchestrator's: anything that touches `~/.claude/`, `~/.config/opencode/` or the home
   directory's own repo, and installing or uninstalling a plugin.
+- **Releases** (`CLAUDE.md`, "How a change reaches the owner"): once `main`'s `.claude-plugin/plugin.json` is at 0.2.0
+  or later, a plan that changes a file the plugin loads (under `skills/`, `bin/`, `templates/`, `hooks/` or
+  `.claude-plugin/`) ends its acceptance task with these `after merge` steps, last, on `main` in the main checkout. (1)
+  `scripts/bump-version.sh <x.y.z>`, where `<x.y.z>` is `main`'s version then (`scripts/bump-version.sh --check`) with
+  its patch number raised by one, unless the owner names another; PASS: `--check` shows both files at `<x.y.z>`. (2) A
+  commit of just `package.json` and `.claude-plugin/plugin.json`, `chore: release v<x.y.z>`, with the attribution lines;
+  `git tag v<x.y.z>`; `git push origin main v<x.y.z>`. (3) The owner's `claude plugin update hyper-relay@hyper-relay`,
+  then `/reload-plugins` in a running session (or a new session); PASS: the cache holds
+  `~/.claude/plugins/cache/hyper-relay/hyper-relay/<x.y.z>/`.
 
 ## executor/setup
 - hyper-relay is a Claude Code and OpenCode plugin: Markdown skills, shell scripts and their tests. There is no app
