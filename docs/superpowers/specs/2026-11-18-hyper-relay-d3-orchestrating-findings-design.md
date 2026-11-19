@@ -30,6 +30,7 @@ repo uses Quartz, what "configured properly" means there, and what happens when 
 | D3.7 | Layout | **A new `skills/orchestrating/quartz.md`** holds the check, the setup, the ticks and the Quartz duties (moved from `SKILL.md`, which keeps a pointer). `brainstorming` points at it, because it runs before any other leg. |
 | D3.8 | A guard for D1's gates (finding 3) | **`tests/orchestrating/run-tests.sh`,** which also guards finding 7: `quartz install-git-hook` is named only in `quartz.md`. |
 | D3.9 | Two setup details (owner, at stop 3) | **Setup also excludes `.mcp.json` and `.envrc`** in `.git/info/exclude` when git does not track them, so they never show as `??` in a branch run's clean-tree checks (the planner's P3). **And setup prompts the owner for the token** that `.envrc` loads: when the token check still fails after setup writes its files, the closing message opens by asking the owner to create the token in Quartz's project settings and put it in `.env` as `QUARTZ_TOKEN=<token>`, in their editor, never in the chat (§2.2). |
+| D3.10 | Two code-review fixes (owner, at stop 4) | **The `.envrc` line keeps the whole token** (`cut -d= -f2-`, not `-f2`), and **the exclude file is the one `git rev-parse --git-path info/exclude` prints** in the main checkout, not a hard-coded `.git/info/exclude`. Fixed on the branch in `aeb39e5`; §2.2 below follows it. |
 
 ## 1. What changes where
 
@@ -90,8 +91,9 @@ work has a card; the spec and the plan carry its card line (a plan through its `
     `"Authorization": "Bearer ${QUARTZ_TOKEN}"` and `"X-Quartz-Repo": "<repo name>"`), keeping any other servers;
     create the file when there is none.
   - `.envrc`: when it has no `QUARTZ_TOKEN` line, append `watch_file .env` and
-    `export QUARTZ_TOKEN=$(grep '^QUARTZ_TOKEN=' .env 2>/dev/null | cut -d= -f2)`.
-  - `.env` ignored: `git check-ignore -q .env` succeeds, or add a `.env` line to `.git/info/exclude`. The same for
+    `export QUARTZ_TOKEN=$(grep '^QUARTZ_TOKEN=' .env 2>/dev/null | cut -d= -f2-)` (D3.10).
+  - `.env` ignored: `git check-ignore -q .env` succeeds, or add a `.env` line to the file `git rev-parse --git-path info/exclude`
+    prints (D3.10). The same for
     `.mcp.json` and `.envrc` when git does not track them (D3.9).
   - `quartz install-git-hook`.
   - Then one message. When the token check (below) fails, it opens with the prompt for the token (D3.9): create it in
