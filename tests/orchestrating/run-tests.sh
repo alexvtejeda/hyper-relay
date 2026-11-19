@@ -1,10 +1,11 @@
 #!/bin/sh
-# POSIX guard for the relay skills (hyper-relay D.3): D1's gates, the orchestrating
-# folder, no machine paths in it, references that resolve, and `quartz install-git-hook`
-# named only in quartz.md. It reads the working tree, not git's index, so an untracked
-# new file counts and it runs the same in a worktree. Each check also runs on a copy of
-# the tree broken on purpose, where it must fail.
-# Usage: sh tests/orchestrating/run-tests.sh      Expect: "24 passed, 0 failed"
+# POSIX guard for the relay skills (hyper-relay D.3, D.2): D1's gates, the orchestrating
+# folder, no machine paths in it, references that resolve, `quartz install-git-hook`
+# named only in quartz.md, and no orchestrating file naming finishing-a-development-branch
+# (the relay lands branches with relay-merge). It reads the working tree, not git's index,
+# so an untracked new file counts and it runs the same in a worktree. Each check also runs
+# on a copy of the tree broken on purpose, where it must fail.
+# Usage: sh tests/orchestrating/run-tests.sh      Expect: "26 passed, 0 failed"
 set -u
 LC_ALL=C
 export LC_ALL
@@ -78,11 +79,11 @@ brainstorming_never_invokes_writing_plans() (
         -e 'writing-plans is the next step' skills/brainstorming
 )
 
-# --- 2. The folder holds exactly the map, the three leg files and quartz.md.
+# --- 2. The folder holds exactly the map, the three leg files, parallel.md and quartz.md.
 orchestrating_folder() (
     cd "$1/skills/orchestrating" || exit 2
     got=$(ls -A | tr '\n' ' ')
-    want='SKILL.md dispatching.md planning.md quartz.md reviewing.md '
+    want='SKILL.md dispatching.md parallel.md planning.md quartz.md reviewing.md '
     if [ "$got" != "$want" ]; then
         echo "expected [$want], got [$got]"
         exit 1
@@ -150,9 +151,17 @@ install_git_hook_only_in_quartz_md() (
     fi
 )
 
+# --- 6. The relay lands branches with relay-merge: no orchestrating file names
+# finishing-a-development-branch, which stays for work outside the relay.
+no_finishing_branch_in_orchestrating() (
+    cd "$1" || exit 2
+    none -F 'finishing-a-development-branch' skills/orchestrating
+)
+
 CHECKS='no_old_dispatching_pointer dispatching_pointers_name_orchestrating old_dispatching_gone
 no_subagent_driven code_review_not_per_task brainstorming_never_invokes_writing_plans orchestrating_folder
-no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_in_quartz_md'
+no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_in_quartz_md
+no_finishing_branch_in_orchestrating'
 
 # --- the repo's tree passes every check
 for check in $CHECKS; do
@@ -208,7 +217,7 @@ broken "brainstorming invoking writing-plans"
 printf '\nThen invoke writing-plans.\n' >> "$CASE/skills/brainstorming/SKILL.md"
 expect_fail brainstorming_never_invokes_writing_plans
 
-broken "a sixth file in skills/orchestrating"
+broken "a seventh file in skills/orchestrating"
 printf '# notes\n' > "$CASE/skills/orchestrating/notes.md"
 expect_fail orchestrating_folder
 
@@ -231,6 +240,10 @@ expect_fail section_refs_resolve
 broken "quartz install-git-hook outside quartz.md"
 printf '\nRun `quartz install-git-hook` once.\n' >> "$CASE/skills/brainstorming/SKILL.md"
 expect_fail install_git_hook_only_in_quartz_md
+
+broken "finishing-a-development-branch in skills/orchestrating"
+printf '\nMerge with `hyper-relay:finishing-a-development-branch`.\n' >> "$CASE/skills/orchestrating/reviewing.md"
+expect_fail no_finishing_branch_in_orchestrating
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]
