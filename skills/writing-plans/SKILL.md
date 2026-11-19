@@ -26,7 +26,7 @@ Before writing, compare the number of plans you intend to write with the spec's 
 
 ## Stacked plans
 
-When the spec's list of plans says your plan builds on another, your plan's header carries `**Builds on:** <base plan path>`, beside its `**Spec:**` line, above its first `---`. The orchestrator dispatches you once the base plan is committed: read it, and plan against the files as the base plan leaves them (its tasks' code), not as `main` has them. A plan builds on exactly one plan. Its branch is cut from the base's branch (`hyper-relay:orchestrating`'s `parallel.md`).
+When the spec's list of plans says your plan builds on another, your plan's header carries `**Builds on:** <base plan path>`, beside its `**Spec:**` line, above its first `---`. The orchestrator dispatches you once the base plan is committed: read it, and plan against the files as the base plan leaves them (its tasks' files, signatures and text), not as `main` has them. A plan builds on exactly one plan. Its branch is cut from the base's branch (`hyper-relay:orchestrating`'s `parallel.md`).
 
 ## Sent back to renumber
 
@@ -80,7 +80,7 @@ A plan's **Execution notes** carry what is particular to it: a command not to ru
 
 ## Review Focus
 
-After its header and before its first task, the plan carries a **Review Focus** section: up to five input classes or failure modes that the spec implies but no task's tests exercise, the ones most likely to bite a person using the software, most likely first. Each is one line, naming the input or condition and the behaviour a reasonable person would expect. The spec is a vision document: its silence on an input is not permission for that input to break the program. Add each line's test to the task that owns the code, in that task's own step style. An empty section means you checked and found none, not that you skipped the check.
+After its header and before its first task, the plan carries a **Review Focus** section: up to five input classes or failure modes that the spec implies but no task's tests exercise, the ones most likely to bite a person using the software, most likely first. Each is one line, naming the input or condition and the behaviour a reasonable person would expect. The spec is a vision document: its silence on an input is not permission for that input to break the program. Each line's test goes into the test step of the task that owns the code, with its name and assertions, beside the spec's own cases: a Review Focus line that no test step asserts is a gap. An empty section means you checked and found none, not that you skipped the check.
 
 ## No Quartz steps in a plan
 
@@ -171,7 +171,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
-**4. Review Focus:** For each input class or failure mode the spec implies, a task's tests exercise it, or it is in Review Focus with its test added to the task that owns the code.
+**4. Review Focus:** For each input class or failure mode the spec implies, a task's tests exercise it, or it is in Review Focus and its test, with its assertions, is in the test step of the task that owns the code.
 
 **5. Proportion:** Compare the plan's length with the spec's. When code blocks are most of the plan, replace bodies with signatures, test names and assertions, and check that each step is still unambiguous. Text steps do not count against the plan here.
 
