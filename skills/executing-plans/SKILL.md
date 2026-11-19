@@ -63,7 +63,8 @@ setup, its full gates, its constraints and its acceptance steps.
 
 ## Never, in either mode
 
-- Switch branches, stash, reset, rebase, merge, push or tag. Tick the plan. Invoke
+- Switch branches, stash, reset, rebase, push or tag. Merge your branch into anything: the orchestrator lands it. Your
+  one merge is a catch-up or conflict round's, of `main` into your own branch (below). Tick the plan. Invoke
   `hyper-relay:finishing-a-development-branch`: the owner decides the merge.
 - Start a live `claude -p` or `opencode run` session, install or uninstall a plugin, or add a marketplace.
 - Call a real third-party API or use real credentials: tests use fakes.
@@ -73,6 +74,34 @@ setup, its full gates, its constraints and its acceptance steps.
   you started by its PID.
 
 Read files in targeted ranges, and pipe long output through `tail` or `grep`: the owner rations usage.
+
+## Catch-up and conflict rounds
+
+After your tasks, the orchestrator may resume you, or dispatch a fresh executor with the plan, for one of two rounds:
+
+- **Catch-up:** your plan was stacked on another plan's branch; that branch has merged, and `main` has changes your
+  branch lacks.
+- **Conflict:** `relay-merge` could not merge your branch into `main` because of a conflict, and left `main` unchanged.
+
+Either way, in your checkout and on your branch (process step 1):
+
+1. Merge `main`, or the branch the prompt names, into your branch. The merge commit carries the attribution lines your
+   instructions give, in one final paragraph, and no `Plan-Task:` trailer:
+
+   ```bash
+   git merge -m "Merge branch 'main' into <branch>" -m "Co-Authored-By: <the line your instructions give>
+   Claude-Session: <the URL the dispatch prompt gives>" main
+   ```
+
+   "Already up to date." means there is nothing to merge: say so in your report.
+2. On a conflict, resolve each conflicted file so that both sides' changes hold, and stage each by name
+   (`git add <file>`). Then commit the merge with the same two messages:
+   `git commit -m "Merge branch 'main' into <branch>" -m "<the same attribution lines>"`. When the two sides cannot
+   both hold, run `git merge --abort`, then stop and report the files and why.
+3. Rerun the full gates (process step 5).
+4. Report: the merge commit's hash, each conflict and how you resolved it, and the gates with their counts.
+
+Never merge your branch into `main` or any other branch: the orchestrator lands it with `relay-merge`.
 
 ## Branch mode adds
 
@@ -90,4 +119,5 @@ You share the repo's main checkout with the orchestrator, who keeps working whil
 - `hyper-relay:orchestrating` hands you the plan (its `dispatching.md`) and owns the review and the merge.
 - `hyper-relay:writing-plans` is the planner's: a planner wrote the plan you run.
 - `hyper-relay:test-driven-development`: when a task writes a test first, watch it fail before you make it pass.
-- `hyper-relay:finishing-a-development-branch` belongs to the owner and the orchestrator, after the click-through.
+- The orchestrator lands your branch with `relay-merge`, after the click-through.
+  `hyper-relay:finishing-a-development-branch` is for work outside the relay.
