@@ -72,6 +72,7 @@ One message, which ends there. It opens with its questions, numbered, in this or
 Then the report, short, one line per item:
 
 - the plan paths and their task counts;
+- a line per plan, "plan N lines for an M-line spec", from `wc -l` on the plan and on its spec;
 - the planner's deviations and ambiguities, with its resolutions;
 - the external facts it re-verified, and any differences.
 

@@ -122,7 +122,8 @@ catch-up round is done: `parallel.md` §3):
    tasks ends in a commit carrying its `Plan-Task:` trailer.
 3. Check the tree is clean: `GIT_OPTIONAL_LOCKS=0 git status --short` prints nothing but, on a branch run, your
    held-back docs (`??` under `docs/superpowers/`).
-4. Weigh every deviation the report lists: accept it, or tell the owner why not.
+4. Weigh every deviation the report lists, and every call the executor made where the plan left a choice open: accept
+   each, or tell the owner why not.
 5. Act on every `quartz:` line the report quotes.
 
 Then run `quartz review` there (the cards move to In review); if it fails, move the cards by hand through the Quartz
