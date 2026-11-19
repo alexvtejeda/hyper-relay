@@ -23,7 +23,7 @@ Agent tool (general-purpose, model: sonnet):
     | Placeholders | "TBD", "TODO", "implement later", "fill in details", "Similar to Task N", or a step that says what to do without the code or text to do it. |
     | Consistent names | A file, function, flag, heading or section named one way in one task and another way in a later one. |
     | `Plan-Task:` trailers | Each task with a commit step: its final commit carries `Plan-Task: <this plan's path>#<N>` once, with its own task number and this plan's own path. |
-    | The acceptance task | It is the last task. Each of its steps says who runs it (`reviewer`, `owner` or `after merge`), with its command or action and the result that counts as PASS. |
+    | The acceptance task | It is the last task. Each of its steps says who runs it (`reviewer`, `owner`, `after merge` or `skill-test`), with its command or action and the result that counts as PASS; a `skill-test` step gives a situation, what GREEN must do and what RED is expected to do. |
     | Execution notes | Present: how to commit, what is not the executor's, the full gates. |
     | External facts | Each fact the spec asks to re-verify is cited with its URL and the date it was checked; a difference is listed as a deviation. |
     | Buildability | Could an executor follow every step without getting stuck or guessing? |

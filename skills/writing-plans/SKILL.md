@@ -26,6 +26,14 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 Before writing, compare the number of plans you intend to write with the spec's `**Plans:** <n>` header line. A spec without the line means 1. If they differ, stop before writing any plan and report the mismatch to the orchestrator: the number you would write, and why. It asks the owner, updates the spec's `**Plans:**` line itself (`hyper-relay:orchestrating`'s `planning.md`), and dispatches you again. Never edit the spec: you write plans only.
 
+## Stacked plans
+
+When the spec's list of plans says your plan builds on another, your plan's header carries `**Builds on:** <base plan path>`, beside its `**Spec:**` line, above its first `---`. The orchestrator dispatches you once the base plan is committed: read it, and plan against the files as the base plan leaves them (its tasks' code), not as `main` has them. A plan builds on exactly one plan. Its branch is cut from the base's branch (`hyper-relay:orchestrating`'s `parallel.md`).
+
+## Sent back to renumber
+
+When the orchestrator sends your plan back because another plan in flight creates files with the same leading number in the same folder (`000097_*` migrations, say), renumber yours above the highest number its prompt names, everywhere the plan names them (paths, code, commands), and commit the plan again.
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
@@ -71,7 +79,17 @@ A plan carries no `quartz link-branch` step and no `quartz review` step: the orc
 ## Spec coverage and the acceptance task
 
 - After the header, a **Spec coverage** table maps each `## ` section of the spec to the task numbers that implement it. With sibling plans, each plan has a **Contract** section, identical in each.
-- The plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the orchestrator: live sessions, reinstalls, edits outside the repo), with its command or action and the result that counts as PASS.
+- The plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the orchestrator: live sessions, reinstalls, edits outside the repo), or **`skill-test`** (below), with its command or action and the result that counts as PASS.
+
+## Skill tests
+
+A plan that creates or changes a file in a skill's folder (its `SKILL.md`, or a file beside it that agents read) adds `skill-test` steps to its acceptance task: one per pressure scenario the spec names. When the spec names none, write them from the behaviour it changes, and list that among your deviations. Each step gives:
+
+- **Situation:** everything a fresh agent needs, in full, since it sees only the skills and this text: who it is (the orchestrator, an executor, a planner), the repo's state, what has just happened, and what it is asked to answer.
+- **GREEN:** what an agent reading the branch's skills must do, concretely enough to judge from its answer (the commands it would run and its next message).
+- **RED:** what an agent reading `main`'s skills (or none, for a new skill) is expected to do instead.
+
+The orchestrator runs each scenario on both, after acceptance and beside the code review (`hyper-relay:orchestrating`'s `reviewing.md`).
 
 ## Task Structure
 
