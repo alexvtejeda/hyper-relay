@@ -194,7 +194,7 @@ of it, and nothing in it reaches the repo.
 **Files:**
 - Create: `tests/relay-merge/run-tests.sh`
 
-- [ ] **Step 1: Write the suite.** Create `tests/relay-merge/run-tests.sh` with exactly this content:
+- [x] **Step 1: Write the suite.** Create `tests/relay-merge/run-tests.sh` with exactly this content:
 
 ```sh
 #!/bin/sh
@@ -644,12 +644,12 @@ printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]
 ```
 
-- [ ] **Step 2: Syntax.**
+- [x] **Step 2: Syntax.**
 
 Run: `dash -n tests/relay-merge/run-tests.sh`
 Expected: silent, exit 0.
 
-- [ ] **Step 3: Run it; it fails, because `bin/relay-merge` does not exist yet.**
+- [x] **Step 3: Run it; it fails, because `bin/relay-merge` does not exist yet.**
 
 | Run | Expected |
 |---|---|
@@ -658,7 +658,7 @@ Expected: silent, exit 0.
 
 If the counts do not add up to 107, a case did not run to its assertions: stop and report the output.
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add tests/relay-merge/run-tests.sh
