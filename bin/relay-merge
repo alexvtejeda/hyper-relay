@@ -1,0 +1,259 @@
+#!/bin/sh
+# relay-merge: land branches on main one at a time, gating each merged result.
+# POSIX shell, run by dash. How to use it, and what to put in .hyper-relay/merge.conf:
+# docs/relay-merge.md in hyper-relay.
+#
+#   relay-merge <branch>...    in the main checkout, on main
+#
+# Each branch, in the order given, stopping at the first failure: the checks, then
+# git merge --no-ff, then the gates of main's committed .hyper-relay/merge.conf whose
+# path prefix matches a file the branch changed, run on the merged result. Once every
+# branch is in: the push, then the cleanup of each branch and its worktree.
+#
+# Exit: 0 every branch landed; 1 refused by a check, that branch did not change main;
+#       2 a merge conflict, aborted, main unchanged for that branch;
+#       3 a gate failed, the merge is on main, unpushed.
+# Environment: PUSH=1 pushes, PUSH=0 does not, unset asks on a terminal (no terminal:
+#       no); KEEP=1 skips the cleanup; SKIP_TESTS=1 skips the test gates;
+#       RELAY_MERGE_TRAILERS holds lines for the end of each merge message.
+set -eu
+
+CONF_PATH=.hyper-relay/merge.conf
+LOG_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/relay-merge"
+USAGE="usage: relay-merge <branch>... (in the main checkout, on main; settings are environment variables: docs/relay-merge.md)"
+LANDED=
+
+say() { printf 'relay-merge: %s\n' "$*"; }
+warn() { printf 'relay-merge: warning: %s\n' "$*" >&2; }
+
+# stop <code> <message>: says why, and what landed before it, then exits with <code>.
+stop() {
+    code=$1
+    shift
+    printf 'relay-merge: %s\n' "$*" >&2
+    if [ -n "$LANDED" ]; then
+        printf 'relay-merge: landed before this:%s (nothing was pushed or cleaned up)\n' "$LANDED" >&2
+    fi
+    exit "$code"
+}
+
+# under <prefixes>: the paths on stdin, one per line, that start with one of the
+# newline-separated prefixes. The prefix "." matches every path.
+under() {
+    PREFIXES=$1 awk 'BEGIN { n = split(ENVIRON["PREFIXES"], p, "\n") }
+        { for (i = 1; i <= n; i++) if (p[i] == "." || (p[i] != "" && index($0, p[i]) == 1)) { print; next } }'
+}
+
+# worktree_of <branch>: the path of the worktree that has <branch> checked out, if any.
+worktree_of() {
+    git worktree list --porcelain | awk -v ref="refs/heads/$1" '
+        /^worktree / { path = substr($0, 10) }
+        $0 == "branch " ref { print path; exit }'
+}
+
+# stack_up <worktree>: wt ls lists a stack for exactly that worktree. False when wt is
+# not on PATH.
+stack_up() {
+    command -v wt > /dev/null 2>&1 || return 1
+    wt ls 2> /dev/null | sed -n 's/^[^ ]*  [0-9]* running  //p' | sed 's/ \[stale: .*\]$//' |
+        grep -q -x -F -e "$1"
+}
+
+# drain_input: drops what was typed on the terminal while the gates ran, so an Enter
+# pressed then cannot answer the push question.
+drain_input() {
+    tty_state=$(stty -g 2> /dev/null) || return 0
+    stty -icanon min 0 time 0 2> /dev/null || return 0
+    while IFS= read -r junk; do :; done
+    stty "$tty_state" 2> /dev/null || true
+}
+
+# want_push <question>: PUSH=1 is yes and PUSH=0 no. Otherwise the answer comes from a
+# terminal, and with no terminal it is no.
+want_push() {
+    case ${PUSH:-} in
+        1) return 0 ;;
+        0) return 1 ;;
+    esac
+    if [ ! -t 0 ]; then
+        say "$1 No terminal to ask on, so: no (PUSH=1 pushes)."
+        return 1
+    fi
+    drain_input
+    printf 'relay-merge: %s [y/N] ' "$1"
+    answer=
+    read -r answer || true
+    case $(printf '%s' "$answer" | tr -d ' \t\r') in
+        y | Y | yes | Yes | YES) return 0 ;;
+    esac
+    return 1
+}
+
+# run_gates: on the merged result, each gate whose prefix matches a file $branch
+# changed, once per command, in the file's order. A failed gate stops everything.
+run_gates() {
+    if [ "$HAVE_CONF" = 0 ]; then
+        say "  no $CONF_PATH on main: landed without gates"
+        return 0
+    fi
+    log="$LOG_ROOT/$REPO_NAME-$STAMP-$(printf '%s' "$branch" | tr '/' '-').log"
+    seen=
+    ran=0
+    while read -r prefix kind cmd; do
+        case $prefix in '' | '#'*) continue ;; esac
+        [ -n "$(printf '%s\n' "$changed" | under "$prefix")" ] || continue
+        if printf '%s\n' "$seen" | grep -q -x -F -e "$cmd"; then
+            continue
+        fi
+        seen="$seen
+$cmd"
+        if [ "$kind" = test ] && [ "${SKIP_TESTS:-0}" = 1 ]; then
+            say "  skipped (SKIP_TESTS=1): $cmd"
+            continue
+        fi
+        printf '\n$ %s\n' "$cmd" >> "$log"
+        printf 'relay-merge:   %-5s  %s ... ' "$kind" "$cmd"
+        if sh -c "$cmd" < /dev/null >> "$log" 2>&1; then
+            echo ok
+            ran=$((ran + 1))
+        else
+            echo FAILED
+            tail -n 20 "$log" | sed 's/^/    /' >&2
+            stop 3 "a gate failed on the merged result of $branch. The merge is on main, NOT pushed; main was $before before it. Fix forward, or undo it yourself. Log: $log"
+        fi
+    done << EOF
+$CONF
+EOF
+    if [ -z "$seen" ]; then
+        say "  no gate matches its changes"
+    elif [ "$ran" -gt 0 ]; then
+        say "  $ran gate(s) passed; log: $log"
+    fi
+}
+
+# --- the repo-wide checks, before anything changes
+for arg in "$@"; do
+    case $arg in
+        -*) stop 1 "$USAGE" ;;
+    esac
+done
+[ $# -gt 0 ] || stop 1 "$USAGE"
+TOP=$(git rev-parse --show-toplevel 2> /dev/null) || stop 1 "not inside a git repository"
+cd "$TOP"
+git_dir=$(cd "$(git rev-parse --git-dir)" && pwd -P)
+git_common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+[ "$git_dir" = "$git_common" ] || stop 1 "this is a worktree; run relay-merge from the main checkout"
+[ "$(git branch --show-current)" = main ] || stop 1 "the main checkout is not on main; switch it to main first"
+if git rev-parse -q --verify MERGE_HEAD > /dev/null; then
+    stop 1 "a merge is in progress in the main checkout; finish or abort it first"
+fi
+
+# --- main's committed merge.conf: checked line by line, and the prefixes it watches
+HAVE_CONF=0
+CONF=
+WATCH=.
+if git cat-file -e "HEAD:$CONF_PATH" 2> /dev/null; then
+    HAVE_CONF=1
+    CONF=$(git show "HEAD:$CONF_PATH")
+    WATCH=
+    n=0
+    while read -r prefix kind cmd; do
+        n=$((n + 1))
+        case $prefix in
+            '' | '#'*) continue ;;
+            /* | ./*) stop 1 "$CONF_PATH line $n: the prefix $prefix must be a path from the repo's top, with no leading / or ./" ;;
+        esac
+        case $kind in
+            build | test) ;;
+            *) stop 1 "$CONF_PATH line $n: the kind is build or test, not '$kind'" ;;
+        esac
+        [ -n "$cmd" ] || stop 1 "$CONF_PATH line $n: no command"
+        WATCH="$WATCH
+$prefix"
+    done << EOF
+$CONF
+EOF
+    mkdir -p "$LOG_ROOT" || stop 1 "cannot create the log folder $LOG_ROOT"
+fi
+REPO_NAME=$(basename "$TOP")
+STAMP=$(date +%Y%m%d-%H%M%S)
+
+# --- each branch: the checks, the merge, the gates
+for branch in "$@"; do
+    say "landing $branch"
+    [ "$branch" != main ] || stop 1 "main cannot land on itself"
+    dirt=$(git -c core.quotePath=false diff --name-only --no-renames HEAD -- | under "$WATCH")
+    if [ -n "$dirt" ]; then
+        printf '%s\n' "$dirt" | sed 's/^/    /' >&2
+        stop 1 "uncommitted changes on main under the paths the gates watch (above); commit or stash them first"
+    fi
+    git rev-parse -q --verify "refs/heads/$branch" > /dev/null || stop 1 "no branch named $branch"
+    wt=$(worktree_of "$branch")
+    if [ -n "$wt" ]; then
+        [ -d "$wt" ] || stop 1 "$branch's worktree $wt is missing; git worktree prune forgets it"
+        [ -z "$(git -C "$wt" status --porcelain)" ] || stop 1 "$branch's worktree $wt has uncommitted changes"
+        if stack_up "$wt"; then
+            stop 1 "$branch's worktree has a wt stack up; run wt down in $wt first"
+        fi
+    fi
+    if git merge-base --is-ancestor "$branch" HEAD; then
+        say "  already in main; nothing to merge"
+        LANDED="$LANDED $branch"
+        continue
+    fi
+
+    changed=$(git -c core.quotePath=false diff --name-only --no-renames "HEAD...$branch" --)
+    before=$(git rev-parse --short HEAD)
+    msg="Merge branch '$branch'"
+    if [ -n "${RELAY_MERGE_TRAILERS:-}" ]; then
+        msg="$msg
+
+$RELAY_MERGE_TRAILERS"
+    fi
+    if ! git merge --no-ff --no-edit -m "$msg" "$branch"; then
+        if git rev-parse -q --verify MERGE_HEAD > /dev/null; then
+            git merge --abort || warn "git merge --abort failed; look at the main checkout before anything else"
+            stop 2 "merging $branch conflicted, so it was aborted and main is unchanged. Merge main into $branch and resolve it there"
+        fi
+        stop 1 "git refused to merge $branch (above); main is unchanged"
+    fi
+    say "  merged as $(git rev-parse --short HEAD)"
+    run_gates
+    LANDED="$LANDED $branch"
+done
+
+# --- every branch is in: the push, then the cleanup
+remote=$(git config --get branch.main.remote || echo origin)
+ahead=$(git rev-list --count '@{upstream}..HEAD' 2> /dev/null) || ahead=
+if [ "$ahead" = 0 ]; then
+    say "main is level with its upstream: nothing to push"
+elif want_push "Push main to $remote${ahead:+ ($ahead commit(s) ahead)}?"; then
+    if git push "$remote" main; then
+        say "pushed main to $remote"
+    else
+        warn "the push failed; main has landed here, not on $remote"
+    fi
+else
+    say "main is not pushed"
+fi
+
+if [ "${KEEP:-0}" = 1 ]; then
+    say "kept the branches and their worktrees (KEEP=1)"
+else
+    for branch in $LANDED; do
+        wt=$(worktree_of "$branch")
+        if [ -n "$wt" ]; then
+            if git worktree remove "$wt"; then
+                say "removed the worktree $wt"
+            else
+                warn "could not remove the worktree $wt; it is left as it is"
+            fi
+        fi
+        if git branch -d "$branch" > /dev/null 2>&1; then
+            say "deleted the branch $branch"
+        else
+            warn "kept the branch $branch (git branch -d refused it)"
+        fi
+    done
+fi
+say "landed:$LANDED"
