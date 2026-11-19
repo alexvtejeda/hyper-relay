@@ -692,7 +692,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `skills/orchestrating/SKILL.md` (The stops; Finding where work stands)
 
-- [ ] **Step 1: The stops rule, and rows 3 and 4 in the new order.** In `skills/orchestrating/SKILL.md`, replace:
+- [x] **Step 1: The stops rule, and rows 3 and 4 in the new order.** In `skills/orchestrating/SKILL.md`, replace:
 
 ```text
 | 3. Plan ready | The hand-back check's result, the planner's deviations, the decisions the owner must make, the plan-review offer, the handoff question (`planning.md` §3) | execution, a plan review, or plan changes |
@@ -712,7 +712,7 @@ after the report.
 
 The existing blank line and the paragraph "A stop ends the message: …" follow it unchanged.
 
-- [ ] **Step 2: A spec with no plan is offered, not assumed (finding 2).** Replace:
+- [x] **Step 2: A spec with no plan is offered, not assumed (finding 2).** Replace:
 
 ```text
 | A spec that no plan's `**Spec:**` line names | The planner leg, once the owner has approved the spec: their asking to pick it up is that approval. Never brainstorm it again. |
@@ -724,7 +724,7 @@ with:
 | A spec that no plan's `**Spec:**` line names | **Offer** the planner leg: name the spec and ask whether to plan it; the owner's yes is the approval. When the owner asked to pick up that spec, the request is the yes. Never brainstorm it again. |
 ```
 
-- [ ] **Step 3: A branch with every executor task committed goes by its review status (finding 1).** Replace:
+- [x] **Step 3: A branch with every executor task committed goes by its review status (finding 1).** Replace:
 
 ```text
 | A plan's branch with all its executor tasks committed | `dispatching.md` §7 (verify), then `reviewing.md` |
@@ -763,7 +763,7 @@ first, and the fix commits are those above the newest one with a trailer.
 The branch name comes from the plan's file name (`dispatching.md` §3). To read the state:
 ```
 
-- [ ] **Step 4: Check.**
+- [x] **Step 4: Check.**
 
 | Run | Expected |
 |---|---|
@@ -772,7 +772,7 @@ The branch name comes from the plan's file name (`dispatching.md` §3). To read 
 | `git grep -n -F '**Offer** the planner leg' -- skills/orchestrating/SKILL.md` | one line |
 | `git grep -n -e '"acceptance done"' -e '"code review done"' -e 'A fix commit is' -- skills/orchestrating/SKILL.md` | three lines |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/orchestrating/SKILL.md
