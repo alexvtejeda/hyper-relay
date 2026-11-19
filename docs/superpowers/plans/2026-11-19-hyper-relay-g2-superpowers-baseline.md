@@ -740,7 +740,7 @@ Then `git ls-files -s tests/benchmark/run-tests.sh` must print a line starting `
 - Create: `scripts/benchmark/prices.tsv`, `scripts/benchmark/run-usage.jq`, `scripts/benchmark/run-usage.sh`
 - Test: `tests/benchmark/run-tests.sh`
 
-- [ ] **Step 1: The prices.** Run this from the checkout's top (it writes tabs, which the Write tool may not keep):
+- [x] **Step 1: The prices.** Run this from the checkout's top (it writes tabs, which the Write tool may not keep):
 
 ```sh
 mkdir -p scripts/benchmark
@@ -765,7 +765,7 @@ printf 'claude-haiku-4-5\t0\t1\t5\t0.10\t1.25\t2\n'
 
 Check: `awk -F '\t' '!/^#/ && NF { print NF }' scripts/benchmark/prices.tsv | sort -u` prints `7` alone.
 
-- [ ] **Step 2: The reader.** Create `scripts/benchmark/run-usage.jq` with exactly this content:
+- [x] **Step 2: The reader.** Create `scripts/benchmark/run-usage.jq` with exactly this content:
 
 ```jq
 # run-usage.jq: the transcript reader behind run-usage.sh (hyper-relay G.2; docs/benchmarks/README.md).
@@ -969,7 +969,7 @@ def sessions:
 if $ARGS.named.mode == "sessions" then sessions else report end
 ```
 
-- [ ] **Step 3: The script.** Create `scripts/benchmark/run-usage.sh` with exactly this content:
+- [x] **Step 3: The script.** Create `scripts/benchmark/run-usage.sh` with exactly this content:
 
 ```sh
 #!/bin/sh
@@ -1121,14 +1121,14 @@ jq -n -r -R --arg mode report --arg title "$TITLE" --arg config "$CONFIG_RAW" \
     -f "$PROG" "$@"
 ```
 
-- [ ] **Step 4: Mode and syntax.**
+- [x] **Step 4: Mode and syntax.**
 
 | Run | Expected |
 |---|---|
 | `chmod +x scripts/benchmark/run-usage.sh` | silent |
 | `dash -n scripts/benchmark/run-usage.sh` | silent, exit 0 |
 
-- [ ] **Step 5: The usage tool's half of the suite passes.** (`superpowers-env.sh` comes in Task 3, so the `env:`
+- [x] **Step 5: The usage tool's half of the suite passes.** (`superpowers-env.sh` comes in Task 3, so the `env:`
   assertions still fail.)
 
 | Run | Expected |
@@ -1139,7 +1139,7 @@ jq -n -r -R --arg mode report --arg title "$TITLE" --arg config "$CONFIG_RAW" \
 A failure here is a bug in `run-usage.sh` or `run-usage.jq` (a jq syntax error shows as `jq: error: … compile error`):
 fix the code, never the suite.
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add scripts/benchmark/prices.tsv scripts/benchmark/run-usage.jq scripts/benchmark/run-usage.sh
