@@ -2354,3 +2354,23 @@ git -C /home/noob_master/hyper-relay commit -m "docs: G.2 last-task record" -m "
 ```
 
 Then the runbook (`docs/benchmarks/README.md`) takes over: its runs are not this plan's.
+
+## Last-task record (Task 7)
+
+- **Before the merge:** acceptance reviewer 9/9 PASS, 0 NEEDS-HUMAN, 0 blocking; D1's rows equal (all five legs
+  match `relay-token-measurements` call for call); D1's cross-check $1.82, 4.87% of the cost records, within; the
+  compacted session's $3.98, 5.16%, 1 compaction, within; fix rounds 1, owner-requested at stop 4 (`46e2fc2`, the
+  runbook only: step 1 says the linked user skill `quartz-import-roadmap` is expected and that `ccs` still writes
+  `~/.claude/session-state`; step 6c gives the catch counter copies of the run's own transcripts instead of whole
+  `projects` trees), after which Steps 3 and 9 re-PASS; code review: Ready, no Critical, 0 Important, 3 Minor (two
+  fixed in that round, the prices spot-check answered by D1's Sonnet costs matching the cost records exactly);
+  proposed cards: one (runbook polish), fixed on the branch instead; token counts: executor 16 calls / 9,477 output
+  (fix round 5 / 3,082), acceptance reviewer 17 / 13,625 (rerun 3 / 2,699), code reviewer 4 / 3,231.
+- **Owner steps:** Step 10 agreed, no change; Step 11 superpowers 7.0.2, installed as
+  `superpowers@anthropic-plugin-directory` at `22f0b463` (upstream's `v7.0.2` tag; the script asked for
+  `superpowers@superpowers-marketplace`), checks passed, the owner's `settings.json` and `CLAUDE.md` unchanged;
+  Step 12 `merge-tree` exit 0 (at `8a2b55c`, and again at `46e2fc2`). Merged in `89adf66`; `relay-merge` ran one gate
+  (`tests/orchestrating`), from `main`'s `merge.conf`, which did not yet have this branch's benchmark gates.
+- **After merge:** suites on `main` 90 passed, 0 failed (benchmark) and 26 passed, 0 failed (orchestrating);
+  `claude plugin validate .` passes with its three warnings; no release; D1's table committed in `652b9b5`; `main`
+  pushed no (the owner's call).
