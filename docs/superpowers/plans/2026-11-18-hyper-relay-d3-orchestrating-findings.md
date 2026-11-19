@@ -787,7 +787,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/orchestrating/planning.md:25-29` (§1's prompt), `:36-37` (§2 check 1), `:55-70` (§3)
 - Modify: `skills/orchestrating/dispatching.md:45` (§2), `:73` (§4), `:104` (§6)
 
-- [ ] **Step 1: The planner hears whether the repo uses Quartz (spec §7).** In `skills/orchestrating/planning.md`,
+- [x] **Step 1: The planner hears whether the repo uses Quartz (spec §7).** In `skills/orchestrating/planning.md`,
   replace:
 
 ```text
@@ -810,7 +810,7 @@ with:
     Quartz) and you commit it after the merge (`reviewing.md` §5).
 ```
 
-- [ ] **Step 2: The branch-run hand-back check (spec §6).** Replace:
+- [x] **Step 2: The branch-run hand-back check (spec §6).** Replace:
 
 ```text
 1. **Committed:** `git log -1 --format=%h main -- <plan>` prints a commit. During a branch run: the file exists, and
@@ -825,7 +825,7 @@ with:
    among its docs. When the repo does not use Quartz (`quartz.md` §1), the file exists.
 ```
 
-- [ ] **Step 3: Stop 3 asks first (spec §3).** Replace:
+- [x] **Step 3: Stop 3 asks first (spec §3).** Replace:
 
 ```text
 One message, which ends there:
@@ -867,7 +867,7 @@ with:
   changed.
 ```
 
-- [ ] **Step 4: `dispatching.md`'s section references and its Quartz condition (spec §6, §7).** In
+- [x] **Step 4: `dispatching.md`'s section references and its Quartz condition (spec §6, §7).** In
   `skills/orchestrating/dispatching.md`, replace:
 
 ```text
@@ -904,7 +904,7 @@ with:
 - **A second plan runs only in a worktree** (§1).
 ```
 
-- [ ] **Step 5: Check (P17).**
+- [x] **Step 5: Check (P17).**
 
 | Run | Expected |
 |---|---|
@@ -914,7 +914,7 @@ with:
 | `git grep -c -F 'quartz.md' -- skills/orchestrating/planning.md skills/orchestrating/dispatching.md` | `skills/orchestrating/dispatching.md:1` and `skills/orchestrating/planning.md:2` |
 | `git grep -n -F 'Then the report, short' -- skills/orchestrating/planning.md` | one line, in §3 |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/orchestrating/planning.md skills/orchestrating/dispatching.md
