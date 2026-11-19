@@ -1054,7 +1054,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
   (Integration)
 - Modify: `templates/agents/executor.md:5-7` (description), `:16-19` (the opening paragraph)
 
-- [ ] **Step 1: The "never" list allows one merge.** In `skills/executing-plans/SKILL.md`, replace:
+- [x] **Step 1: The "never" list allows one merge.** In `skills/executing-plans/SKILL.md`, replace:
 
 ```text
 - Switch branches, stash, reset, rebase, merge, push or tag. Tick the plan. Invoke
@@ -1069,7 +1069,7 @@ with:
   `hyper-relay:finishing-a-development-branch`: the owner decides the merge.
 ```
 
-- [ ] **Step 2: The rounds.** Replace:
+- [x] **Step 2: The rounds.** Replace:
 
 ```text
 ## Branch mode adds
@@ -1109,7 +1109,7 @@ Never merge your branch into `main` or any other branch: the orchestrator lands 
 ## Branch mode adds
 ````
 
-- [ ] **Step 3: Integration.** Replace:
+- [x] **Step 3: Integration.** Replace:
 
 ```text
 - `hyper-relay:finishing-a-development-branch` belongs to the owner and the orchestrator, after the click-through.
@@ -1122,7 +1122,7 @@ with:
   `hyper-relay:finishing-a-development-branch` is for work outside the relay.
 ```
 
-- [ ] **Step 4: The executor template.** In `templates/agents/executor.md`, replace:
+- [x] **Step 4: The executor template.** In `templates/agents/executor.md`, replace:
 
 ```text
   hyper-relay:executing-plans skill, on the branch it is given, in the main checkout or its own worktree. Never
@@ -1157,7 +1157,7 @@ the plan, the mode (`branch` or `worktree`), the checkout and the branch, and wh
 what is particular to {{project}}.
 ```
 
-- [ ] **Step 5: Check.**
+- [x] **Step 5: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1170,7 +1170,7 @@ what is particular to {{project}}.
 | `grep -n -F 'never merges its branch into anything' templates/agents/executor.md` | one line, in the front matter |
 | `sed -n '13p' templates/agents/executor.md` | `---`: the front matter, one line longer, now closes on line 13 |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/executing-plans/SKILL.md templates/agents/executor.md
