@@ -1095,7 +1095,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Create: `docs/relay-merge.md`
 
-- [ ] **Step 1: Write the reference.** Create `docs/relay-merge.md` with exactly this content:
+- [x] **Step 1: Write the reference.** Create `docs/relay-merge.md` with exactly this content:
 
 ````markdown
 # relay-merge: land branches on main, gated
@@ -1229,7 +1229,7 @@ tracked file on `main`.
   privileges: land only branches whose code you would run.
 ````
 
-- [ ] **Step 2: The reference says what the tool does.** (`git grep --untracked` reads the new file before its
+- [x] **Step 2: The reference says what the tool does.** (`git grep --untracked` reads the new file before its
   commit.)
 
 | Run | Expected |
@@ -1239,7 +1239,7 @@ tracked file on `main`.
 | `git grep --untracked -n -F '](wt.md)' -- docs/relay-merge.md`, then `test -f docs/wt.md && echo found` | one line, then `found` |
 | `git grep --untracked -n -E 'https?://\|session_' -- docs/relay-merge.md bin/relay-merge .hyper-relay/merge.conf` | nothing: no host or session is named |
 
-- [ ] **Step 3: Commit.**
+- [x] **Step 3: Commit.**
 
 ```bash
 git add docs/relay-merge.md
