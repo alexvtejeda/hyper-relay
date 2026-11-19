@@ -1335,3 +1335,33 @@ git -C /home/noob_master/hyper-relay commit -m "docs: leaner plans last-task rec
 ```
 
 Push it with the next push of `main` (the owner's call).
+
+## Last-task record (Task 7)
+
+- **Before the merge:** acceptance reviewer 7/7 PASS (Step 4 PASS again after the fix round); fix rounds 1:
+  `783744f`, the owner's decision after S3's GREEN half-passed (its Review Focus line had no assertion in the owning
+  task's test step): Review Focus and self-review check 4 now put each line's test, with its assertions, in the owning
+  task's test step, and "Stacked plans" says "(its tasks' files, signatures and text)" (a deviation from spec §2.8);
+  code review Ready Yes, 0 Critical, 0 Important, 3 Minor (the "Stacked plans" leftover, fixed in the fix round;
+  "Implement the minimal code" in the five-step list, dropped by the owner; stale generated agents, which is Step 20);
+  proposed cards: test fixtures as signatures kept (`93e7a9dc`), SAT's execution-notes slot dropped; skill tests GREEN
+  6/6 (S3 after the fix), RED failed in S1, S3, S4, S6, non-discriminating S2 (LP2's guard, as expected), S5 partly
+  (RED wrote the body instead of stopping; only GREEN's reported call differs); the G.2 probe FAIL on its line bar
+  only, accepted by the owner: plan 1,747 lines, 7 tasks (G.2's 2,348, 7), about 530 lines of doc text kept in full
+  (LP2) and about 650 of test code, no script bodies; suite 100 passed, 0 failed; `dash -n` silent on all three
+  scripts; D1's rows: all 20 equal by value (the lean table adds a Models column and a by-model table, drops the
+  thousands separators; D1's run log rewritten `session:` -> `sessions:` for the lean tool's form); its planner 111
+  calls, 264,165 output, 899,340 written, 23,672,715 read, 41m52s (G.2's 106, 364,134, 2,570,760, 27,026,505,
+  55m47s), research 32.5 min, writing 6 min (one 102,647-output call), review 3 min, 96% model time; its executor 27
+  calls, 45,787 output, 6m13s (G.2's 16, 9,477, 1m19s), 0 deviations, its open calls listed (jq structure, mode
+  branch, `find -newermt`, a shell version compare); about 40% cheaper across both legs at list prices. Caveats: the
+  probe planner had no guard (it ran awk/find and a helper script); Claude Code attached this checkout's `CLAUDE.md`
+  to both probe agents' context. Token counts: executor 7 calls / 5,621 output (+ fix round 2 / 1,156), acceptance
+  reviewer 12 / 9,222, code reviewer 5 / 2,673, skill tests 38 / 36,377 over 13 runs.
+- **Owner steps:** Step 15 accepted at stop 4 ("accept it and merge"); Step 16 `merge-tree` exit 0. Merged in
+  `ea3b2bf` by `relay-merge` (3 gates ok).
+- **After merge:** suites on `main` 26/0 and 153/0, validate its three warnings; released v0.2.1 in `b3f4855`, tagged,
+  `main` and the tag pushed (with the 21 earlier commits); the owner's update and `/reload-plugins`: 0.2.1 in the cache,
+  with `What a Step Contains`, the Review Focus fix and `## Every plan`; agents regenerated here (`relay-planner.md`
+  written, the rest unchanged) and in SAT (`sat-planner.md` written, the rest unchanged; no SAT benchmark run in
+  flight); token log rows added. The research step the probe pointed to is card `d16b46da`.
