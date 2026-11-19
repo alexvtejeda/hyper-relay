@@ -1147,7 +1147,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `README.md:25-27` (the relay diagram), `:68-69` (the Quartz section)
 - Modify: `CLAUDE.md:70` (the `validate` row), `:75` (after the `wt` row)
 
-- [ ] **Step 1: The relay diagram names legs, and shows `orchestrating` (P11).** In `README.md`, the code block under
+- [x] **Step 1: The relay diagram names legs, and shows `orchestrating` (P11).** In `README.md`, the code block under
   `## The relay` holds three lines (25–27). Replace those three lines whole (their spacing is as
   `sed -n '25,27p' README.md` prints it):
 
@@ -1169,7 +1169,7 @@ with these four lines, exactly (each annotation starts under its node; the last 
 
 The fences around the block and the relay table below it do not change.
 
-- [ ] **Step 2: Two sentences on setup and declining (spec §6).** In `README.md`, replace:
+- [x] **Step 2: Two sentences on setup and declining (spec §6).** In `README.md`, replace:
 
 ```text
 Without Quartz, nothing breaks. Every Quartz step falls back to plain Markdown, and the skills work on their own. But
@@ -1187,7 +1187,7 @@ only for the steps that are yours: a project, a token and the repo's name. `git 
 that off in a repo, and `git config --unset hyper-relay.quartz` turns it back on.
 ```
 
-- [ ] **Step 3: `CLAUDE.md`'s Checks (spec §6, §8; P14).** In `CLAUDE.md`, replace:
+- [x] **Step 3: `CLAUDE.md`'s Checks (spec §6, §8; P14).** In `CLAUDE.md`, replace:
 
 ```text
 | Manifests and skills | `claude plugin validate .` | Passes. Its one warning is about this `CLAUDE.md` at the plugin root, which is for developing hyper-relay, not for users |
@@ -1212,7 +1212,7 @@ with:
 | Relay skills | `sh tests/orchestrating/run-tests.sh` | `0 failed` |
 ```
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add README.md CLAUDE.md
@@ -1221,7 +1221,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 5: The full gates, once.**
+- [x] **Step 5: The full gates, once.**
 
 | Run | Expected |
 |---|---|
