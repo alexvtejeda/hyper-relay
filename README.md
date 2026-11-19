@@ -22,12 +22,33 @@ everything stands.
 
 ## The relay
 
+```mermaid
+flowchart LR
+    subgraph brainstorming
+        direction TB
+        rec(["a recording<br>(optional)"]) -. voice-to-specs .-> idea(["your idea"])
+        idea --> talk["you and the<br>orchestrator<br>work out the design"]
+        talk --> stop1{{"<b>Stop 1</b><br>you approve<br>the design"}}
+        stop1 --> spec[/"<b>spec</b><br>committed"/]
+        spec --> stop2{{"<b>Stop 2</b><br>you approve<br>the spec"}}
+    end
+
+    subgraph orchestrating
+        direction TB
+        planner["<b>planner</b> agent<br>writes the plan"] --> plan[/"<b>plan</b><br>committed"/]
+        plan --> stop3{{"<b>Stop 3</b><br>you approve<br>the plan"}}
+        stop3 --> executor["<b>executor</b> agent<br>one commit per task"]
+        executor --> review["<b>reviewers</b><br>acceptance, code review,<br>skill tests"]
+        review -- fix round --> executor
+        review --> stop4{{"<b>Stop 4</b><br>you click through"}}
+        stop4 --> merge["<b>relay-merge</b><br>a gated merge<br>into main"]
+    end
+
+    brainstorming --> orchestrating
 ```
- voice-to-specs ─▶ brainstorming ─▶ spec ─▶ plan ─▶ execute ─▶ review ─▶ you ─▶ merge
-   (optional)      (you + the       (committed)     (isolated) (clicks,  (anchor leg)
-                   orchestrator)            (a planner agent)  not tests)
-                                    └──────────────── orchestrating ────────────────┘
-```
+
+Hexagons are your stops: the relay never passes one without your answer. Rectangles are the work (in `orchestrating`,
+each leg by a fresh agent), and slanted boxes are the files handed from leg to leg.
 
 | Leg | Skill | Hands over |
 |---|---|---|
