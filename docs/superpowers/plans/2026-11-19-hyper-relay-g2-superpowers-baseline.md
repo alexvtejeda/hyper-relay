@@ -22,8 +22,10 @@ commit times, unions every transcript's working time, and cross-checks the whole
 `cost-state` record. One suite, written first, drives both with fixture transcripts, a fake home folder and a fake
 `claude`. `docs/benchmarks/` holds the prompts, the template and the runbook.
 
-**Tech Stack:** POSIX `sh` run by dash; jq 1.6 or later (1.7.1 on this machine); `awk`, `sed`, `grep`, GNU coreutils;
-Markdown. Claude Code 2.1.327's transcript format and `claude plugin` CLI. No skill, `bin/`, `templates/`, `hooks/` or
+**Tech Stack:** POSIX `sh` run by dash; jq 1.6 or later (`jq --version` says 1.7 on this machine; dpkg names its
+package 1.7.1-3ubuntu0.24.04.2); `awk`, `sed`, `grep`, GNU coreutils; Markdown. Claude Code's transcript format as
+2.1.327 wrote it (that is the transcripts' own `version` field; the installed CLI is 2.1.328) and its `claude plugin`
+CLI. No skill, `bin/`, `templates/`, `hooks/` or
 `.claude-plugin/` file changes: no release and no `skill-test` steps.
 
 **How this was checked:** written against `main` at `ed3eb05` by reading only; nothing was built, run, installed or
@@ -155,8 +157,9 @@ words (none).
   you did not create are its held-back specs and plans, and `tasks/` is the owner's scratch tracker: never stage, edit,
   move or delete either. A "the tree is clean" check ignores them.
 - **This repo is public.** The scripts and the suite name no other project; their fixtures use `example.invalid` and
-  made-up names. `docs/benchmarks/` names SAT as the committed spec does (P14), and quotes none of its files. Nothing
-  you write names a session id, host or person beyond what this plan's text holds.
+  made-up names. `docs/benchmarks/` names SAT as the committed spec does, but no path for its checkout (P14: the
+  owner sets `SAT`), and quotes none of its files. Nothing you write names a session id, host or person beyond what
+  this plan's text holds.
 - **No release.** Nothing under `skills/`, `bin/`, `templates/`, `hooks/` or `.claude-plugin/` changes, so `package.json`
   and `.claude-plugin/plugin.json` keep their version (`CLAUDE.md`, "How a change reaches the owner").
 - Never wait with a self-matching `pgrep`; never `pkill -f` a pattern in your own command line.
@@ -178,18 +181,18 @@ words (none).
 | P3 | §3 Agent time: "after an assistant message that ends its turn … until the next record: that is waiting" | Until the next **user or assistant** record: Claude Code writes `system` records after a turn ends (stop-hook summary, turn duration, a recap when the owner is away), which would otherwise turn the owner's time into agent time. Also waiting: a pending `AskUserQuestion` call (the owner is answering) and an interruption ("[Request interrupted by user…]"), each until the next user or assistant record. A turn ends at any `stop_reason` but `tool_use` and `pause_turn`. A permission prompt's wait cannot be told apart and counts as agent time; both runs use the owner's `auto` permission mode, so it is rare in both. |
 | P4 | §3: "the owner's own prompts, not tool results and not harness notifications" | User records with `origin.kind` `human`, in the run's main sessions, within the run's window. On 2.1.327 that is every typed, queued or accepted-suggestion prompt and a typed skill command; tool results, notifications (`task-notification`), other sessions' messages (`peer`), subagents' dispatch prompts and local commands carry no such origin. |
 | P5 | §3 Rows: the phases run from the start to the merge | A call before the start or after the merge (by its own time, in a main session or a subagent) goes on its own "Outside the run" line, not in a row or the total. The cross-check compares whole sessions, since the cost records cover whole sessions. |
-| P6 | §3 Cross-check: "The plan establishes what `cost-state` covers … and states the tolerance" | Covers: every call the session's processes made, main and subagents (Sonnet matched exactly on D1), across resumes; plus calls no transcript holds: side requests on the session's model (prompt suggestions, recaps: mostly cache reads), compaction summaries (no assistant record at a `compact_boundary`), Haiku side calls (titles, page summaries) and web searches. **Tolerance:** the transcripts' total is 0% to 10% below the cost records' (rounding allowance $0.005); above them, or more than 10% below, is OUTSIDE, and a session with no record makes it incomplete. The tool prints both totals, the gap, the gap's share, each model's cost and output tokens on both sides, and the compactions, so a gap can be explained. The acceptance measures D1's gap and a compacted session's (Task 7 Steps 6–7); a gap outside is for the owner, not a fix round, unless a model that only subagents used (Sonnet, there) differs. |
+| P6 | §3 Cross-check: "The plan establishes what `cost-state` covers … and states the tolerance" | Covers: every call the session's processes made, main and subagents (Sonnet matched exactly on D1), across resumes; plus calls no transcript holds: side requests on the session's model (prompt suggestions, recaps: mostly cache reads), compaction summaries (no assistant record at a `compact_boundary`), Haiku side calls (titles, page summaries) and web searches. **Tolerance:** the transcripts' total is 0% to 10% below the cost records' (rounding allowance $0.005); above them, or more than 10% below, is OUTSIDE, and a session with no record makes it incomplete. The tool prints both totals, the gap, the gap's share, each model's cost and output tokens on both sides, and the compactions, so a gap can be explained. The acceptance measures D1's gap and a compacted session's (Task 7 Steps 6–7); a gap outside is for the owner, not a fix round, unless a model that only subagents used (Sonnet, there) differs. **Owner (2026-11-19, stop 3):** the 10% tolerance stands. |
 | P7 | §3 Cost: "per model, the price per million tokens" | A row may name a prompt-size threshold (`over`), so Haiku 5.5's higher prices apply to a call whose input, cache reads and writes together pass 100,000 tokens. Global-routing prices. Rows for Opus 5, Sonnet 5 and Haiku 4.5 too. A model with no row is named on an "Unpriced models" line and counts $0, never silently. `<synthetic>` messages (no usage) are skipped. Web searches are not priced: Claude Code runs them in side calls no transcript holds. |
 | P8 | §2: the script builds the folder, links, copies and installs | Also, each decided here: it drops `extraKnownMarketplaces.hyper-relay` beside the `enabledPlugins` entry (else `/plugin` still lists the hyper-relay marketplace, against §2's check); it refuses an MCP server whose name holds "quartz"; it installs the plugins the settings enable, since the folder has no `plugins/` of its own (the official marketplace by its documented source; any other from `extraKnownMarketplaces`, else it refuses); `umask 077`, since `.claude.json`'s MCP servers can hold keys; every check runs before the folder is created, and a failure after that leaves the half-built folder for the owner to remove (the script never deletes a folder); the folder's parent must exist. |
 | P9 | §3 Rows and §4: superpowers' "spec reviewer and quality reviewer" | Superpowers 7.0.2 has one task reviewer giving both verdicts (header). The roles are whatever the run dispatches: the runbook's example role lines cover both shapes, and `catches-prompt.md` counts every per-task issue "whatever it calls the review". |
 | P10 | §4: "one agent checks every item on both features", no prompt named | `docs/benchmarks/pitfall-check-prompt.md`, fixed before the runs like the other prompts, so the check runs the same on both features. |
 | P11 | Scope: `scripts/benchmark/`, `tests/benchmark/`, `docs/benchmarks/`, `CLAUDE.md` | Also `.hyper-relay/merge.conf`: the new suite and the two scripts' syntax become gates, since `CLAUDE.md` says that file "maps its paths to the Checks table". Task 6 runs each new line once. |
 | P12 | §4: the headless steps (pitfall writer, restater, blind review, verification, catch counter, checker) | Each runs `claude -p` in `~/.claude-neutral` with `--no-session-persistence`, `--permission-mode dontAsk`, `--allowedTools` and narrow `--add-dir`: the blind steps reach only their worktree and `~/sat-benchmark/blind/`, never the sealed list or the run logs; the pitfall writer leaves no transcript for anyone to open. |
-| P13 | §1: the logs are copied at scoring | Claude Code deletes transcripts after 30 days by default, so the runbook runs `run-usage.sh` right after each merge and keeps its output, and scoring must finish within 30 days of C.1's start. D1's table, "the README's first rows", is committed after this merge (Task 7 Step 14): D1's transcripts expire around 2026-12-18. |
-| P14 | (none) | This repo is public. The runbook names SAT's checkout once (`SAT=~/sat.pentraze.com`), the two cards' ids and SAT's code folders (`api/`, `web/`, `mailer-worker/`), as the committed spec does; the tools and the suite name no project. **For the owner (Task 7 Step 10):** keep, or replace the line before the next push. |
-| P15 | §1: "No run is told it is being measured"; "the superpowers run does not read the board" | SAT's tracked `CLAUDE.md` names the Quartz board and tells agents to run `quartz review` (its lines 7, 922, 931), and SAT's tracked `.hyper-relay/agents.md` is in C.2's worktree too; the superpowers run reads the first and may read the second. The plan changes nothing in SAT (spec §1); the runbook has C.2's log record any Quartz call the run makes. **For the owner (Task 7 Step 10):** accept, or decide otherwise before C.2. |
+| P13 | §1: the logs are copied at scoring | Claude Code deletes transcripts after 30 days by default, so the runbook runs `run-usage.sh` right after each merge and keeps its output, and scoring must finish within 30 days of C.1's start. D1's table, "the README's first rows", is committed after this merge (Task 7 Step 14): D1's transcripts expire around 2026-12-18. **Owner (2026-11-19, stop 3):** yes, commit D1's table, so there is persistent evidence. |
+| P14 | (none) | This repo is public. **Owner (2026-11-19, stop 3): the runbook names no path for SAT's checkout.** Its `## Paths` block reads `SAT=${SAT:?set SAT to the path of the SAT main checkout first}`: the owner sets `SAT` before running the commands, and the line stops them when it is unset. Nothing in `docs/benchmarks/` holds `sat.pentraze` (Task 5 Step 2 checks it). The runbook still names SAT, its two cards' ids and its code folders (`api/`, `web/`, `mailer-worker/`), as the committed spec does; the tools and the suite name no project. The decision covers the runbook only: this plan's own mentions and the committed spec stay. |
+| P15 | §1: "No run is told it is being measured"; "the superpowers run does not read the board" | SAT's tracked `CLAUDE.md` names the Quartz board and tells agents to run `quartz review` (its lines 7, 922, 931), and SAT's tracked `.hyper-relay/agents.md` is in C.2's worktree too; the superpowers run reads the first and may read the second. The plan changes nothing in SAT (spec §1); the runbook has C.2's log record any Quartz call the run makes. **Owner (2026-11-19, stop 3):** accepted as written. |
 | P16 | §5: "The owner builds the two real folders"; §1: "Build both config folders … so both runs start under the same day's environment" | The owner builds them at this plan's click-through, from the branch's script (Task 7 Step 11); the runbook's step 1 says to move them aside and build again if C.1 starts later and the owner's settings, `CLAUDE.md` or MCP servers changed. |
-| P17 | §1: "Opus 5.5 main session, default effort" | The owner's `settings.json` sets `effortLevel` `xhigh`, and the copy keeps it, so both runs share it. The runbook reads "default" as the owner's own and tells both runs to leave it. |
+| P17 | §1: "Opus 5.5 main session, default effort" | The owner's `settings.json` sets `effortLevel` `xhigh`, and the copy keeps it, so both runs share it. The runbook reads "default" as the owner's own and tells both runs to leave it. **Owner (2026-11-19, stop 3):** `xhigh` is fine. |
 | P18 | §5: the acceptance runs on "D1's relay run" | D1's session also holds piece E's legs, planned and run beside D1: they come out as `other`. Its design phase covers that session only (the brainstorm began in an earlier one); its start is that session's first owner prompt. |
 | P19 | §3 Input: "the run log's header" | The header is every `key: value` line before the first `## ` heading; times are UTC, `2026-11-20T14:03:00Z`; `spec:`, `plan:` and `merge:` are `<hash> <time>` (`-` for a hash when a workflow never commits it); `session:` and `role:` repeat; `workflow:`, `card:`, `start-commit:` and `pitfalls-sha256:` are for people. A duplicate session line counts once. |
 
@@ -281,7 +284,7 @@ yes_no() { # path: yes when it exists (a dangling link included), no when not
 echo '--- prices.tsv'
 PRICES=$REPO/scripts/benchmark/prices.tsv
 assert_eq "prices: every row is a model, a threshold and five prices, all numbers" 0 \
-    "$(awk -F '\t' '!/^#/ && NF { if (NF != 7) bad++; for (i = 2; i <= 7; i++) if ($i !~ /^[0-9]+(\.[0-9]+)?$/) bad++ } END { print bad + 0 }' "$PRICES" 2>/dev/null)"
+    "$(if [ -f "$PRICES" ]; then awk -F '\t' '!/^#/ && NF { if (NF != 7) bad++; for (i = 2; i <= 7; i++) if ($i !~ /^[0-9]+(\.[0-9]+)?$/) bad++ } END { print bad + 0 }' "$PRICES"; else echo "no prices.tsv"; fi)"
 assert_eq "prices: Opus, Sonnet and Haiku 5.5 have rows" 3 \
     "$(awk -F '\t' '!/^#/ && NF { print $1 }' "$PRICES" 2>/dev/null | sort -u | grep -c -E '^claude-(opus|sonnet|haiku)-5-5$')"
 assert_contains "prices: the date they were taken, and where" \
@@ -1738,11 +1741,12 @@ turns a run log into a usage table (`run-usage.sh --sessions` finds a run's sess
 
 ## Paths
 
-Every command below runs in the owner's own terminal, after these three lines:
+Every command below runs in the owner's own terminal, after these three lines. Set `SAT` to the path of SAT's main
+checkout first (`export SAT=<its path>`): this repo names no path for it, and the second line stops when it is unset.
 
 ```sh
 HR=~/hyper-relay           # this repo's main checkout, on main
-SAT=~/sat.pentraze.com     # SAT's main checkout
+SAT=${SAT:?set SAT to the path of the SAT main checkout first}
 BENCH=~/sat-benchmark      # outside both repos
 ```
 
@@ -2018,7 +2022,8 @@ numbers, one-line findings and commit hashes, never SAT's code, data or secrets.
 | `grep -c -E '^## [1-7]\. ' docs/benchmarks/README.md` | `7` |
 | `grep -o -h -E 'docs/benchmarks/[a-z-]+\.md' docs/benchmarks/README.md \| sort -u` | each of the seven files of Task 4 and this one exist (`test -f` each) |
 | `grep -o -h -E 'scripts/benchmark/[a-z-]+\.sh' docs/benchmarks/README.md \| sort -u` | `scripts/benchmark/run-usage.sh` and `scripts/benchmark/superpowers-env.sh`, both present |
-| `grep -c -F 'SAT=~/sat.pentraze.com' docs/benchmarks/README.md` | `1` (P14) |
+| `grep -c -F 'SAT=${SAT:?' docs/benchmarks/README.md` | `1` (P14: the owner supplies the path) |
+| `grep -r -n -F 'sat.pentraze' docs/benchmarks` | nothing (P14: no path for SAT's checkout anywhere in `docs/benchmarks/`) |
 
 - [ ] **Step 3: Commit.**
 
@@ -2180,7 +2185,9 @@ Each step is marked with who runs it:
 | `git grep -n -i -E 'relay\|superpowers\|hyper\|quartz' -- docs/benchmarks/pitfall-brief.md docs/benchmarks/restate-prompt.md docs/benchmarks/blind-review-prompt.md docs/benchmarks/verify-prompt.md docs/benchmarks/pitfall-check-prompt.md` | nothing |
 | Reading | the runbook covers spec §5's seven steps in order with commands; every headless step uses `~/.claude-neutral`, `--no-session-persistence` and `--permission-mode dontAsk`; the blind review and its verification reach only their worktree and `~/sat-benchmark/blind/` (P12); the pitfall writer works from SAT's `CLAUDE.md`, the two cards and the Notifications A and B code only, and reports only a path and a hash; the blind review is limited to `api/`, `web/` and `mailer-worker/` from the run's start commit, with no `docs/` and no git history; the catch counter's findings and non-findings match spec §4; list any claim that contradicts the spec as a FAIL |
 
-- [ ] **Step 4 (`reviewer`): D1's session, found rather than assumed (P18).**
+- [ ] **Step 4 (`reviewer`): D1's session, found rather than assumed (P18).** `run-usage.sh --sessions` reads every
+  session under `~/.claude/projects` (about 1.5 GB, 137 sessions, when this plan was reviewed): give that command, here
+  and in Step 7, a long timeout (5 minutes; it takes about one).
 
 | Run | PASS |
 |---|---|
@@ -2222,7 +2229,8 @@ Also: each of those roles shows `1 agent`; `subtotal: other` is piece E's four l
 Outside the tolerance with the Sonnet entry equal: report it with the By model line, for the owner (P6), not as a
 tool defect. The Sonnet entry unequal: a FAIL.
 
-- [ ] **Step 7 (`reviewer`): A session with a compaction (P6).**
+- [ ] **Step 7 (`reviewer`): A session with a compaction (P6).** The `--sessions` command below takes about a minute:
+  run it with a 5-minute timeout, as in Step 4.
 
 | Run | PASS |
 |---|---|
@@ -2249,15 +2257,15 @@ the By model line, for the owner (P6).
 
 - [ ] **Step 9 (`reviewer`): Nothing names more than the spec does.** Read the 15 changed files and the branch's
   commit messages (`git log --format=%B main..HEAD`). PASS: the scripts, the suite, `CLAUDE.md` and `merge.conf` name
-  no other project; `docs/benchmarks/` names SAT, its checkout path once, its two cards and its code folders, as the
-  spec does, and quotes none of SAT's files; no file or message holds a session id, a person's name or a host other
-  than the documentation URLs in `prices.tsv` and the commit trailers.
+  no other project; `docs/benchmarks/` names SAT, its two cards and its code folders, as the spec does, but no path
+  for SAT's checkout (P14: `git grep -n -F 'sat.pentraze' -- docs/benchmarks` prints nothing), and quotes none of
+  SAT's files; no file or message holds a session id, a person's name or a host other than the documentation URLs in
+  `prices.tsv` and the commit trailers.
 
-- [ ] **Step 10 (`owner`): Read the protocol, and decide P14 and P15.** Read
+- [ ] **Step 10 (`owner`): Read the protocol.** Read
   `git -C /home/noob_master/hyper-relay show hyper-relay-g2-superpowers-baseline:docs/benchmarks/README.md` and the
-  prompts beside it. PASS: the owner agrees they fix the protocol as decided, and answers P14 (keep the SAT path line in
-  a public repo, or replace it) and P15 (SAT's `CLAUDE.md` names Quartz and the C.2 run reads it: accept, or decide
-  otherwise before C.2). A change goes to the executor as a finding.
+  prompts beside it. PASS: the owner agrees they fix the protocol as decided (P14 and P15 were decided at stop 3). A
+  change goes to the executor as a finding.
 
 - [ ] **Step 11 (`owner`): The two real folders, the login and the checks (spec §2, §5; P16).** The orchestrator runs
   the first two commands and the last; the owner runs the builds and the sessions in their own terminal:
@@ -2332,7 +2340,7 @@ Push it with the next push of `main` (the owner's call).
   <difference, share, within or not>; the compacted session's <difference, share, compactions>; fix rounds <n, what
   each changed>; code review: Critical <fixed / dropped, why>, proposed cards <kept / dropped>; token counts: executor
   <n>, acceptance reviewer <n>, code reviewer <n>.
-- **Owner steps:** Step 10 <agreed / what changed; P14: kept or replaced; P15: accepted or what instead>; Step 11
+- **Owner steps:** Step 10 <agreed / what changed>; Step 11
   <superpowers version; checks passed / what failed>; Step 12 <merge-tree exit>. Merged in <hash>.
 - **After merge:** suites on `main` <counts>; D1's table committed in <hash>; `main` pushed <yes/no>.
 ```
