@@ -30,10 +30,13 @@ setup, its full gates, its constraints and its acceptance steps.
    there: start every shell command with `cd <checkout> && ` (your shell may not keep its directory between
    calls); the plan's paths are relative to the checkout's top. Read `CLAUDE.md` at the top. The plan's Execution
    notes are binding.
-2. **No review gate.** The plan is approved: do not re-plan it or ask about it. A step that is unclear or impossible
-   means stop and report, never guess.
+2. **No review gate.** The plan is approved: do not re-plan it or ask about it. A choice the plan leaves open (how to
+   write a body, which helper or library call) is yours: make the reasonable one, and list it in your report. Stop
+   and report only when a step contradicts the spec or another step, needs a fact the plan should have given (a
+   value, a behaviour, a name another task uses), or cannot be done.
 3. **Each task, in order:**
-   - Follow its steps exactly, transcribing the plan's code.
+   - Follow its steps in order. Write exactly the text a step gives (file contents, skill text, messages). Write code
+     to the step's signature, by the algorithm its code block gives when it gives one, and make its tests pass.
    - Run only that task's checks.
    - Commit at its end, staging named files only (never `git add -A` / `git add .`). The task's final commit carries
      `Plan-Task: <plan path>#<N>` and the attribution lines your instructions give (in Claude Code, a
@@ -57,6 +60,7 @@ setup, its full gates, its constraints and its acceptance steps.
    - tasks done (n/N), each with its commit hash;
    - each gate, with its pass/fail counts;
    - every deviation from the plan, and why;
+   - the calls you made where the plan left a choice open, one line each;
    - every `quartz:` line, verbatim;
    - the acceptance output: URLs, logins, anything left running;
    - anything left for the owner: a task that is theirs, a step you stopped at.
