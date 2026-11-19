@@ -67,8 +67,8 @@ dispatched.
 - **Numbered names.** Two plans create files in the same folder whose names start with the same digits, such as
   migrations (`000097_orders.up.sql` and `000097_coupons.up.sql`). Compare the folder and leading digits of each
   plan's `- Create:` paths, and of the files the in-flight branch has added
-  (`git diff --name-only --diff-filter=A main...<branch>`), as `sed -E -n 's#^(.*/)?([0-9]+)[^/]*$#\1\2#p'` prints
-  them. A date (`2026-11-18-…`) is not a sequence number.
+  (`git diff --name-only --diff-filter=A main...<branch>`), as `sed -E -n 's#^(.*/)?([0-9]+)[_.][^/]*$#\1\2#p'`
+  prints them: the digits must be followed by `_` or `.`, so a date (`2026-11-18-…`) is not a sequence number.
 
 **What happens.** "Later" means dispatched later, or later in the spec's order for a spec's own plans.
 

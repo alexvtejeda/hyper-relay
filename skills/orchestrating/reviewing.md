@@ -86,10 +86,11 @@ them in a plan that creates or changes a file in a skill's folder), at the same 
 
 1. Put the skills from `main` and from the branch in two scratch folders, inside an evidence folder as §1's:
    `mkdir -p <folder>/red <folder>/green`, then
-   `git archive main <skills> | tar -x -C <folder>/red` and
+   `git cat-file -e main:<skills> 2>/dev/null && git archive main <skills> | tar -x -C <folder>/red` and
    `git archive <branch> <skills> | tar -x -C <folder>/green`. `<skills>` is the folder that holds the repo's skill
-   folders (`skills` in a plugin, `.claude/skills` in a project). When `main` has no such folder, `red/` stays empty:
-   RED then reads no skill at all, as it should for a new skill.
+   folders (`skills` in a plugin, `.claude/skills` in a project). When `main` has no such folder, the `cat-file`
+   check fails, nothing is copied and `red/` stays empty: RED then reads no skill at all, as it should for a new
+   skill.
 2. Dispatch each step's scenario twice, in the background, each time to a general-purpose agent on Sonnet
    (`SKILL.md`, Fallbacks): GREEN given the `green/` folder, RED given the `red/` folder. Each prompt is this standing
    preamble, then the step's situation, verbatim:

@@ -85,18 +85,18 @@ After your tasks, the orchestrator may resume you, or dispatch a fresh executor 
 
 Either way, in your checkout and on your branch (process step 1):
 
-1. Merge `main`, or the branch the prompt names, into your branch. The merge commit carries the attribution lines your
-   instructions give, in one final paragraph, and no `Plan-Task:` trailer:
+1. Merge `<base>` into your branch: `main`, unless the prompt names another branch. The merge commit carries the
+   attribution lines your instructions give, in one final paragraph, and no `Plan-Task:` trailer:
 
    ```bash
-   git merge -m "Merge branch 'main' into <branch>" -m "Co-Authored-By: <the line your instructions give>
-   Claude-Session: <the URL the dispatch prompt gives>" main
+   git merge -m "Merge branch '<base>' into <branch>" -m "Co-Authored-By: <the line your instructions give>
+   Claude-Session: <the URL the dispatch prompt gives>" <base>
    ```
 
    "Already up to date." means there is nothing to merge: say so in your report.
 2. On a conflict, resolve each conflicted file so that both sides' changes hold, and stage each by name
    (`git add <file>`). Then commit the merge with the same two messages:
-   `git commit -m "Merge branch 'main' into <branch>" -m "<the same attribution lines>"`. When the two sides cannot
+   `git commit -m "Merge branch '<base>' into <branch>" -m "<the same attribution lines>"`. When the two sides cannot
    both hold, run `git merge --abort`, then stop and report the files and why.
 3. Rerun the full gates (process step 5).
 4. Report: the merge commit's hash, each conflict and how you resolved it, and the gates with their counts.
