@@ -661,7 +661,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `README.md:57`
 
-- [ ] **Step 1: The Plan row (P1).** In `README.md`, replace:
+- [x] **Step 1: The Plan row (P1).** In `README.md`, replace:
 
 ```text
 | Plan | `writing-plans`, run by a planner agent | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with full code, tests and a binding contract between plans |
@@ -673,7 +673,7 @@ with:
 | Plan | `writing-plans`, run by a planner agent | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with its files, its tests and the decisions the executor cannot make alone (signatures, the spec's values, skill text in full), and a binding contract between plans |
 ```
 
-- [ ] **Step 2: Commit.**
+- [x] **Step 2: Commit.**
 
 ```bash
 git add README.md
@@ -682,7 +682,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 3: The full gates, once.**
+- [x] **Step 3: The full gates, once.**
 
 | Run | Expected |
 |---|---|
