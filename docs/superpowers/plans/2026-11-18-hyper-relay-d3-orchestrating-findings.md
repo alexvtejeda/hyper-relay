@@ -176,7 +176,7 @@ tool schemas (P13).
 **Files:**
 - Create: `tests/orchestrating/run-tests.sh`
 
-- [ ] **Step 1: Write the suite.** Create `tests/orchestrating/run-tests.sh` with exactly this content:
+- [x] **Step 1: Write the suite.** Create `tests/orchestrating/run-tests.sh` with exactly this content:
 
 ```sh
 #!/bin/sh
@@ -417,12 +417,12 @@ printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]
 ```
 
-- [ ] **Step 2: Syntax.**
+- [x] **Step 2: Syntax.**
 
 Run: `dash -n tests/orchestrating/run-tests.sh`
 Expected: silent, exit 0.
 
-- [ ] **Step 3: Run it; exactly two checks fail, because `quartz.md` does not exist yet.**
+- [x] **Step 3: Run it; exactly two checks fail, because `quartz.md` does not exist yet.**
 
 Run: `sh tests/orchestrating/run-tests.sh | grep -A 1 -e '^FAIL' -e 'passed, '`
 Expected, in this order:
@@ -439,7 +439,7 @@ FAIL install_git_hook_only_in_quartz_md
 `sh tests/orchestrating/run-tests.sh | grep -c '^ok   .* can fail: '`: expected `13`, so every broken copy fails its
 check. If anything else fails, stop and report: the tree differs from the one this plan read.
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add tests/orchestrating/run-tests.sh
