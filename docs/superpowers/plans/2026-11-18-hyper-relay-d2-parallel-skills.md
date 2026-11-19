@@ -1186,7 +1186,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/writing-plans/SKILL.md:27` (after the plan count), `:74` (the acceptance bullet, and a new section)
 - Modify: `skills/writing-plans/plan-document-reviewer-prompt.md:26` (P17)
 
-- [ ] **Step 1: `brainstorming` lists a spec's plans in order (spec §7; P19).** In `skills/brainstorming/SKILL.md`,
+- [x] **Step 1: `brainstorming` lists a spec's plans in order (spec §7; P19).** In `skills/brainstorming/SKILL.md`,
   replace:
 
 ```text
@@ -1199,7 +1199,7 @@ with:
 Quartz reads it, and keeps the card open until that many plans have merged. Such a spec also lists its plans in order, under `## The plans`: each with its subject, the suffix of its plan's file name (`-api`, `-web`), and the plan it builds on, if any. A plan builds on another when it needs that plan's unmerged work, and on one plan at most; plans that build on nothing run at once (`hyper-relay:orchestrating`'s `parallel.md`).
 ```
 
-- [ ] **Step 2: `brainstorming`, a spec that changes a skill names its pressure scenarios (spec §7).** Replace:
+- [x] **Step 2: `brainstorming`, a spec that changes a skill names its pressure scenarios (spec §7).** Replace:
 
 ```text
 - Use elements-of-style:writing-clearly-and-concisely skill if available
@@ -1212,7 +1212,7 @@ with:
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 ```
 
-- [ ] **Step 3: `writing-plans`, stacked plans and renumbering (spec §7).** In `skills/writing-plans/SKILL.md`,
+- [x] **Step 3: `writing-plans`, stacked plans and renumbering (spec §7).** In `skills/writing-plans/SKILL.md`,
   replace:
 
 ```text
@@ -1233,7 +1233,7 @@ When the spec's list of plans says your plan builds on another, your plan's head
 When the orchestrator sends your plan back because another plan in flight creates files with the same leading number in the same folder (`000097_*` migrations, say), renumber yours above the highest number its prompt names, everywhere the plan names them (paths, code, commands), and commit the plan again.
 ```
 
-- [ ] **Step 4: `writing-plans`, the `skill-test` step kind (spec §7, §8).** Replace:
+- [x] **Step 4: `writing-plans`, the `skill-test` step kind (spec §7, §8).** Replace:
 
 ```text
 - The plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the orchestrator: live sessions, reinstalls, edits outside the repo), with its command or action and the result that counts as PASS.
@@ -1267,7 +1267,7 @@ with:
     | The acceptance task | It is the last task. Each of its steps says who runs it (`reviewer`, `owner`, `after merge` or `skill-test`), with its command or action and the result that counts as PASS; a `skill-test` step gives a situation, what GREEN must do and what RED is expected to do. |
 ```
 
-- [ ] **Step 5: Check.**
+- [x] **Step 5: Check.**
 
 | Run | Expected |
 |---|---|
@@ -1280,7 +1280,7 @@ with:
 | `grep -n -E 'after merge. or .skill-test' skills/writing-plans/plan-document-reviewer-prompt.md` | one line |
 | `grep -n -i -F 'invoke writing-plans' skills/brainstorming/SKILL.md` | nothing |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/brainstorming/SKILL.md skills/writing-plans/SKILL.md skills/writing-plans/plan-document-reviewer-prompt.md
