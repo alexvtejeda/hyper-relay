@@ -29,9 +29,11 @@ and the codebase state. Everything below is standing.
 - Read `CLAUDE.md` at the repo root in full. Its non-negotiables and gotchas bind every plan.
 - Read the spec, its mockups if it has any, and any spec it amends or depends on.
 - Plan format: a header with the **Card:** line (from the spec) and a **Spec:** line (the spec's repo-relative
-  path), Goal / Architecture / Tech Stack / **How this was checked** (list every file you read), binding
-  **Execution notes**, tasks with FULL code, and a **Spec ambiguities / deviations** table. Mirror the newest plans
-  in `docs/superpowers/plans/` for format.
+  path), Goal / Architecture / Tech Stack / **How this was checked** (one line: the commit the plan was written
+  against, read-only, nothing run), binding **Execution notes**, **Review Focus**, tasks written as
+  `hyper-relay:writing-plans`' "What a Step Contains" says, and a **Spec ambiguities / deviations** table. Mirror
+  the newest plans in `docs/superpowers/plans/` for format. Plans there written before this format carry full code:
+  take their header and acceptance task as models, never their steps.
 - Also in the plan: a **Spec coverage** table mapping each `## ` section of the spec to the task numbers that
   implement it; with sibling plans, a **Contract** section, identical in each.
 {{slot planner/plan-format}}
@@ -48,27 +50,15 @@ and the codebase state. Everything below is standing.
   show inline. When it doesn't have them, use `git -C <dir> grep --no-index -n <pattern>` (works outside repos
   too), `git ls-files` (`-o` for untracked files) and `git diff --no-index [--stat] <a> <b>` to compare trees.
 - **External facts** the spec says to re-verify: check them with WebFetch/WebSearch, cite URL + date in the plan,
-  and list any difference as a deviation, never a silent design change.
-- Write for the `{{project}}-executor` agent: put the full code in each task so execution is transcription plus
-  targeted tests.
+  quote only what decides something, and list any difference as a deviation, never a silent design change.
+- Write for the `{{project}}-executor` agent the decisions it cannot make alone, as `hyper-relay:writing-plans`'
+  "What a Step Contains" says.
 
-## Every plan's Execution notes carry
-- The executor works where its dispatch prompt says: a branch in the main checkout or its own worktree, chosen at
-  the handoff. A plan names no mode, no checkout path and no `cd` prefix, and carries no Quartz step: the
-  orchestrator runs `quartz link-branch` and `quartz review`.
-- Commit after every task, staging named files only (never `git add -A` / `git add .`), ending with the
-  attribution trailer the executor's instructions give. The final commit of each task also carries
-  `Plan-Task: <plan path>#<N>`.
-- Never wait with a self-matching `pgrep`; never `pkill -f` a pattern in your own command line.
-- Token budget: targeted tests per task; the full gates once at the end.
+## Every plan
 - **Outside the executor's branch is not the executor's.** Anything that touches `main`, another repo, the owner's
   own config, or GitHub (push, tag, repo settings), or that needs real credentials, a real third-party API or a live
   Claude Code or OpenCode session, is an owner/orchestrator task: mark it so, with exact commands and exact text.
   Tests use fakes.
-- A plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by
-  the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the
-  orchestrator: live sessions, reinstalls, edits outside the repo); and it gives its command or action and the
-  result that counts as PASS, so it can be run as written.
 {{slot planner/execution-notes}}
 
 ## Committing

@@ -14,8 +14,8 @@ the generator (the hyper-relay:agents skill). The generator ignores everything b
 - External facts to re-verify are usually Claude Code's, OpenCode's or GitHub's.
 
 ## planner/plan-format
-- The model is the newest hyper-relay plan in `docs/superpowers/plans/`; upstream's older plans in `docs/upstream/`
-  and `docs/plans/` are not.
+- The model is the newest hyper-relay plan in `docs/superpowers/plans/`, for its header and acceptance task, not its
+  steps; upstream's older plans in `docs/upstream/` and `docs/plans/` are not.
 
 ## planner/execution-notes
 - The full gates: the test suites the plan touches (the Checks table in `CLAUDE.md`), plus `claude plugin validate .`.

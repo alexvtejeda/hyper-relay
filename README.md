@@ -54,7 +54,7 @@ each leg by a fresh agent), and slanted boxes are the files handed from leg to l
 |---|---|---|
 | Capture | `voice-to-specs` | Briefs or board cards from a recording. It stops there and never writes specs, plans or code. |
 | Design | `brainstorming` (+ `visual-companion` for mockups) | An approved design, written as a spec in `docs/superpowers/specs/` |
-| Plan | `writing-plans`, run by a planner agent | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with full code, tests and a binding contract between plans |
+| Plan | `writing-plans`, run by a planner agent | `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`: every task with its files, its tests and the decisions the executor cannot make alone (signatures, the spec's values, skill text in full), and a binding contract between plans |
 | Execute | `executing-plans`, `using-git-worktrees`, `test-driven-development` | Commits, one per task, on a branch or in a worktree |
 | Review | the acceptance reviewer agent, `requesting-code-review` (one review per branch), `receiving-code-review`, `verification-before-completion`, and the skill tests (`writing-skills`' RED/GREEN runs) | Evidence that it works: the plan's acceptance steps, one code review of the whole branch, each skill test when a plan changes a skill, then your click-through |
 | Finish | `relay-merge`, run by the orchestrator (`finishing-a-development-branch` for work outside the relay) | A `--no-ff` merge into `main`, gated by the repo's `.hyper-relay/merge.conf`, on your call |
