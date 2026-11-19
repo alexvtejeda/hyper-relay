@@ -2149,7 +2149,7 @@ Each step is marked with who runs it:
 
 **No release:** nothing the plugin loads changes, so the version stays and there is no plugin update.
 
-- [ ] **Step 1 (`reviewer`): The suite, the syntax and the modes.**
+- [x] **Step 1 (`reviewer`): The suite, the syntax and the modes.**
 
 | Run | PASS |
 |---|---|
@@ -2160,7 +2160,7 @@ Each step is marked with who runs it:
 | `git ls-files -s scripts/benchmark tests/benchmark` | `100755` for the two `.sh` tools, `100644` for `prices.tsv`, `run-usage.jq` and the suite |
 | `git grep -n -i -w -e sat -e pentraze -- scripts/benchmark tests/benchmark` | nothing |
 
-- [ ] **Step 2 (`reviewer`): The tools against spec §2 and §3.** Read `scripts/benchmark/superpowers-env.sh`,
+- [x] **Step 2 (`reviewer`): The tools against spec §2 and §3.** Read `scripts/benchmark/superpowers-env.sh`,
   `run-usage.sh` and `run-usage.jq` in full, spec §2 and §3, and P1–P8 and P19. PASS, each point quoted with its line:
   - `superpowers-env.sh` is `#!/bin/sh` with `set -eu` and `umask 077`; it refuses an existing folder before
     anything else; every check (the `CLAUDE.md` cut and its two refusals, the settings edits, the `mcpServers` copy
@@ -2176,7 +2176,7 @@ Each step is marked with who runs it:
     union with P3's waits, the owner's messages per P4, and the cross-check of P6 against each session's last
     `cost-state`. Nothing contradicts spec §2 or §3 beyond the P-notes; list any line that does as a FAIL.
 
-- [ ] **Step 3 (`reviewer`): The runbook against spec §1 and §4.** Read `docs/benchmarks/README.md` and the seven
+- [x] **Step 3 (`reviewer`): The runbook against spec §1 and §4.** Read `docs/benchmarks/README.md` and the seven
   files beside it in full.
 
 | Run | PASS |
@@ -2185,7 +2185,7 @@ Each step is marked with who runs it:
 | `git grep -n -i -E 'relay\|superpowers\|hyper\|quartz' -- docs/benchmarks/pitfall-brief.md docs/benchmarks/restate-prompt.md docs/benchmarks/blind-review-prompt.md docs/benchmarks/verify-prompt.md docs/benchmarks/pitfall-check-prompt.md` | nothing |
 | Reading | the runbook covers spec §5's seven steps in order with commands; every headless step uses `~/.claude-neutral`, `--no-session-persistence` and `--permission-mode dontAsk`; the blind review and its verification reach only their worktree and `~/sat-benchmark/blind/` (P12); the pitfall writer works from SAT's `CLAUDE.md`, the two cards and the Notifications A and B code only, and reports only a path and a hash; the blind review is limited to `api/`, `web/` and `mailer-worker/` from the run's start commit, with no `docs/` and no git history; the catch counter's findings and non-findings match spec §4; list any claim that contradicts the spec as a FAIL |
 
-- [ ] **Step 4 (`reviewer`): D1's session, found rather than assumed (P18).** `run-usage.sh --sessions` reads every
+- [x] **Step 4 (`reviewer`): D1's session, found rather than assumed (P18).** `run-usage.sh --sessions` reads every
   session under `~/.claude/projects` (about 1.5 GB, 137 sessions, when this plan was reviewed): give that command, here
   and in Step 7, a long timeout (5 minutes; it takes about one).
 
@@ -2196,7 +2196,7 @@ Each step is marked with who runs it:
 | `TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format='%h %cd' 9590bc8`, the same for `bca6dae` and `fd0a928` | `9590bc8 2026-11-18T04:19:31Z`, `bca6dae 2026-11-18T04:52:27Z`, `fd0a928 2026-11-18T05:10:12Z` (D1's spec, its plan as approved, its merge) |
 | `sh scripts/benchmark/run-usage.sh --sessions ~/.claude 2026-11-18T04:19:31Z 2026-11-18T05:10:12Z > <evidence folder>/04-sessions.md` | exit 0; a row for `<SESSION>` in project `-home-noob-master-hyper-relay`, whose First prompt is the owner's (note its time, `<START>`, which is before 04:19:31Z) |
 
-- [ ] **Step 5 (`reviewer`): D1's rows line up with its recorded legs.** Write the log, then run the tool:
+- [x] **Step 5 (`reviewer`): D1's rows line up with its recorded legs.** Write the log, then run the tool:
 
 ```bash
 printf '%s\n' '# Run log: D1, the orchestrator (G.2 acceptance)' '' 'workflow: hyper-relay (the relay, 2026-11-18)' 'config: ~/.claude' 'session: <SESSION>' 'start: <START>' 'spec: 9590bc8 2026-11-18T04:19:31Z' 'plan: bca6dae 2026-11-18T04:52:27Z' 'merge: fd0a928 2026-11-18T05:10:12Z' 'role: Write the D1 → planner' 'role: Review the D1 plan → plan reviewer' 'role: Execute the D1 → executor' 'role: Acceptance-check D1 → acceptance reviewer' 'role: Code review of D1 → code reviewer' > <evidence folder>/d1-run-log.md
@@ -2219,7 +2219,7 @@ reviewer's output and cache reads), with "cache write" the row's 5m and 1h colum
 Also: each of those roles shows `1 agent`; `subtotal: other` is piece E's four legs, run beside D1 in the same session
 (P18); the three `main:` rows and the time lines are present. A differing number is a FAIL: quote both.
 
-- [ ] **Step 6 (`reviewer`): D1's cross-check (P6).** From `05-d1-usage.md`:
+- [x] **Step 6 (`reviewer`): D1's cross-check (P6).** From `05-d1-usage.md`:
 
 | Check | PASS |
 |---|---|
@@ -2229,7 +2229,7 @@ Also: each of those roles shows `1 agent`; `subtotal: other` is piece E's four l
 Outside the tolerance with the Sonnet entry equal: report it with the By model line, for the owner (P6), not as a
 tool defect. The Sonnet entry unequal: a FAIL.
 
-- [ ] **Step 7 (`reviewer`): A session with a compaction (P6).** The `--sessions` command below takes about a minute:
+- [x] **Step 7 (`reviewer`): A session with a compaction (P6).** The `--sessions` command below takes about a minute:
   run it with a 5-minute timeout, as in Step 4.
 
 | Run | PASS |
@@ -2244,7 +2244,7 @@ CLAST, in the same form>`, and no role lines, and run `sh scripts/benchmark/run-
 Cross-check line ends `Within the tolerance (0 to 10%).`; record the difference and its share. Outside: report it with
 the By model line, for the owner (P6).
 
-- [ ] **Step 8 (`reviewer`): `CLAUDE.md`, `merge.conf`, and only the planned files (spec §5; P11).**
+- [x] **Step 8 (`reviewer`): `CLAUDE.md`, `merge.conf`, and only the planned files (spec §5; P11).**
 
 | Run | PASS |
 |---|---|
@@ -2255,19 +2255,19 @@ the By model line, for the owner (P6).
 | `git diff --name-only main...HEAD` | exactly the 15 files of Task 6 Step 7 |
 | `git log --format=%B main..HEAD \| grep -v '^Claude-Session: ' \| grep -c -E 'https?://'` | `0` |
 
-- [ ] **Step 9 (`reviewer`): Nothing names more than the spec does.** Read the 15 changed files and the branch's
+- [x] **Step 9 (`reviewer`): Nothing names more than the spec does.** Read the 15 changed files and the branch's
   commit messages (`git log --format=%B main..HEAD`). PASS: the scripts, the suite, `CLAUDE.md` and `merge.conf` name
   no other project; `docs/benchmarks/` names SAT, its two cards and its code folders, as the spec does, but no path
   for SAT's checkout (P14: `git grep -n -F 'sat.pentraze' -- docs/benchmarks` prints nothing), and quotes none of
   SAT's files; no file or message holds a session id, a person's name or a host other than the documentation URLs in
   `prices.tsv` and the commit trailers.
 
-- [ ] **Step 10 (`owner`): Read the protocol.** Read
+- [x] **Step 10 (`owner`): Read the protocol.** Read
   `git -C /home/noob_master/hyper-relay show hyper-relay-g2-superpowers-baseline:docs/benchmarks/README.md` and the
   prompts beside it. PASS: the owner agrees they fix the protocol as decided (P14 and P15 were decided at stop 3). A
   change goes to the executor as a finding.
 
-- [ ] **Step 11 (`owner`): The two real folders, the login and the checks (spec §2, §5; P16).** The orchestrator runs
+- [x] **Step 11 (`owner`): The two real folders, the login and the checks (spec §2, §5; P16).** The orchestrator runs
   the first two commands and the last; the owner runs the builds and the sessions in their own terminal:
 
 ```bash
@@ -2291,7 +2291,7 @@ sha256sum -c /tmp/g2-before.sha256
 
 A failure is a finding for the executor. If C.1 starts on a later day, the runbook's step 1 says when to rebuild.
 
-- [ ] **Step 12 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
+- [x] **Step 12 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly.**
 
 | Run | PASS |
@@ -2300,7 +2300,7 @@ A failure is a finding for the executor. If C.1 starts on a later day, the runbo
 
 On exit 1 it names the conflicted files: tell the owner before merging.
 
-- [ ] **Step 13 (`after merge`): The suites on the merged `main`.**
+- [x] **Step 13 (`after merge`): The suites on the merged `main`.**
 
 | Run | PASS |
 |---|---|
@@ -2310,7 +2310,7 @@ On exit 1 it names the conflicted files: tell the owner before merging.
 | `git -C /home/noob_master/hyper-relay diff --stat HEAD^1 HEAD -- .claude-plugin package.json` | nothing: no release |
 | `git -C /home/noob_master/hyper-relay status --short` | nothing |
 
-- [ ] **Step 14 (`after merge`): D1's table, kept before its transcripts expire (P13).** In the main checkout on
+- [x] **Step 14 (`after merge`): D1's table, kept before its transcripts expire (P13).** In the main checkout on
   `main` (`git -C /home/noob_master/hyper-relay branch --show-current` prints `main`; no `MERGE_HEAD`), with the
   reviewer's `d1-run-log.md` from Step 5:
 
@@ -2331,7 +2331,7 @@ git -C /home/noob_master/hyper-relay commit -m "docs: G.2, D1's usage table from
 
 Push it with the next push of `main` (the owner's call).
 
-- [ ] **Step 15 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
+- [x] **Step 15 (`after merge`): Record.** Append to this plan, in the main checkout (on `main`):
 
 ```markdown
 ## Last-task record (Task 7)
