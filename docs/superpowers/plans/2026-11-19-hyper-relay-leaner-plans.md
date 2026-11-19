@@ -613,7 +613,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/orchestrating/planning.md:74` (stop 3's report)
 - Modify: `skills/orchestrating/dispatching.md:125` (the hand-back check)
 
-- [ ] **Step 1: Stop 3's report.** In `skills/orchestrating/planning.md`, replace:
+- [x] **Step 1: Stop 3's report.** In `skills/orchestrating/planning.md`, replace:
 
 ```text
 - the plan paths and their task counts;
@@ -626,7 +626,7 @@ with:
 - a line per plan, "plan N lines for an M-line spec", from `wc -l` on the plan and on its spec;
 ```
 
-- [ ] **Step 2: The hand-back check.** In `skills/orchestrating/dispatching.md`, replace:
+- [x] **Step 2: The hand-back check.** In `skills/orchestrating/dispatching.md`, replace:
 
 ```text
 4. Weigh every deviation the report lists: accept it, or tell the owner why not.
@@ -639,7 +639,7 @@ with:
    each, or tell the owner why not.
 ```
 
-- [ ] **Step 3: Check it.**
+- [x] **Step 3: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -647,7 +647,7 @@ with:
 | `grep -n -F 'left a choice open' skills/orchestrating/dispatching.md` | one line, §7's check 4 |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `26 passed, 0 failed` |
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add skills/orchestrating/planning.md skills/orchestrating/dispatching.md
