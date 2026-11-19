@@ -1370,7 +1370,7 @@ Then `git ls-files -s scripts/benchmark/superpowers-env.sh` must print a line st
   `docs/benchmarks/blind-review-prompt.md`, `docs/benchmarks/verify-prompt.md`, `docs/benchmarks/catches-prompt.md`,
   `docs/benchmarks/pitfall-check-prompt.md`
 
-- [ ] **Step 1: The run-log template.** Create `docs/benchmarks/run-log-template.md` with exactly this content:
+- [x] **Step 1: The run-log template.** Create `docs/benchmarks/run-log-template.md` with exactly this content:
 
 ````markdown
 # Run log: <C.1 or C.2>, <the card's title>
@@ -1422,7 +1422,7 @@ role: <extended regex> → <role>
 Quartz call the superpowers run made, a session resumed after a break, a compaction.>
 ````
 
-- [ ] **Step 2: The pitfall writer's brief.** Create `docs/benchmarks/pitfall-brief.md` with exactly this content:
+- [x] **Step 2: The pitfall writer's brief.** Create `docs/benchmarks/pitfall-brief.md` with exactly this content:
 
 ````markdown
 # Sealed pitfall list: the writer's brief
@@ -1481,7 +1481,7 @@ your reply: whoever reads it must not learn them before the scoring.
 ## The cards
 ````
 
-- [ ] **Step 3: The restating prompt.** Create `docs/benchmarks/restate-prompt.md` with exactly this content:
+- [x] **Step 3: The restating prompt.** Create `docs/benchmarks/restate-prompt.md` with exactly this content:
 
 ````markdown
 # Requirements lists: the restating prompt
@@ -1513,7 +1513,7 @@ nowhere else. Report only the two paths.
 ## The documents
 ````
 
-- [ ] **Step 4: The blind review prompt.** Create `docs/benchmarks/blind-review-prompt.md` with exactly this content:
+- [x] **Step 4: The blind review prompt.** Create `docs/benchmarks/blind-review-prompt.md` with exactly this content:
 
 ````markdown
 # The blind review
@@ -1560,7 +1560,7 @@ suggestions.
 End with one line: `Findings: <c> Critical, <i> Important, <m> Minor`.
 ````
 
-- [ ] **Step 5: The verification prompt.** Create `docs/benchmarks/verify-prompt.md` with exactly this content:
+- [x] **Step 5: The verification prompt.** Create `docs/benchmarks/verify-prompt.md` with exactly this content:
 
 ````markdown
 # The blind review's second pass
@@ -1597,7 +1597,7 @@ Important findings count as escaped defects.
 ## The review
 ````
 
-- [ ] **Step 6: The catch counter's prompt.** Create `docs/benchmarks/catches-prompt.md` with exactly this content:
+- [x] **Step 6: The catch counter's prompt.** Create `docs/benchmarks/catches-prompt.md` with exactly this content:
 
 ````markdown
 # In-process catches: the counter's prompt
@@ -1646,7 +1646,7 @@ Then one line per run: `<run>: <n> findings: <f> fixed, <d> dropped, <x> dispute
 ## The transcripts
 ````
 
-- [ ] **Step 7: The pitfall checker's prompt.** Create `docs/benchmarks/pitfall-check-prompt.md` with exactly this content:
+- [x] **Step 7: The pitfall checker's prompt.** Create `docs/benchmarks/pitfall-check-prompt.md` with exactly this content:
 
 ````markdown
 # Sealed pitfall list: the checker's prompt
@@ -1675,7 +1675,7 @@ Then one line per feature: `<feature>: <y> yes, <n> no, <u> unclear`.
 ## The checklist
 ````
 
-- [ ] **Step 8: Check the prompts.**
+- [x] **Step 8: Check the prompts.**
 
 | Run | Expected |
 |---|---|
@@ -1684,7 +1684,7 @@ Then one line per feature: `<feature>: <y> yes, <n> no, <u> unclear`.
 | `grep -c -F -e '<C1_MERGE>' -e '<C2_MERGE>' docs/benchmarks/pitfall-check-prompt.md` | at least `2` |
 | `grep -c -F ' → ' docs/benchmarks/run-log-template.md` | at least `2` (the comment and the `role:` line) |
 
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ```bash
 git add docs/benchmarks/run-log-template.md docs/benchmarks/pitfall-brief.md docs/benchmarks/restate-prompt.md docs/benchmarks/blind-review-prompt.md docs/benchmarks/verify-prompt.md docs/benchmarks/catches-prompt.md docs/benchmarks/pitfall-check-prompt.md
