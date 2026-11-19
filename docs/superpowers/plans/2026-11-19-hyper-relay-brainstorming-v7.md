@@ -874,7 +874,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Files:**
 - Modify: `README.md:33` (a diagram line, two lines after it), `:56` (the Design row)
 
-- [ ] **Step 1: The diagram (P1).** Replace:
+- [x] **Step 1: The diagram (P1).** Replace:
 
 ```text
         spec --> stop2{{"<b>Stop 2</b><br>you approve<br>the spec"}}
@@ -888,7 +888,7 @@ with:
         spec -. short design approved .-> handover
 ```
 
-- [ ] **Step 2: The Design row.** Replace:
+- [x] **Step 2: The Design row.** Replace:
 
 ```text
 | Design | `brainstorming` (+ `visual-companion` for mockups) | An approved design, written as a spec in `docs/superpowers/specs/` |
@@ -900,7 +900,7 @@ with:
 | Design | `brainstorming` (+ `visual-companion` for mockups) | An approved design, written as a spec in `docs/superpowers/specs/`, read first by a builder check |
 ```
 
-- [ ] **Step 3: Check it.**
+- [x] **Step 3: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -909,7 +909,7 @@ with:
 | `grep -c -F -e '-> planner' README.md` | `0`: no edge, solid or dashed, runs from a node in `brainstorming` to `planner` (P1) |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add README.md
@@ -918,7 +918,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 5: The full gates, once.**
+- [x] **Step 5: The full gates, once.**
 
 | Run | Expected |
 |---|---|
