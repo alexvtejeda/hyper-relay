@@ -2238,3 +2238,40 @@ git -C /home/noob_master/hyper-relay commit -m "docs: piece D.2 plan 2 last-task
 ```
 
 Push it with the next change of `main` (the owner's call).
+
+## Last-task record (Task 9)
+
+- **Before the merge:** acceptance reviewer 8/8 PASS, 0 blocking (PRE-EXISTING: four lines on `main` name another
+  project, `skills/visual-companion/SKILL.md:158` and `skills/voice-to-specs/SKILL.md:82, 397, 405`, which Task 8's
+  name grep, scoped to whole folders rather than the diff, also prints; POLISH: README says 0.2.0 before the release).
+  Fix rounds 1, asked by the owner at stop 4 (`d39f48e`): the numbered-name `sed` needs the digits followed by `_` or
+  `.`, so dates no longer print; the RED copy is guarded by `git cat-file -e main:<skills>`; the catch-up and
+  conflict rounds merge `<base>` (`main` unless the prompt names another). Code review: Ready, 0 Critical, 0
+  Important, 5 Minor (three fixed in that round, two dropped); the other-project lines left as they are (already
+  named across committed docs). Output tokens: executor 28,821 (with the fix round), acceptance reviewer 10,008, code
+  reviewer 4,901.
+- **Skill tests (by hand):** GREEN 9/9 PASS; RED failed as expected in S1, S2, S4, S8, S9, and in part S5 (a conflict
+  round, but no short stop 4 before the second merge); each RED that did not fail: S3 (`main`'s text caught the
+  `000097` collision by common sense), S6 (it already stops and asks on a red `main`; it only offers no undo), S7
+  (it already dispatched the planner first, as D.3's probe (a) saw); the runs' output tokens 50,528; fix rounds 0.
+- **Owner steps:** Step 18 agreed ("not the final version; we'll improve the skills as we use them"); Step 19
+  merge-tree exit 0. Merged in `4882d27`, by `relay-merge` (`PUSH=0`; three gates on the merged result; branch
+  deleted), its first real use.
+- **Release, 2026-11-18:** `chore: release v0.2.0` at `9b2cff1`; tag `v0.2.0` pushed: yes, with `main`.
+- **Update, 2026-11-18:** the owner's `claude plugin update hyper-relay@hyper-relay` installed 0.2.0 at `9b2cff1`
+  (its line not relayed); marketplace refresh needed: no; `/reload-plugins` loaded 0.2.0 in the running session (the
+  orchestrating skill's base directory ended `hyper-relay/0.2.0/skills/orchestrating`), no reinstall and no new
+  session; marketplace clone at `9b2cff1`; `parallel.md` and `bin/relay-merge` in the 0.2.0 cache: yes.
+- **Agents:** `unchanged .claude/agents/relay-planner.md`, `written .claude/agents/relay-executor.md`,
+  `unchanged .claude/agents/relay-reviewer.md`, `unchanged .claude/hooks/hyper-relay-planner-guard.py`.
+- **Probes:** (a) PASS on every item and row: planners 1 and 2 at once, 3 after plan 1's commit; one stop 3, all
+  worktrees, no Branch; executors 1 and 2 at once; plan 3 cut from `toy-farewells-bye` after its acceptance, held
+  until it merged, then a catch-up round (`Merge branch 'main' into toy-farewells-loud`); one stop 4 covered bye and
+  shout (`PUSH=0 relay-merge toy-farewells-shout toy-farewells-bye`), then loud's; three `relay-merge` commits with
+  the trailers; `4 passed, 0 failed`; every plan ticked by hand. Differences: the toy spec had no contract, so the
+  session wrote one from its design lines for all three planners; the owner's codebase-memory hook refused one of
+  its `grep` calls. Its agents' tokens, as its stop 4 gave them (final context): executors 48.4k each, acceptance
+  45.2k and 47.2k, code review 52.5k and 52.1k. (b) PASS: the handoff named `greet.sh` as shared with
+  `toy-greet-polite`, made the loud plan wait, offered "run them at once anyway", offered no Branch. Continued by the
+  owner past the probe, it also refused to merge the half-done polite branch and to start a second executor before
+  the owner said the first had stopped.
