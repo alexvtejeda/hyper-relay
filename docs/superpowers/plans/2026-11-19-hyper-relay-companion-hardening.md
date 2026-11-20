@@ -574,7 +574,7 @@ git commit -m "feat(visual-companion): the tab says when the companion has pause
   `state/server-instance-id`; the running rule of P5, which Task 5's move reuses for the old folder; `stop-server.sh`'s
   answers `{"status": "stopped"}`, `{"status": "not_running"}` (today's) and `{"status":"stale_pid"}`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `test-session.cjs`, `start()` passes `env: { ...process.env, GIT_CEILING_DIRECTORIES: os.tmpdir() }` (Execution
 notes), and these checks go after check 5 (`stop removes server-info`). `st(name)` is
@@ -705,14 +705,14 @@ await check("foreground mode records node's own PID", async () => {
 });
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `node skills/visual-companion/scripts/test-stop.cjs`, then `node skills/visual-companion/scripts/test-session.cjs`
 Expected: from the first, `FAIL a reused PID that is not ours is not signalled` (today's stop signals it) among
 others, exit 1; from the second, `FAIL the state files are owner-only` (`server.log` is 644, or `server-instance-id`
 does not exist) and the `--idle-timeout-minutes` checks failing as unknown arguments, exit 1.
 
-- [ ] **Step 3: Implement it in `start-server.sh`.** In this order:
+- [x] **Step 3: Implement it in `start-server.sh`.** In this order:
 
 1. `--idle-timeout-minutes <n>` joins the arguments. After parsing, a value not matching `^[1-9][0-9]*$` prints
    `{"error": "--idle-timeout-minutes must be a positive integer"}` and exits 1; a valid one exports
@@ -734,21 +734,21 @@ does not exist) and the `--idle-timeout-minutes` checks failing as unknown argum
 8. Foreground: `echo "$$" > "$PID_FILE"`, then `exec env … node server.cjs "--companion-id=$ID"`. Background: as
    today, with `"--companion-id=$ID"` after `server.cjs`.
 
-- [ ] **Step 4: Implement it in `stop-server.sh`**
+- [x] **Step 4: Implement it in `stop-server.sh`**
 
 With the PID file present: when `pid_alive` and `carries_id` (with a well-formed id from `state/server-instance-id`)
 both hold, stop it as today, then `rm -f` `server.pid`, `server-instance-id`, `server.log` and `server-info`. Otherwise
 signal nothing: `rm -f` `server.pid`, and `server-info` too when the PID is not alive (P4); print
 `{"status":"stale_pid"}`, exit 0. Without the PID file, `{"status": "not_running"}` as today.
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `node skills/visual-companion/scripts/test-stop.cjs`, `node skills/visual-companion/scripts/test-session.cjs`,
 `bash -n skills/visual-companion/scripts/start-server.sh`, `bash -n skills/visual-companion/scripts/stop-server.sh`,
 then `bash skills/visual-companion/scripts/run-tests.sh`
 Expected: every line `ok` and exit 0 from the tests; `bash -n` silent.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add skills/visual-companion/scripts/start-server.sh skills/visual-companion/scripts/stop-server.sh skills/visual-companion/scripts/test-session.cjs skills/visual-companion/scripts/test-stop.cjs
