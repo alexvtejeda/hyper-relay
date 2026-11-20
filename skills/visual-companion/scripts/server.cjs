@@ -199,7 +199,11 @@ function safeHandleRequest(req, res) {
 
 // ========== Activity Tracking ==========
 
-const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+// While the session that started the server runs, it never idles out. Only when that
+// session is unknown (no owner pid) does it stop after IDLE_TIMEOUT_MS without activity.
+const positiveMs = (v, fallback) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : fallback);
+const IDLE_TIMEOUT_MS = positiveMs(process.env.BRAINSTORM_IDLE_TIMEOUT_MS, 4 * 60 * 60 * 1000);
+const LIFECYCLE_CHECK_MS = positiveMs(process.env.BRAINSTORM_LIFECYCLE_CHECK_MS, 60 * 1000);
 let lastActivity = Date.now();
 
 function touchActivity() {
@@ -243,7 +247,7 @@ function startServer() {
   const server = http.createServer(safeHandleRequest);
 
   const watcher = fs.watch(CONTENT_DIR, (eventType, filename) => {
-    if (!filename || !filename.endsWith('.html')) return;
+    if (!filename || filename.startsWith('.') || !filename.endsWith('.html')) return;
 
     if (debounceTimers.has(filename)) clearTimeout(debounceTimers.get(filename));
     debounceTimers.set(filename, setTimeout(() => {
@@ -288,11 +292,15 @@ function startServer() {
     try { process.kill(ownerPid, 0); return true; } catch (e) { return e.code === 'EPERM'; }
   }
 
-  // Check every 60s: exit if owner process died or idle for 30 minutes
+  // With an owner: exit when it is gone, never for idleness. Without one: exit after
+  // IDLE_TIMEOUT_MS with no activity.
   const lifecycleCheck = setInterval(() => {
-    if (!ownerAlive()) shutdown('owner process exited');
-    else if (Date.now() - lastActivity > IDLE_TIMEOUT_MS) shutdown('idle timeout');
-  }, 60 * 1000);
+    if (ownerPid) {
+      if (!ownerAlive()) shutdown('owner process exited');
+    } else if (Date.now() - lastActivity > IDLE_TIMEOUT_MS) {
+      shutdown('idle timeout');
+    }
+  }, LIFECYCLE_CHECK_MS);
   lifecycleCheck.unref();
 
   // Without these, stop-server.sh's plain `kill` terminates node before shutdown() runs:
@@ -302,7 +310,7 @@ function startServer() {
 
   // Validate owner PID at startup. If it's already dead, the PID resolution
   // was wrong (common on WSL, Tailscale SSH, and cross-user scenarios).
-  // Disable monitoring and rely on the idle timeout instead.
+  // Disable monitoring and rely on the idle timeout instead (server-info says which).
   if (ownerPid) {
     try { process.kill(ownerPid, 0); }
     catch (e) {
@@ -336,7 +344,8 @@ function startServer() {
     const info = JSON.stringify({
       type: 'server-started', port: Number(port), host: HOST,
       url_host: URL_HOST, url: 'http://' + URL_HOST + ':' + port + '/?key=' + sessionKey,
-      screen_dir: CONTENT_DIR, state_dir: STATE_DIR
+      screen_dir: CONTENT_DIR, state_dir: STATE_DIR,
+      owner_pid: ownerPid, idle_timeout_ms: ownerPid ? null : IDLE_TIMEOUT_MS
     });
     console.log(info);
     fs.writeFileSync(path.join(STATE_DIR, 'server-info'), info + '\n', { mode: 0o600 });

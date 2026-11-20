@@ -246,7 +246,50 @@ const stopped = (t) => JSON.parse(fs.readFileSync(path.join(t.dir, 'state', 'ser
     assert(/^[0-9a-f]{64}$/.test(key) && t.info.url.endsWith('/?key=' + key), key);
   });
 
-  // LIFETIME-SECTION
+  // ---- the lifetime ----
+  const L = { BRAINSTORM_IDLE_TIMEOUT_MS: '600', BRAINSTORM_LIFECYCLE_CHECK_MS: '50', BRAINSTORM_TOKEN: K };
+  const cookieOf = (t) => `companion-key-${t.info.port}=${K}`;
+
+  await check('a live owner: no idle exit past the timeout', async () => {
+    const t = await serve(newSession(), { BRAINSTORM_OWNER_PID: String(process.pid),
+      BRAINSTORM_IDLE_TIMEOUT_MS: '200', BRAINSTORM_LIFECYCLE_CHECK_MS: '50' });
+    assert(t.info.owner_pid === process.pid && t.info.idle_timeout_ms === null, JSON.stringify(t.info));
+    assert(!(await exited(t.proc, 1000)), 'it idled out');
+    assert(!fs.existsSync(path.join(t.dir, 'state', 'server-stopped')));
+  });
+  await check('no owner: an idle exit after the timeout', async () => {
+    const t = await serve(newSession(), { BRAINSTORM_IDLE_TIMEOUT_MS: '300', BRAINSTORM_LIFECYCLE_CHECK_MS: '50' });
+    assert(t.info.owner_pid === null && t.info.idle_timeout_ms === 300, JSON.stringify(t.info));
+    assert(await exited(t.proc, 3000), 'still running');
+    assert(stopped(t).reason === 'idle timeout');
+  });
+  await check('an owner already dead at startup: the 4-hour fallback', async () => {
+    const t = await serve(newSession(), { BRAINSTORM_OWNER_PID: String(spawnSync('true').pid) });
+    assert(t.info.owner_pid === null && t.info.idle_timeout_ms === 14400000, JSON.stringify(t.info));
+  });
+  await check('the owner exiting stops the server', async () => {
+    const owner = spawn('sleep', ['30']);
+    procs.push(owner);
+    const t = await serve(newSession(), { BRAINSTORM_OWNER_PID: String(owner.pid), BRAINSTORM_LIFECYCLE_CHECK_MS: '50' });
+    owner.kill();
+    assert(await exited(t.proc, 2000), 'outlived its owner');
+    assert(stopped(t).reason === 'owner process exited');
+  });
+  await check('requests with the key count as activity', async () => {
+    const t = await serve(newSession(), L);
+    for (let i = 0; i < 15; i++) { await get(t, '/poll', { cookie: cookieOf(t) }); await sleep(100); }
+    assert(t.proc.exitCode === null && t.proc.signalCode === null, 'idled out while polled');
+  });
+  await check('a rejected request does not count as activity', async () => {
+    const t = await serve(newSession(), L);
+    const until = Date.now() + 2500;
+    while (Date.now() < until && t.proc.exitCode === null && t.proc.signalCode === null) {
+      try { await get(t, '/'); } catch (e) { /* gone */ }
+      await sleep(100);
+    }
+    assert(await exited(t.proc, 2500), 'rejected requests kept it alive');
+    assert(stopped(t).reason === 'idle timeout');
+  });
 
   for (const p of procs) { try { p.kill('SIGKILL'); } catch (e) { /* gone */ } }
   fs.rmSync(root, { recursive: true, force: true });
