@@ -1,7 +1,7 @@
 {
   "name": "hyper-relay",
   "description": "Workflow skills for Claude Code and OpenCode: brainstorm, spec, plan, execute, review and merge, each leg handing a written artefact to the next. Forked from superpowers v5.1.0.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": {
     "name": "Alex",
     "url": "https://github.com/alexvtejeda"
