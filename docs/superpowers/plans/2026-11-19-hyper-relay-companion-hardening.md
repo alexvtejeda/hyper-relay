@@ -472,7 +472,7 @@ git commit -m "feat(visual-companion): no idle-out while the session that starte
 - Modify: `skills/visual-companion/scripts/helper.js`
 - Create: `skills/visual-companion/scripts/test-helper.cjs`
 
-- [ ] **Step 1: Write the failing tests** in `test-helper.cjs`, with `test-session.cjs`'s harness in an async main. One
+- [x] **Step 1: Write the failing tests** in `test-helper.cjs`, with `test-session.cjs`'s harness in an async main. One
   fixture:
 
 - `loadHelper(responses) -> Promise<{ tick, notice, reloads }>`: runs `helper.js`'s source with
@@ -529,13 +529,13 @@ await check('the notice carries its own inline style', async () => {
 });
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `node skills/visual-companion/scripts/test-helper.cjs`
 Expected: `FAIL four failed polls show nothing; the fifth shows Paused: null`, the two "new screen" and "resets" checks
 `ok`, the rest `FAIL`; exit 1.
 
-- [ ] **Step 3: Implement it in `helper.js`**
+- [x] **Step 3: Implement it in `helper.js`**
 
 It stays an IIFE: `async function poll()`, passed to `setInterval(poll, 1000)` and called once at load. A 403 shows
 "Ask the agent for the full link." at once. A rejected fetch or another non-OK answer adds one failure, and the fifth
@@ -547,12 +547,12 @@ in a row shows "Paused — the agent will bring it back.". A good answer resets 
 appended with `document.body.appendChild`; then its `textContent` is set. The header comment says what the notices
 are for.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `node skills/visual-companion/scripts/test-helper.cjs`, then `bash skills/visual-companion/scripts/run-tests.sh`
 Expected: every line `ok`, exit 0, from each.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add skills/visual-companion/scripts/helper.js skills/visual-companion/scripts/test-helper.cjs
