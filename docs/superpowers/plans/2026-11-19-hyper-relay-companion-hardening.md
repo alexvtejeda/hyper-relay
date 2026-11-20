@@ -163,7 +163,7 @@ The spec flags no fact for re-check, so none was re-checked. One detail of Node'
   0600); the cookie `companion-key-<bound port>=<key>`; `server-info`'s `url`, `http://<url host>:<port>/?key=<key>`;
   `test-server.cjs`'s fixtures `newSession`, `freePort`, `serve`, `get` and `exited`, which Task 2 uses.
 
-- [ ] **Step 1: Write the failing tests** in `test-server.cjs`.
+- [x] **Step 1: Write the failing tests** in `test-server.cjs`.
 
 The harness is `test-session.cjs`'s (`check`, `assert`, the failures list, `ok  <name>` and `FAIL <name>: <message>`
 lines, exit 1 on any failure), in an async main whose `check` awaits its body. `root` is this file's temporary folder,
@@ -320,19 +320,19 @@ await check('a malformed state/token is replaced', async () => {
 });
 ```
 
-- [ ] **Step 2: The injection test sends the key.** In `test-injection.cjs`, add `const TOKEN = 'ab'.repeat(32);` beside
+- [x] **Step 2: The injection test sends the key.** In `test-injection.cjs`, add `const TOKEN = 'ab'.repeat(32);` beside
   `PORT`, put `BRAINSTORM_TOKEN: TOKEN` in the server's `env`, and make the fetch
   `fetch(`http://127.0.0.1:${PORT}/`, { headers: { cookie: `companion-key-${PORT}=${TOKEN}` } })`. Nothing else in it
   changes.
 
-- [ ] **Step 3: Run them to verify they fail**
+- [x] **Step 3: Run them to verify they fail**
 
 Run: `node skills/visual-companion/scripts/test-server.cjs`
 Expected: `FAIL` lines, exit 1 (today's server answers `/` without a key, and crashes on the dangling link, so the
 later checks fail on a fetch error). `node skills/visual-companion/scripts/test-injection.cjs` still prints `ok`
 (today's server ignores the cookie).
 
-- [ ] **Step 4: Implement it in `server.cjs`**
+- [x] **Step 4: Implement it in `server.cjs`**
 
 - `FORBIDDEN_PAGE`, exactly:
 
@@ -370,12 +370,12 @@ later checks fail on a fetch error). `node skills/visual-companion/scripts/test-
 - The `listening` handler: `url` becomes `http://<URL_HOST>:<port>/?key=<key>`, and `server-info` is written with mode
   `0o600`.
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `node skills/visual-companion/scripts/test-server.cjs`, then `bash skills/visual-companion/scripts/run-tests.sh`
 Expected: every line `ok`, exit 0, from each.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add skills/visual-companion/scripts/server.cjs skills/visual-companion/scripts/test-server.cjs skills/visual-companion/scripts/test-injection.cjs
