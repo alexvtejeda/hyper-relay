@@ -1187,7 +1187,7 @@ your commands, in order, and take what it would show from the facts the situatio
 its file name and one line on its content instead of its HTML. Today is 2026-11-21.
 ```
 
-- [ ] **Step 1 (`reviewer`): The gates (spec §10 step 1).**
+- [x] **Step 1 (`reviewer`): The gates (spec §10 step 1).**
 
 | Run | PASS |
 |---|---|
@@ -1198,7 +1198,7 @@ its file name and one line on its content instead of its HTML. Today is 2026-11-
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | ends `0 failed` |
 | `git diff --stat main...HEAD -- package.json .claude-plugin` | nothing (the release is after the merge) |
 
-- [ ] **Step 2 (`reviewer`): A live run in a temporary git repo (spec §10 step 2).** One command per run, in order.
+- [x] **Step 2 (`reviewer`): A live run in a temporary git repo (spec §10 step 2).** One command per run, in order.
   `<port>` and `<key>` come from the first start's `url`.
 
 | Run | PASS |
@@ -1219,7 +1219,7 @@ its file name and one line on its content instead of its HTML. Today is 2026-11-
 | `test -e /tmp/vc-accept/.gitignore \|\| echo absent` | `absent` |
 | `bash skills/visual-companion/scripts/stop-server.sh /tmp/vc-accept/.hyper-relay/companion/accept`, then `rm -rf /tmp/vc-accept` | `{"status": "stopped"}` |
 
-- [ ] **Step 3 (`reviewer`): Only the planned files (spec §10 step 3; §12; P1).**
+- [x] **Step 3 (`reviewer`): Only the planned files (spec §10 step 3; §12; P1).**
 
 | Run | PASS |
 |---|---|
@@ -1227,12 +1227,12 @@ its file name and one line on its content instead of its HTML. Today is 2026-11-
 | `git diff main...HEAD -- skills \| grep -c -E '^\+.*(/home/\|/Users/\|~/)'` | `0` |
 | `git diff --stat main...HEAD -- skills/visual-companion/scripts/frame-template.html skills/visual-companion/scripts/run-tests.sh` | nothing |
 
-- [ ] **Step 4 (`reviewer`): The text against the plan (spec §5, §8; P12, P13, P15).** Read
+- [x] **Step 4 (`reviewer`): The text against the plan (spec §5, §8; P12, P13, P15).** Read
   `git diff main...HEAD -- skills/visual-companion/SKILL.md CLAUDE.md`. PASS: each hunk is one of Task 6 Step 1's or
   Task 5 Step 5's "Replace X with Y" edits, with Y word for word, and nothing else differs; Task 6 Step 2's nine
   checks give their expected counts. A sentence that contradicts the spec beyond the P-notes is a FAIL, with its line.
 
-- [ ] **Step 5 (`skill-test`): S1, two hours later, the server is still up (§9 S1; §8 the loop).**
+- [x] **Step 5 (`skill-test`): S1, two hours later, the server is still up (§9 S1; §8 the loop).**
 
 Situation:
 
@@ -1263,7 +1263,7 @@ RED is expected to: run `start-server.sh --session checkout-layout` again, in ca
 minutes, and/or give the link again. A RED that only checks the files and writes the screen is recorded as not
 failing.
 
-- [ ] **Step 6 (`skill-test`): S2, "Ask the agent for the full link" (§9 S2; §8 the notices).**
+- [x] **Step 6 (`skill-test`): S2, "Ask the agent for the full link" (§9 S2; §8 the notices).**
 
 Situation:
 
@@ -1290,7 +1290,7 @@ digit, saying it must be opened with its key.
 RED is expected to: not know the message: restart the server, or debug it (`curl`, the log, a stop and a start), or
 give a link without its key.
 
-- [ ] **Step 7 (`skill-test`): S3, the tab shows "Paused" (§9 S3; §8 the notices; P15).**
+- [x] **Step 7 (`skill-test`): S3, the tab shows "Paused" (§9 S3; §8 the notices; P15).**
 
 Situation:
 
@@ -1320,7 +1320,7 @@ a link, by hand.
 RED is expected to: not know the notice: it may restart (its text restarts on `server-stopped`), but asks the human
 partner to refresh the page or open the URL again.
 
-- [ ] **Step 8 (`skill-test`): S4, where the screens are (§9 S4; §8 the folder).**
+- [x] **Step 8 (`skill-test`): S4, where the screens are (§9 S4; §8 the folder).**
 
 Situation:
 
@@ -1342,7 +1342,7 @@ they are.
 
 RED is expected to: answer `/home/user/shop/.superpowers/brainstorm/invoice-pdf/` (or its `content/`).
 
-- [ ] **Step 9 (`skill-test`): S5, the start adds the exclude line (§9 S5; §8 git).**
+- [x] **Step 9 (`skill-test`): S5, the start adds the exclude line (§9 S5; §8 git).**
 
 Situation:
 
@@ -1368,7 +1368,7 @@ anything to `.gitignore`.
 RED is expected to: remind the human partner to add `.superpowers/` (or the companion's folder) to `.gitignore`, or
 edit `.gitignore` itself.
 
-- [ ] **Step 10 (`owner`): In a real browser (spec §10 step 4).** The orchestrator runs, one command per call, from
+- [x] **Step 10 (`owner`): In a real browser (spec §10 step 4).** The orchestrator runs, one command per call, from
   the top of the checkout on the branch:
 
 ```bash
@@ -1390,12 +1390,12 @@ and gives the owner the full link from the start's `url`. Then, in order:
 | The owner opens `http://localhost:<port>/` in a private window | "Ask the agent for the full link." |
 | The orchestrator runs the stop command, then `rm -rf /tmp/vc-click` | `{"status": "stopped"}` |
 
-- [ ] **Step 11 (`owner`): Read the new text.** Read
+- [x] **Step 11 (`owner`): Read the new text.** Read
   `git -C /home/noob_master/hyper-relay diff main...hyper-relay-companion-hardening -- skills/visual-companion/SKILL.md CLAUDE.md`,
   with stop 4's skill-test results and the P-notes, P3, P4, P12 and P15 above all. PASS: the owner agrees with them as
   written. A change goes to the executor as a finding.
 
-- [ ] **Step 12 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
+- [x] **Step 12 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly.**
 
 | Run | PASS |
@@ -1404,7 +1404,7 @@ and gives the owner the full link from the start's `url`. Then, in order:
 
 The merge runs as the installed relay says: `relay-merge` from the main checkout on `main`.
 
-- [ ] **Step 13 (`after merge`): Re-check on `main`, and the role agents (spec §10; P18).** None of the templates
+- [x] **Step 13 (`after merge`): Re-check on `main`, and the role agents (spec §10; P18).** None of the templates
   change, so the agents stay current; `main`'s own generator checks it here and in SAT.
 
 | Run | PASS |
@@ -1418,7 +1418,7 @@ The merge runs as the installed relay says: `relay-merge` from the main checkout
 
 A line from `--check` stops the step: tell the owner.
 
-- [ ] **Step 14 (`after merge`): The release, 0.2.5 (spec §10; `.hyper-relay/agents.md`, Releases, (1) and (2)).**
+- [x] **Step 14 (`after merge`): The release, 0.2.5 (spec §10; `.hyper-relay/agents.md`, Releases, (1) and (2)).**
   The owner approves this push at stop 4: it also takes `main`'s earlier unpushed commits (this spec and plan among
   them), which is expected. In the main checkout on `main` (no `MERGE_HEAD`), one command per Bash call, with
   `<x.y.z>` the version `--check` shows with its patch number raised by one (`0.2.5` from `0.2.4`):
@@ -1446,7 +1446,7 @@ git -C /home/noob_master/hyper-relay push origin main v<x.y.z>
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v<x.y.z>` | one line |
 
-- [ ] **Step 15 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [x] **Step 15 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session).
 
@@ -1459,3 +1459,18 @@ If the update says it is already at the latest version, the owner runs `claude p
 and the update again. If a check still fails, stop and tell the owner; delete or uninstall nothing. Companions that
 0.2.4's scripts started keep running until their sessions end (spec §2, a server an old script started). Then tick the
 acceptance task as `reviewing.md` §5 says.
+
+## Last-task record (Task 7)
+
+- **Execution:** the first executor was stopped by the owner (over Remote Control) partway through Task 5, after Tasks
+  1–4 had committed (`990d832`, `b961325`, `2b3a6fd`, `9bb0f0e`); it could not be resumed. A fresh executor found the
+  half-done Task 5 edits matched the plan, kept them unchanged, and committed Tasks 5 and 6 (`0e02e24`, `c6a214e`).
+  0 deviations.
+- **Before the merge:** acceptance Steps 1–4 4/4 PASS, 0 fix rounds. Skill tests GREEN 5/5; RED failed in S1, S3, S4;
+  non-discriminating S2 and S5 (each situation's JSON hands RED the answer: the keyed URL, `git_exclude: "added"`).
+  Code review: 0 Critical, 0 Important, 4 Minor, which the owner kept as one card, `c6930d80`.
+- **Owner steps:** the owner merged without Steps 10 (the real browser) and 11 (reading the new text): both skipped at
+  the owner's word, not run. Step 12 `merge-tree` exit 0. Merged in `8a07a4b` (`relay-merge`, 3 gates ok).
+- **After merge:** Step 13 on `main`: 72 `ok`, validate passes, clean tree, `hyper-relay-agents --check` silent here
+  and in SAT; Step 14 released v0.2.5 in `7780d7f`, tagged, pushed; Step 15 0.2.5 in the cache after the owner's
+  update and `/reload-plugins`.
