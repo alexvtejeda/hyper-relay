@@ -931,7 +931,7 @@ git commit -m "feat(visual-companion): sessions live in .hyper-relay/companion/,
 - Modify: `skills/visual-companion/SKILL.md:74-75`, `:86-97`, `:105-111`, `:116-122`, `:145-151`, `:163`, `:183`,
   `:307-308`
 
-- [ ] **Step 1: The text.** In `skills/visual-companion/SKILL.md`, replace each X with its Y.
+- [x] **Step 1: The text.** In `skills/visual-companion/SKILL.md`, replace each X with its Y.
 
 1. X:
 
@@ -1121,7 +1121,7 @@ If the session used `--project-dir`, mockup files persist in `.hyper-relay/compa
 for later reference. Only `/tmp` sessions are deleted on stop.
 ```
 
-- [ ] **Step 2: Check it**
+- [x] **Step 2: Check it**
 
 | Run | Expected |
 |---|---|
@@ -1142,7 +1142,7 @@ git add skills/visual-companion/SKILL.md
 git commit -m "docs(visual-companion): the skill's lifetime, link, notices, folder and git" -m "Plan-Task: docs/superpowers/plans/2026-11-19-hyper-relay-companion-hardening.md#6"
 ```
 
-- [ ] **Step 3: The full gates, once.** In a command inside a table cell, `\|` is a plain `|`.
+- [x] **Step 3: The full gates, once.** In a command inside a table cell, `\|` is a plain `|`.
 
 | Run | Expected |
 |---|---|
