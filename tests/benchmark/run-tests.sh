@@ -1,9 +1,10 @@
 #!/bin/sh
-# POSIX tests for G.2's benchmark tools (docs/benchmarks/README.md): scripts/benchmark/run-usage.sh on
-# small fixture transcripts priced by a test prices file, and scripts/benchmark/superpowers-env.sh with
-# a fake home folder and a fake claude that records its calls. HOME is a temporary folder before either
-# tool runs, so nothing here reads or writes the real ~/.claude, ~/.claude.json or a login.
-# Usage: sh tests/benchmark/run-tests.sh      Expect: "90 passed, 0 failed"
+# POSIX tests for G.2's benchmark tools (docs/benchmarks/README.md): scripts/benchmark/run-usage.sh and
+# scripts/benchmark/plan-usage.sh on small fixture transcripts priced by a test prices file (plan-usage.sh
+# also on fixture plans in a temporary git repo), and scripts/benchmark/superpowers-env.sh with a fake
+# home folder and a fake claude that records its calls. HOME is a temporary folder before any tool runs,
+# so nothing here reads or writes the real ~/.claude, ~/.claude.json or a login.
+# Usage: sh tests/benchmark/run-tests.sh      Expect: "110 passed, 0 failed"
 set -u
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
@@ -301,6 +302,227 @@ assert_contains "sessions: an empty window says so" \
     "No session has a record between 2026-02-01T00:00:00Z and 2026-02-02T00:00:00Z." "$OUT"
 ru --sessions "$HOME/cfg" 2026-01-01 2026-01-02T00:00:00Z
 assert_eq "sessions: a time not in UTC form: exit 1" 1 "$RC"
+# file_tool <tool> <path>: one tool_use content block, for call's last argument.
+file_tool() {
+    printf '{"type":"tool_use","id":"t","name":"%s","input":{"file_path":"%s"}}' "$1" "$2"
+}
+# agent_meta <transcript> <agent type>: the transcript's meta file.
+agent_meta() {
+    printf '{"agentType":"%s","description":"x","spawnDepth":1}\n' "$2" > "${1%.jsonl}.meta.json"
+}
+# pu <args>: plan-usage.sh with the test prices; no git repo above the temporary folder counts.
+pu() {
+    OUT=$(RUN_USAGE_PRICES="$TMP_ROOT/prices.tsv" GIT_CEILING_DIRECTORIES=$TMP_ROOT dash "$PU" "$@" 2>&1)
+    RC=$?
+}
+
+echo '--- plan-usage: fixture plans and transcripts'
+PU=$REPO/scripts/benchmark/plan-usage.sh
+G=2026-01-03T
+PR=$TMP_ROOT/pu-repo
+PP=$PR/docs/superpowers/plans
+PA=$PP/2026-01-01-pu-a.md
+PB=$PP/2026-01-01-pu-b.md
+PC=$PP/2026-01-01-pu-c.md
+PD=$PP/2026-01-01-pu-d.md
+PE=$PP/2026-01-01-pu-e.md
+git init -q "$PR"
+mkdir -p "$PP" "$PR/docs/superpowers/specs"
+printf '%s\n' '# Demo spec' '' '## Goal' 'A demo.' > "$PR/docs/superpowers/specs/2026-01-01-pu-design.md"
+cat > "$PA" <<'EOF'
+# Plan A
+
+**Spec:** `docs/superpowers/specs/2026-01-01-pu-design.md`
+
+```sh
+echo in no step
+```
+
+### Task 1: The tool
+
+- [x] **Step 1: Write the failing test**
+
+```sh
+assert_eq one 1 "$x"
+assert_eq two 2 "$y"
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+  ```sh
+  sh tests/x/run-tests.sh
+  ```
+
+- [ ] **Step 3: The fixtures,** in `tests/x/run-tests.sh`:
+
+```sh
+fixture a
+fixture b
+fixture c
+```
+
+### Task 2: The docs
+
+```sh
+echo after a heading
+```
+
+- [ ] **Step 1: The doc**
+
+```markdown
+# Doc
+Some text.
+```
+
+- [ ] **Step 2: The skill text**
+
+````markdown
+Intro.
+```sh
+inner
+```
+````
+
+```
+plain
+```
+EOF
+printf '%s\n' '# Plan B' '' '- [ ] **Step 1: Write the failing test**' > "$PB"
+printf '%s\n' '# Plan C' '' '**Spec:** `docs/superpowers/specs/nosuch-design.md`' > "$PC"
+printf '%s\n' '# Plan D' > "$PD"
+printf '%s\n' '# Plan E' > "$PE"
+
+PS=$HOME/.claude/projects/-pu
+mkdir -p "$PS/s1/subagents" "$PS/s2/subagents" "$PS/s3/subagents" "$HOME/pu-other/projects/-x/s9/subagents"
+# a1, plan A's planner, resumed an hour later: a call written as two records, an older record with no
+# cache_creation, a line cut short, a <synthetic> record.
+{
+    prompt "${G}10:00:00.000Z" "write plan A"
+    call "${G}10:01:00.000Z" A1 test-big tool_use 10 1000000 0 0 10000 "$TOOL"
+    result "${G}10:01:01.000Z"
+    call "${G}10:02:00.000Z" A2 test-big tool_use 10 0 1000000 1000000 20000 "$THINK"
+    call "${G}10:02:01.000Z" A2 test-big tool_use 10 0 1000000 1000000 20000 "$(file_tool Write "$PA")"
+    result "${G}10:02:02.000Z"
+    old_call "${G}10:03:00.000Z" A3 test-big end_turn 10 1000000 2000000 30000
+    printf '%s\n' '{"type":"assistant","message":'
+    call "${G}10:03:05.000Z" A0 '<synthetic>' end_turn 0 0 0 0 0
+    prompt "${G}11:03:05.000Z" "revise plan A"
+    call "${G}11:04:00.000Z" A4 test-big tool_use 10 0 0 3000000 45000 "$(file_tool Edit "$PA")"
+    result "${G}11:04:01.000Z"
+    call "${G}11:05:10.000Z" A5 test-big end_turn 20 100000 0 3000000 60000
+} > "$PS/s1/subagents/agent-a1.jsonl"
+agent_meta "$PS/s1/subagents/agent-a1.jsonl" relay-planner
+# b1 and b2, two planners of plan B; b3, of another type, also edited it; b4 only read it.
+{
+    prompt "${G}12:00:00.000Z" "write plan B"
+    call "${G}12:50:00.000Z" B1 test-small tool_use 100 0 0 2000000 10000 "$(file_tool Write "$PB")"
+} > "$PS/s2/subagents/agent-b1.jsonl"
+agent_meta "$PS/s2/subagents/agent-b1.jsonl" relay-planner
+{
+    prompt "${G}13:00:00.000Z" "revise plan B"
+    call "${G}13:20:00.000Z" B2 test-big tool_use 100 500000 0 0 20000 "$(file_tool Edit "$PB")"
+} > "$PS/s2/subagents/agent-b2.jsonl"
+agent_meta "$PS/s2/subagents/agent-b2.jsonl" relay-planner
+{
+    prompt "${G}13:30:00.000Z" "fix plan B"
+    call "${G}13:30:30.000Z" B3 test-small tool_use 100 0 0 100000 5000 "$(file_tool MultiEdit "$PB")"
+} > "$PS/s2/subagents/agent-b3.jsonl"
+agent_meta "$PS/s2/subagents/agent-b3.jsonl" general-purpose
+{
+    prompt "${G}13:40:00.000Z" "read plan B"
+    call "${G}13:40:10.000Z" B4 test-big tool_use 0 0 0 0 1000000 "$(file_tool Read "$PB")"
+} > "$PS/s2/subagents/agent-b4.jsonl"
+agent_meta "$PS/s2/subagents/agent-b4.jsonl" Explore
+# c1 wrote plan C in a worktree; c2 wrote a file of the same name in another repo; e1 wrote plan E on a model
+# with no price.
+{
+    prompt "${G}14:00:00.000Z" "write plan C"
+    call "${G}14:01:00.000Z" C1 test-big tool_use 1 0 0 0 1000 "$(file_tool Write "$PR/.worktrees/w1/docs/superpowers/plans/2026-01-01-pu-c.md")"
+} > "$PS/s3/subagents/agent-c1.jsonl"
+agent_meta "$PS/s3/subagents/agent-c1.jsonl" relay-planner
+{
+    prompt "${G}14:10:00.000Z" "write another repo's plan"
+    call "${G}14:10:30.000Z" C2 test-big tool_use 0 0 0 0 1000000 "$(file_tool Write "$TMP_ROOT/elsewhere/docs/superpowers/plans/2026-01-01-pu-c.md")"
+} > "$PS/s3/subagents/agent-c2.jsonl"
+agent_meta "$PS/s3/subagents/agent-c2.jsonl" relay-planner
+{
+    prompt "${G}16:00:00.000Z" "write plan E"
+    call "${G}16:00:10.000Z" E1 test-unknown tool_use 1 0 0 0 1 "$(file_tool Write "$PE")"
+} > "$PS/s3/subagents/agent-e1.jsonl"
+agent_meta "$PS/s3/subagents/agent-e1.jsonl" relay-planner
+# z1, in another config folder, wrote plan D.
+{
+    prompt "${G}15:00:00.000Z" "write plan D"
+    call "${G}15:00:20.000Z" D1 test-big tool_use 0 0 0 0 100 "$(file_tool Write "$PD")"
+} > "$HOME/pu-other/projects/-x/s9/subagents/agent-z1.jsonl"
+agent_meta "$HOME/pu-other/projects/-x/s9/subagents/agent-z1.jsonl" general-purpose
+
+PU_HEAD='| Plan | Agents | Model | API calls | Output | Cache write | Cache read | Uncached in | Final context | Tool uses | Duration | Cost | Plan lines | Spec lines | Test code | Other code | Text |'
+PU_SEP='|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|'
+ROW_A='| 2026-01-01-pu-a.md | relay-planner | test-big | 5 | 165,000 | 3,100,000 | 9,000,000 | 60 | 3,100,020 | 3 | 5m10s | $7.18 | 56 | 4 | 5 | 3 | 7 |'
+ROW_B='| 2026-01-01-pu-b.md | relay-planner ×2, general-purpose | test-small, test-big | 3 | 35,000 | 500,000 | 2,100,000 | 300 | 100,100 | 3 | 1h10m30s | $1.08 | 3 | - | 0 | 0 | 0 |'
+ROW_C='| 2026-01-01-pu-c.md | relay-planner | test-big | 1 | 1,000 | 0 | 0 | 1 | 1 | 1 | 1m00s | $0.01 | 3 | - | 0 | 0 | 0 |'
+ROW_D='| 2026-01-01-pu-d.md | general-purpose | test-big | 1 | 100 | 0 | 0 | 0 | 0 | 1 | 0m20s | $0.00 | 1 | - | 0 | 0 | 0 |'
+PU_USAGE='usage: plan-usage.sh [--config <folder>] [--no-header] <plan file>'
+
+echo '--- plan-usage: rows'
+pu "$PA"
+assert_eq "plan-usage: the header names the columns, in order" "$PU_HEAD" "$(printf '%s\n' "$OUT" | sed -n 1p)"
+assert_eq "plan-usage: the separator" "$PU_SEP" "$(printf '%s\n' "$OUT" | sed -n 2p)"
+assert_eq "plan-usage: a resumed planner: one call per message id, no <synthetic> call or model, 5-minute and 1-hour writes priced apart, an older record's writes as 5-minute ones, the hour between its prompts left out, a cut-short line skipped; the plan's shape and its spec's lines" \
+    "$ROW_A" "$(printf '%s\n' "$OUT" | sed -n 3p)"
+assert_eq "plan-usage: three lines in all" 3 "$(printf '%s\n' "$OUT" | wc -l | tr -d ' ')"
+cd "$PR" || exit 1
+pu --no-header docs/superpowers/plans/2026-01-01-pu-a.md
+cd - > /dev/null || exit 1
+assert_eq "plan-usage --no-header: the row alone, for a plan path relative to the checkout's top" "$ROW_A" "$OUT"
+pu --no-header "$PB"
+assert_eq "plan-usage: two planners and an agent of another type that edited the plan are summed, one that only read it is not; no Spec line" \
+    "$ROW_B" "$OUT"
+pu --no-header "$PC"
+assert_eq "plan-usage: a plan written in a worktree; the same file name in another repo does not count; a Spec line naming no file" \
+    "$ROW_C" "$OUT"
+git -C "$PR" add docs
+git -C "$PR" -c core.hooksPath=/dev/null -c commit.gpgsign=false -c user.name=test -c user.email=test@example.invalid commit -q -m fixtures
+git -C "$PR" -c core.hooksPath=/dev/null worktree add -q "$PR/.worktrees/w2"
+pu --no-header "$PR/.worktrees/w2/docs/superpowers/plans/2026-01-01-pu-a.md"
+assert_eq "plan-usage: a plan given by its path in a worktree is measured as the main checkout's" "$ROW_A" "$OUT"
+
+echo '--- plan-usage: the config folder'
+pu --no-header --config "~/pu-other" "$PD"
+assert_eq "plan-usage --config: a leading ~/ is the home folder, and only that folder's transcripts count" "$ROW_D" "$OUT"
+CLAUDE_CONFIG_DIR=$HOME/pu-other
+export CLAUDE_CONFIG_DIR
+pu --no-header "$PD"
+assert_eq "plan-usage: CLAUDE_CONFIG_DIR is the default config folder" "$ROW_D" "$OUT"
+pu --no-header --config "$HOME/.claude" "$PA"
+assert_eq "plan-usage: --config wins over CLAUDE_CONFIG_DIR" "$ROW_A" "$OUT"
+unset CLAUDE_CONFIG_DIR
+
+echo '--- plan-usage: what it refuses'
+pu "$PP/2026-01-01-nosuch.md"
+assert_eq "plan-usage: no plan file: exit 1, says so" "1 plan-usage: no plan file at $PP/2026-01-01-nosuch.md" "$RC $OUT"
+mkdir -p "$TMP_ROOT/norepo"
+printf '# x\n' > "$TMP_ROOT/norepo/plan.md"
+pu "$TMP_ROOT/norepo/plan.md"
+assert_eq "plan-usage: a plan outside a git repo: exit 1, says so" "1 plan-usage: not in a git repo: $TMP_ROOT/norepo/plan.md" "$RC $OUT"
+mkdir -p "$TMP_ROOT/empty-cfg"
+pu --config "$TMP_ROOT/empty-cfg" "$PA"
+assert_eq "plan-usage: a config folder with no projects folder: exit 1, says so" "1 plan-usage: no projects folder in $TMP_ROOT/empty-cfg" "$RC $OUT"
+pu "$PD"
+assert_eq "plan-usage: a plan no agent wrote: exit 1, says so" \
+    "1 plan-usage: no agent wrote docs/superpowers/plans/2026-01-01-pu-d.md (transcripts under $HOME/.claude/projects)" "$RC $OUT"
+pu "$PE"
+assert_eq "plan-usage: a model with no price: exit 1, says so" "1 plan-usage: no price for test-unknown in $TMP_ROOT/prices.tsv" "$RC $OUT"
+pu
+assert_eq "plan-usage: no argument: the usage line, exit 1" "1 $PU_USAGE" "$RC $OUT"
+pu --bogus "$PA"
+assert_eq "plan-usage: an option it does not know: the usage line, exit 1" "1 $PU_USAGE" "$RC $OUT"
+pu "$PA" "$PB"
+assert_eq "plan-usage: two plans: the usage line, exit 1" "1 $PU_USAGE" "$RC $OUT"
+pu --config
+assert_eq "plan-usage: --config with no folder: the usage line, exit 1" "1 $PU_USAGE" "$RC $OUT"
+
 
 # A fake claude, first on PATH, that records each call as "<CLAUDE_CONFIG_DIR> | <arguments>".
 mkdir -p "$TMP_ROOT/fakebin"
