@@ -394,7 +394,7 @@ git commit -m "feat(visual-companion): a per-session key, safe headers and file 
 - Produces: `BRAINSTORM_IDLE_TIMEOUT_MS` and `BRAINSTORM_LIFECYCLE_CHECK_MS` (milliseconds, positive); `server-info`'s
   `owner_pid` (a number or `null`) and `idle_timeout_ms` (a number when `owner_pid` is `null`, else `null`).
 
-- [ ] **Step 1: Write the failing tests** in `test-server.cjs`'s new lifetime section, with Task 1's fixtures. `L` is
+- [x] **Step 1: Write the failing tests** in `test-server.cjs`'s new lifetime section, with Task 1's fixtures. `L` is
   `{ BRAINSTORM_IDLE_TIMEOUT_MS: '600', BRAINSTORM_LIFECYCLE_CHECK_MS: '50', BRAINSTORM_TOKEN: K }`; `stopped(t)` reads
   `<t.dir>/state/server-stopped` as JSON.
 
@@ -436,13 +436,13 @@ await check('a rejected request does not count as activity', async () => {
 });
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `node skills/visual-companion/scripts/test-server.cjs`
 Expected: `FAIL a live owner: no idle exit past the timeout: {…}` (no `owner_pid`), with the other lifetime checks
 failing; Task 1's checks still `ok`; exit 1.
 
-- [ ] **Step 3: Implement it in `server.cjs`**
+- [x] **Step 3: Implement it in `server.cjs`**
 
 - `IDLE_TIMEOUT_MS`: `Number(process.env.BRAINSTORM_IDLE_TIMEOUT_MS)` when finite and above 0, else
   `4 * 60 * 60 * 1000`. `LIFECYCLE_CHECK_MS`: `BRAINSTORM_LIFECYCLE_CHECK_MS` the same way, else `60 * 1000`.
@@ -454,12 +454,12 @@ failing; Task 1's checks still `ok`; exit 1.
 - The watcher ignores names that start with `.`, as `servableFile` does; a new or changed screen still touches the
   activity clock. The "30 minutes" comments go.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `node skills/visual-companion/scripts/test-server.cjs`, then `bash skills/visual-companion/scripts/run-tests.sh`
 Expected: every line `ok`, exit 0, from each.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add skills/visual-companion/scripts/server.cjs skills/visual-companion/scripts/test-server.cjs
