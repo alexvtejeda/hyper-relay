@@ -145,7 +145,7 @@ generated. The spec flags no fact for re-check, so none was re-checked, and the 
 - Produces: `skills/brainstorming/research-prompt.md`, which Task 4's `planning.md` names as
   `../brainstorming/research-prompt.md`.
 
-- [ ] **Step 1: The research paragraph, in The Conversation (§2; P1, P2).** In `skills/brainstorming/SKILL.md`,
+- [x] **Step 1: The research paragraph, in The Conversation (§2; P1, P2).** In `skills/brainstorming/SKILL.md`,
   replace:
 
 ```text
@@ -182,7 +182,7 @@ its own question, one at a time. What you found goes in the design,
 each fact with its source (see The Written Design).
 ```
 
-- [ ] **Step 2: The Written Design: the Cover line and the facts' paragraph (§2).** Replace:
+- [x] **Step 2: The Written Design: the Cover line and the facts' paragraph (§2).** Replace:
 
 ```text
 - constraints
@@ -226,7 +226,7 @@ approving.
 For a small change, the short design covers the same points in a line
 ```
 
-- [ ] **Step 3: The builder check's fourth pile (§2; P3).** Replace:
+- [x] **Step 3: The builder check's fourth pile (§2; P3).** Replace:
 
 ```text
 until the check is back. Sort what the builder asks into three piles:
@@ -256,7 +256,7 @@ with:
   and any decision it raises joins the "theirs" pile.
 ```
 
-- [ ] **Step 4: The Red Flags row (§2).** Replace:
+- [x] **Step 4: The Red Flags row (§2).** Replace:
 
 ```text
 | "The spike works, I'll keep building on it" | Keeping it is a new request. Back through the gate. |
@@ -269,7 +269,7 @@ with:
 | "The planner can look that up" | A planner can't run code and isn't in this conversation. Find out now, and explain it to your human partner. |
 ```
 
-- [ ] **Step 5: The research agent's prompt (§3).** Create `skills/brainstorming/research-prompt.md` with exactly this
+- [x] **Step 5: The research agent's prompt (§3).** Create `skills/brainstorming/research-prompt.md` with exactly this
   content:
 
 ````markdown
@@ -315,7 +315,7 @@ whole files.
 ```
 ````
 
-- [ ] **Step 6: The builder check's prompt asks for outside facts (§4; P4).** In
+- [x] **Step 6: The builder check's prompt asks for outside facts (§4; P4).** In
   `skills/brainstorming/builder-check-prompt.md`, replace:
 
 ```text
@@ -338,7 +338,7 @@ outside facts to look up".
 Skip anything the document explicitly leaves to the builder, and anything
 ```
 
-- [ ] **Step 7: Check it.**
+- [x] **Step 7: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -356,7 +356,7 @@ Skip anything the document explicitly leaves to the builder, and anything
 | `grep -r -n -F -e '/home/' -e '~/' -e '/Users/' -e '/tmp/' skills/brainstorming` | nothing |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add skills/brainstorming/SKILL.md skills/brainstorming/research-prompt.md skills/brainstorming/builder-check-prompt.md
