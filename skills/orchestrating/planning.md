@@ -68,6 +68,8 @@ list.
 One message, which ends there. It opens with its questions, numbered, in this order (`SKILL.md`, The stops):
 
 - each decision the owner must make;
+- each assumption the planner made where the spec was silent, which the owner can accept, correct, or answer with
+  "research it" (below);
 - "Want a plan review before you read it? A fresh agent on Sonnet reads the plan against the spec.";
 - the handoff question from `dispatching.md` §1, with its warnings: for several plans, or a plan joining one in
   flight, a line per plan and a line per overlap (`parallel.md` §1 and §2).
@@ -77,9 +79,9 @@ Then the report, short, one line per item:
 - the plan paths and their task counts;
 - a line per plan, "plan N lines for an M-line spec", from `wc -l` on the plan and on its spec;
 - the planner's deviations and ambiguities, with its resolutions;
-- the external facts it re-verified, and any differences.
+- the facts it re-checked (those the spec flagged), and any differences.
 
-The answer leads one of three ways:
+The answer leads one of four ways:
 
 - **Approve, with a mode:** `dispatching.md` §2, for each plan that starts now (`parallel.md` §1 says when the others
   start). The answer is the go-ahead: do not ask again.
@@ -90,6 +92,19 @@ The answer leads one of three ways:
   changed.
 - **Changes:** the planner revises the plan (resumed, or fresh with the owner's list) and commits it again. Then §2
   and stop 3.
+- **Research it** (an assumption): find out as `hyper-relay:brainstorming` does before its approaches, then send the
+  planner back with the facts.
+  1. Run a small check yourself (a command or two, a single docs page). A bigger one goes to a fresh general-purpose
+     agent on Sonnet (`SKILL.md`, Fallbacks) with `brainstorming`'s `research-prompt.md`
+     (`../brainstorming/research-prompt.md` from this file), filled in with the questions and where to look.
+  2. Explain what you found to the owner, as brainstorming does: how it works, what you found and the evidence for it.
+     When it raises a decision, ask it, and that message ends there.
+  3. Add each fact to the spec's `## How it works` (adding the section when the spec has none), with its source and
+     the date you checked it, and commit just the spec while the main checkout is on `main` (`git add <spec>`, then
+     `git commit -m "<message>" -- <spec>`). During a branch run, the spec edit waits for the merge
+     (`dispatching.md` §6), and the planner gets the facts in its prompt instead.
+  4. The planner revises the plan (resumed, or fresh with the facts) and commits it again. Then §2, and a short stop 3
+     in the same order as after a plan review.
 
 **Only the planner edits a plan.** When the spec's `**Plans:**` count is wrong, the planner reports it and stops. Ask
 the owner; then update the spec's `**Plans:**` line yourself (add it for more than one plan, remove it for one),
