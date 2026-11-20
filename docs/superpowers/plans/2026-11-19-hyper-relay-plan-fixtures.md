@@ -135,7 +135,7 @@ generated.
 - Modify: `tests/benchmark/run-tests.sh:2-6` (header), after `:303` (a new section)
 - Modify: `.hyper-relay/merge.conf:51`, `docs/benchmarks/README.md` (a section after `:323`), `CLAUDE.md:34-37`
 
-- [ ] **Step 1: Write the failing tests** in `tests/benchmark/run-tests.sh`.
+- [x] **Step 1: Write the failing tests** in `tests/benchmark/run-tests.sh`.
 
 First its header. Replace:
 
@@ -393,12 +393,12 @@ call), priced $1.35001 + $2.30001 + $1.75001 + $0.75001 + $1.02502 = $7.17506; i
 B1 prompt is over 1,000,000, so `test-small`'s upper row prices it ($0.2401 + $0.8251 + $0.01505 = $1.08025); its
 pieces are 50m00s, 20m00s and 0m30s. Plan A's blocks: Test code 2 + 3, Other code 1 + 1 + 1, Text 2 + 4 + 1.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `sh tests/benchmark/run-tests.sh | tail -n 1`
 Expected: `90 passed, 20 failed` (dash cannot open the missing `plan-usage.sh`, so every new assertion fails).
 
-- [ ] **Step 3: Implement `plan-usage.sh [--config <folder>] [--no-header] <plan file>` in
+- [x] **Step 3: Implement `plan-usage.sh [--config <folder>] [--no-header] <plan file>` in
   `scripts/benchmark/plan-usage.sh`, and its reader, `scripts/benchmark/plan-usage.jq`**
 
 `plan-usage.sh`: `#!/bin/sh`, `set -eu`, a header comment in `run-usage.sh`'s style (what it prints and from what,
@@ -467,7 +467,7 @@ each line's file, everything else as `--arg` and `--argjson`):
   `<m>m<ss>s` under an hour and `<h>h<mm>m<ss>s` from an hour.
 - Every number with `commas`; the row is `| <cell> | … |`, its cells in spec §2.2's order, as `ROW_A` shows.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 | Run | Expected |
 |---|---|
@@ -476,7 +476,7 @@ each line's file, everything else as `--arg` and `--argjson`):
 | `dash -n scripts/benchmark/plan-usage.sh` | silent, exit 0 |
 | `test -x scripts/benchmark/plan-usage.sh && echo x` | `x` |
 
-- [ ] **Step 5: The merge gate.** In `.hyper-relay/merge.conf`, replace:
+- [x] **Step 5: The merge gate.** In `.hyper-relay/merge.conf`, replace:
 
 ```text
 scripts/benchmark/              build  dash -n scripts/benchmark/run-usage.sh
@@ -489,7 +489,7 @@ scripts/benchmark/              build  dash -n scripts/benchmark/run-usage.sh
 scripts/benchmark/              build  dash -n scripts/benchmark/plan-usage.sh
 ```
 
-- [ ] **Step 6: The runbook's section (spec §6).** Append to `docs/benchmarks/README.md`, after its last line
+- [x] **Step 6: The runbook's section (spec §6).** Append to `docs/benchmarks/README.md`, after its last line
   (`numbers, one-line findings and commit hashes, never SAT's code, data or secrets.`), one blank line and then exactly
   this:
 
@@ -534,7 +534,7 @@ done
   the loop from `"$SAT"`, with its output in `"$BENCH/plan-usage-<date>.md"`.
 ````
 
-- [ ] **Step 7: `CLAUDE.md`'s layout line.** Replace:
+- [x] **Step 7: `CLAUDE.md`'s layout line.** Replace:
 
 ```text
 - `scripts/benchmark/`: piece G.2's tools for a baseline against upstream superpowers. `superpowers-env.sh` builds a
@@ -554,7 +554,7 @@ with:
   prompts, its run-log template and its runbook.
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add scripts/benchmark/plan-usage.sh scripts/benchmark/plan-usage.jq tests/benchmark/run-tests.sh .hyper-relay/merge.conf docs/benchmarks/README.md CLAUDE.md
