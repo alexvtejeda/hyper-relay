@@ -692,7 +692,7 @@ The jq's layout, and the test fixtures.
 No fact here is flagged for re-check.
 ```
 
-- [ ] **Step 1 (`reviewer`): The suites and the manifest (spec §10 step 1).**
+- [x] **Step 1 (`reviewer`): The suites and the manifest (spec §10 step 1).**
 
 | Run | PASS |
 |---|---|
@@ -702,21 +702,21 @@ No fact here is flagged for re-check.
 | `sh tests/hyper-relay-agents/guard-test.sh \| tail -n 1` | ends `0 failed` |
 | `git diff --stat main...HEAD -- package.json .claude-plugin` | nothing (the release is after the merge) |
 
-- [ ] **Step 2 (`reviewer`): "re-verify" is gone from the relay (spec §10 step 2, §1).**
+- [x] **Step 2 (`reviewer`): "re-verify" is gone from the relay (spec §10 step 2, §1).**
 
 | Run | PASS |
 |---|---|
 | `git grep -n -i 're-verif' -- skills/brainstorming skills/writing-plans skills/orchestrating templates .hyper-relay` | nothing |
 | `git grep -c -i 're-verif' -- skills/writing-skills` | `skills/writing-skills/SKILL.md:1` and `skills/writing-skills/testing-skills-with-subagents.md:3`, as on `main` (its own TDD cycle, untouched) |
 
-- [ ] **Step 3 (`reviewer`): Only the planned files (spec §10 step 3, §1, §12).**
+- [x] **Step 3 (`reviewer`): Only the planned files (spec §10 step 3, §1, §12).**
 
 | Run | PASS |
 |---|---|
 | `git diff --name-only main...HEAD` | exactly the eight files of Task 4 Step 7 |
 | `git diff main...HEAD -- skills templates .hyper-relay \| grep -c -E '^\+.*(/home/\|~/\|/tmp/\|/Users/)'` | `0` |
 
-- [ ] **Step 4 (`reviewer`): The text against the plan (spec §2–§8; P1–P9).** Run `git diff main...HEAD` and read
+- [x] **Step 4 (`reviewer`): The text against the plan (spec §2–§8; P1–P9).** Run `git diff main...HEAD` and read
   every hunk. PASS: each hunk is one of Tasks 1–4's "Replace X with Y" edits, with Y word for word (Task 2's in
   `skills/writing-plans/`, whatever plan-fixtures changed beside them), and `research-prompt.md` is Task 1 Step 5's
   content; nothing else differs. Also:
@@ -729,7 +729,7 @@ No fact here is flagged for re-check.
 
   A sentence that contradicts the spec beyond the P-notes is a FAIL, with its line.
 
-- [ ] **Step 5 (`skill-test`): S1, research before the approaches (§9 S1; §2, §3; RB1, RB2).**
+- [x] **Step 5 (`skill-test`): S1, research before the approaches (§9 S1; §2, §3; RB1, RB2).**
 
 Situation:
 
@@ -785,7 +785,7 @@ left for the planner to find out.
 RED is expected to: lay out the approaches next, with no research agent (a look of its own at most); in Part 2, a spec
 that names a transcript reader without saying, with sources and dates, how a transcript is laid out.
 
-- [ ] **Step 6 (`skill-test`): S2, a one-command check needs no agent (§9 S2; §2). Expected to pass on both.**
+- [x] **Step 6 (`skill-test`): S2, a one-command check needs no agent (§9 S2; §2). Expected to pass on both.**
 
 Situation:
 
@@ -815,7 +815,7 @@ GREEN must: run `gh pr create --help` itself, with no subagent dispatched, and s
 
 RED is expected to: do the same (the guard against sending a one-command check to an agent).
 
-- [ ] **Step 7 (`skill-test`): S3, a fact that may change is flagged (§9 S3; §2).**
+- [x] **Step 7 (`skill-test`): S3, a fact that may change is flagged (§9 S3; §2).**
 
 Situation:
 
@@ -862,7 +862,7 @@ beta page that may change before the plan runs), and leave facts 1, 2 and 4 unfl
 RED is expected to: flag nothing (the facts in the spec, or some of them, with no flag), or send every fact to the
 planner to re-verify.
 
-- [ ] **Step 8 (`skill-test`): S4, the builder check names an unsourced outside fact (§9 S4; §4).**
+- [x] **Step 8 (`skill-test`): S4, the builder check names an unsourced outside fact (§9 S4; §4).**
 
 Situation:
 
@@ -886,7 +886,7 @@ with a source.
 
 RED is expected to: pass over the transcript format, or raise it only as an ordinary question (recorded either way).
 
-- [ ] **Step 9 (`skill-test`): S5, the planner builds on settled facts (§9 S5; §5).**
+- [x] **Step 9 (`skill-test`): S5, the planner builds on settled facts (§9 S5; §5).**
 
 Situation:
 
@@ -922,7 +922,7 @@ re-checked, and that it made no assumption about the format.
 RED is expected to: work the format out again before writing (`ls`, `head` or `jq` on real transcripts, or docs
 fetched to confirm it).
 
-- [ ] **Step 10 (`skill-test`): S6, a gap becomes an assumption, not an investigation (§9 S6; §5).**
+- [x] **Step 10 (`skill-test`): S6, a gap becomes an assumption, not an investigation (§9 S6; §5).**
 
 Situation:
 
@@ -957,7 +957,7 @@ with no fact re-checked (the spec flags none).
 RED is expected to: investigate at length (several searches or fetches, `gh pr list --json statusCheckRollup` run on a
 repo, `gh`'s source read), or state the shape as fact, with no assumption marked.
 
-- [ ] **Step 11 (`skill-test`): S7, the owner answers "research it" at stop 3 (§9 S7; §7).**
+- [x] **Step 11 (`skill-test`): S7, the owner answers "research it" at stop 3 (§9 S7; §7).**
 
 Situation:
 
@@ -1003,7 +1003,7 @@ back. It does not ask the planner to investigate.
 RED is expected to: send the planner back to investigate A1, or treat the answer as plan changes and leave the spec as
 it is.
 
-- [ ] **Step 12 (`skill-test`): S8, the plan reviewer blocks on an unsourced outside fact (§9 S8; §6).**
+- [x] **Step 12 (`skill-test`): S8, the plan reviewer blocks on an unsourced outside fact (§9 S8; §6).**
 
 Situation:
 
@@ -1089,12 +1089,12 @@ owner.
 RED is expected to: pass the External facts check (the spec asks nothing re-checked) and not block on the claim
 (Ready, or the claim at most advisory). A RED that blocks on it under Buildability is recorded as not failing.
 
-- [ ] **Step 13 (`owner`): Read the new text.** Read
+- [x] **Step 13 (`owner`): Read the new text.** Read
   `git -C /home/noob_master/hyper-relay diff main...hyper-relay-research-before-plan`, with stop 4's skill-test results
   and the P-notes, P2, P5 and P10 above all. PASS: the owner agrees with them as written. A change goes to the
   executor as a finding.
 
-- [ ] **Step 14 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
+- [x] **Step 14 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
   cleanly.**
 
 | Run | PASS |
@@ -1104,7 +1104,7 @@ RED is expected to: pass the External facts check (the spec asks nothing re-chec
 On exit 1 it names the conflicted files (with plan-fixtures, `skills/writing-plans/` is where they would be): tell the
 owner before merging. The merge runs as the installed relay says: `relay-merge` from the main checkout on `main`.
 
-- [ ] **Step 15 (`after merge`): Re-check on `main`.**
+- [x] **Step 15 (`after merge`): Re-check on `main`.**
 
 | Run | PASS |
 |---|---|
@@ -1115,7 +1115,7 @@ owner before merging. The merge runs as the installed relay says: `relay-merge` 
 | `git -C /home/noob_master/hyper-relay grep -n -i 're-verif' -- skills/brainstorming skills/writing-plans skills/orchestrating templates .hyper-relay` | nothing |
 | `git -C /home/noob_master/hyper-relay status --porcelain --untracked-files=no` | nothing |
 
-- [ ] **Step 16 (`after merge`, the owner's call): SAT's facts line (spec §8; P14).** SAT's repo is not this branch's,
+- [x] **Step 16 (`after merge`, the owner's call): SAT's facts line (spec §8; P14).** SAT's repo is not this branch's,
   so the owner decides, and commits it as SAT's own rules say. In `/home/noob_master/sat.pentraze.com/.hyper-relay/agents.md`
   (line 13), replace:
 
@@ -1133,7 +1133,7 @@ with:
 |---|---|
 | `git -C /home/noob_master/sat.pentraze.com grep -n -i 're-verif' -- .hyper-relay/agents.md` | nothing (or the owner declined: Step 19 then regenerates SAT's agents with the old line, which the record says) |
 
-- [ ] **Step 17 (`after merge`): The release (spec §10; `.hyper-relay/agents.md`, Releases, (1) and (2); P15).** The
+- [x] **Step 17 (`after merge`): The release (spec §10; `.hyper-relay/agents.md`, Releases, (1) and (2); P15).** The
   owner approves this push at stop 4: it also takes `main`'s earlier unpushed commits (this spec and plan among them),
   which is expected. In the main checkout on `main` (no `MERGE_HEAD`), one command per Bash call, with `<x.y.z>` the
   version `--check` shows with its patch number raised by one (`0.2.4` from `0.2.3`):
@@ -1161,7 +1161,7 @@ git -C /home/noob_master/hyper-relay push origin main v<x.y.z>
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v<x.y.z>` | one line |
 
-- [ ] **Step 18 (`after merge`): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [x] **Step 18 (`after merge`): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session).
 
@@ -1174,7 +1174,7 @@ git -C /home/noob_master/hyper-relay push origin main v<x.y.z>
 If the update says it is already at the latest version, the owner runs `claude plugin marketplace update hyper-relay`
 and the update again. If a check still fails, stop and tell the owner; delete or uninstall nothing.
 
-- [ ] **Step 19 (`after merge`): The role agents, regenerated here and in SAT (spec §10; P13, P14).** With the
+- [x] **Step 19 (`after merge`): The role agents, regenerated here and in SAT (spec §10; P13, P14).** With the
   installed generator, so the agents' version marker matches the installed plugin:
 
 | Run | PASS |
@@ -1193,3 +1193,18 @@ Then SAT, unless a SAT plan is between its dispatch and its merge: then ask the 
 
 A `refused` line (a hand-edited agent) stops the step: tell the owner. The new agents load in a new session. Then tick
 the acceptance task as `reviewing.md` §5 says.
+
+## Last-task record (Task 5)
+
+- **Before the merge:** acceptance 4/4 PASS, 0 fix rounds. Skill tests GREEN 8/8 (S1's first GREEN run was cut off
+  before its Part 2; a fresh rerun passed); RED failed in S1, S3, S4, S7; S2 (the guard) passed on both;
+  non-discriminating S5, S6, S8. Code review: 0 Critical, 1 Important, 3 Minor. The Important (the orchestrating
+  stops table's row 3 lacked the assumptions question and "research it") was fixed on the branch in `756a2c7` at the
+  owner's word, a deviation: a ninth file, `skills/orchestrating/SKILL.md`, which spec §1 did not list (the owner had
+  first kept it unchanged at P10). The Minors became cards `61954d06` and `1f5a94ac`.
+- **Owner steps:** Step 13 agreed (P2, P5, P10 as written, plus the fix above); Step 14 `merge-tree` exit 0. Merged in
+  `c852153`.
+- **After merge:** Step 15 on `main`: 28/0, 153/0, validate passes, no "re-verify"; Step 16 SAT's line changed and
+  committed in SAT (`68756339`, not pushed); Step 17 released v0.2.4 in `d065c18`, tagged, pushed; Step 18 0.2.4 in the
+  cache; Step 19 agents regenerated here (`relay-planner` written) and in SAT (`sat-planner` written), `--check`
+  silent in both.
