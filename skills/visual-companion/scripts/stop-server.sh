@@ -5,7 +5,7 @@
 # Kills the server process, but only a process proved to be this session's own server: its
 # command line must carry the instance id start-server.sh wrote. A pid file that names
 # anything else (a reused pid) is stale, and nothing is signalled. Only deletes session
-# directory if it's under /tmp (ephemeral). Persistent directories (.superpowers/) are
+# directory if it's under /tmp (ephemeral). Persistent directories (.hyper-relay/companion/) are
 # kept so mockups can be reviewed later.
 
 SESSION_DIR="$1"

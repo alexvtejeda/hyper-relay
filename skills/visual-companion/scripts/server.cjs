@@ -341,14 +341,18 @@ function startServer() {
   // 'listening' rather than the listen() callback, so this fires again after a retry.
   server.on('listening', () => {
     boundPort = Number(port);
-    const info = JSON.stringify({
+    const infoObject = {
       type: 'server-started', port: Number(port), host: HOST,
       url_host: URL_HOST, url: 'http://' + URL_HOST + ':' + port + '/?key=' + sessionKey,
       screen_dir: CONTENT_DIR, state_dir: STATE_DIR,
       owner_pid: ownerPid, idle_timeout_ms: ownerPid ? null : IDLE_TIMEOUT_MS
-    });
-    console.log(info);
-    fs.writeFileSync(path.join(STATE_DIR, 'server-info'), info + '\n', { mode: 0o600 });
+    };
+    // git_exclude and moved_from are about this start only: printed, never saved.
+    const startOnly = {};
+    if (process.env.BRAINSTORM_GIT_EXCLUDE) startOnly.git_exclude = process.env.BRAINSTORM_GIT_EXCLUDE;
+    if (process.env.BRAINSTORM_MOVED_FROM) startOnly.moved_from = process.env.BRAINSTORM_MOVED_FROM;
+    console.log(JSON.stringify({ ...infoObject, ...startOnly }));
+    fs.writeFileSync(path.join(STATE_DIR, 'server-info'), JSON.stringify(infoObject) + '\n', { mode: 0o600 });
     fs.writeFileSync(path.join(STATE_DIR, 'port'), String(port) + '\n');
   });
 

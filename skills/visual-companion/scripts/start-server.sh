@@ -6,8 +6,11 @@
 # Each session gets its own directory to avoid conflicts.
 #
 # Options:
-#   --project-dir <path>  Store session files under <path>/.superpowers/brainstorm/
-#                         instead of /tmp. Files persist after server stops.
+#   --project-dir <path>  Store session files under <path>/.hyper-relay/companion/<session>/
+#                         instead of /tmp. Files persist after server stops. A session
+#                         from <path>/.superpowers/brainstorm/ moves here the first time it
+#                         is started again. In a git repo, the folder is kept out of git
+#                         through the repo's local exclude file (never .gitignore).
 #   --session <name>      Name the session: a restart reuses its folder, port and key.
 #   --idle-timeout-minutes <n>
 #                         Stop after <n> minutes with no visit and no new screen (default
@@ -137,14 +140,32 @@ if [[ -n "$PROJECT_DIR" ]]; then
     echo '{"error": "Cannot create or enter --project-dir"}'
     exit 1
   }
-  SESSION_DIR="${PROJECT_DIR}/.superpowers/brainstorm/${SESSION_ID}"
+  SESSION_DIR="${PROJECT_DIR}/.hyper-relay/companion/${SESSION_ID}"
+  OLD_DIR="${PROJECT_DIR}/.superpowers/brainstorm/${SESSION_ID}"
 else
   SESSION_DIR="/tmp/brainstorm-${SESSION_ID}"
+  OLD_DIR=""
 fi
 
 STATE_DIR="${SESSION_DIR}/state"
 PID_FILE="${STATE_DIR}/server.pid"
 LOG_FILE="${STATE_DIR}/server.log"
+
+# A session from before the move: bring it over, screens and port included. If an old
+# script's server is still running there, hand back its info and move nothing.
+MOVED_FROM=""
+if [[ -n "$OLD_DIR" && ! -e "$SESSION_DIR" && -d "$OLD_DIR" ]]; then
+  if [[ -f "${OLD_DIR}/state/server.pid" && -f "${OLD_DIR}/state/server-info" ]] \
+     && pid_alive "$(cat "${OLD_DIR}/state/server.pid")"; then
+    cat "${OLD_DIR}/state/server-info"
+    exit 0
+  fi
+  if ! { mkdir -p "$(dirname "$SESSION_DIR")" && mv "$OLD_DIR" "$SESSION_DIR"; }; then
+    echo '{"error": "Cannot move the old session folder"}'
+    exit 1
+  fi
+  MOVED_FROM="$OLD_DIR"
+fi
 
 # Reuse the session directory when it already exists. content/ is NEVER cleared — the
 # screens written before a restart are the whole reason for naming sessions.
@@ -178,6 +199,26 @@ fi
 # log goes too, so it is made again owner-only.
 rm -f "$PID_FILE" "${STATE_DIR}/server-info" "${STATE_DIR}/server-stopped" "$LOG_FILE"
 
+# Keep the companion's folder out of git, through the repo's local exclude file (shared by
+# every worktree), never .gitignore. The line is anchored at the repo's top, so below the top
+# it carries the folder's prefix. Added once: it is added only when git says the folder is
+# not ignored yet (exit 1; 128 is an error).
+GIT_EXCLUDE=""
+if [[ -n "$PROJECT_DIR" ]] \
+   && [[ "$(git -C "$PROJECT_DIR" rev-parse --is-inside-work-tree 2>/dev/null)" == "true" ]]; then
+  git -C "$PROJECT_DIR" check-ignore -q .hyper-relay/companion/ 2>/dev/null
+  if [[ $? -eq 1 ]]; then
+    EXCLUDE_FILE="$(git -C "$PROJECT_DIR" rev-parse --path-format=absolute --git-path info/exclude)"
+    EXCLUDE_PREFIX="$(git -C "$PROJECT_DIR" rev-parse --show-prefix)"
+    mkdir -p "$(dirname "$EXCLUDE_FILE")"
+    if [[ -s "$EXCLUDE_FILE" && -n "$(tail -c 1 "$EXCLUDE_FILE")" ]]; then
+      printf '\n' >> "$EXCLUDE_FILE"
+    fi
+    printf '/%s.hyper-relay/companion/\n' "$EXCLUDE_PREFIX" >> "$EXCLUDE_FILE"
+    GIT_EXCLUDE="added"
+  fi
+fi
+
 # Reuse the port this session bound last time so the URL is stable and can be stated once.
 # server.cjs falls back to a random high port if it is taken, and rewrites state/port with
 # whatever it actually bound.
@@ -208,12 +249,12 @@ echo "$INSTANCE_ID" > "$ID_FILE"
 # Foreground mode for environments that reap detached/background processes.
 if [[ "$FOREGROUND" == "true" ]]; then
   echo "$$" > "$PID_FILE"
-  exec env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_PORT="$REQUESTED_PORT" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs "--companion-id=$INSTANCE_ID"
+  exec env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_PORT="$REQUESTED_PORT" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_GIT_EXCLUDE="$GIT_EXCLUDE" BRAINSTORM_MOVED_FROM="$MOVED_FROM" node server.cjs "--companion-id=$INSTANCE_ID"
 fi
 
 # Start server, capturing output to log file
 # Use nohup to survive shell exit; disown to remove from job table
-nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_PORT="$REQUESTED_PORT" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs "--companion-id=$INSTANCE_ID" > "$LOG_FILE" 2>&1 &
+nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_PORT="$REQUESTED_PORT" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_GIT_EXCLUDE="$GIT_EXCLUDE" BRAINSTORM_MOVED_FROM="$MOVED_FROM" node server.cjs "--companion-id=$INSTANCE_ID" > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID" 2>/dev/null
 echo "$SERVER_PID" > "$PID_FILE"

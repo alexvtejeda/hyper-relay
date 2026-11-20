@@ -32,7 +32,7 @@ function start(args) {
 }
 
 function sessionDir(name) {
-  return path.join(root, '.superpowers', 'brainstorm', name);
+  return path.join(root, '.hyper-relay', 'companion', name);
 }
 
 function stop(name) {
