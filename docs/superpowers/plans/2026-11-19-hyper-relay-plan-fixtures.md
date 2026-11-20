@@ -572,7 +572,7 @@ Expected: `git ls-files -s scripts/benchmark/plan-usage.sh | cut -c 1-6` prints 
   (check 5)
 - Modify: `skills/writing-plans/plan-document-reviewer-prompt.md:23` (the Step contents row)
 
-- [ ] **Step 1: `SKILL.md`, "What a Step Contains" and "Self-Review".** Replace each X with its Y.
+- [x] **Step 1: `SKILL.md`, "What a Step Contains" and "Self-Review".** Replace each X with its Y.
 
 X1:
 
@@ -623,7 +623,7 @@ Y4 (P11):
 **5. Proportion:** Compare the plan's length with the spec's. When code blocks are most of the plan, replace bodies with signatures, test names and assertions, and fixture helpers with their signature and a sample, and check that each step is still unambiguous. Text steps do not count against the plan here (a test file is never one).
 ```
 
-- [ ] **Step 2: The reviewer's "Step contents" row (P12).** In `skills/writing-plans/plan-document-reviewer-prompt.md`
+- [x] **Step 2: The reviewer's "Step contents" row (P12).** In `skills/writing-plans/plan-document-reviewer-prompt.md`
   (the line sits inside the prompt's block, indented by four spaces: keep them), replace:
 
 ```text
@@ -636,7 +636,7 @@ with:
 | Step contents | A step that decides nothing ("TBD", "TODO", "implement later", "fill in details", "handle edge cases", "Similar to Task N", a name no task defines); a code body that the step's signature and tests already determine; a fixture helper written out instead of its signature and one sample of what it writes (unless its exact bytes are what the test checks); a test file given as a text step ("Create X with exactly this content"); a text step (a skill, a doc, a message) that does not give its text in full. |
 ```
 
-- [ ] **Step 3: Check it**
+- [x] **Step 3: Check it**
 
 | Run | Expected |
 |---|---|
@@ -648,7 +648,7 @@ with:
 | `grep -n -E '/home/\|~/\|/Users/\|/tmp/' skills/writing-plans/SKILL.md skills/writing-plans/plan-document-reviewer-prompt.md` | nothing |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add skills/writing-plans/SKILL.md skills/writing-plans/plan-document-reviewer-prompt.md
@@ -657,7 +657,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 5: The full gates, once**
+- [x] **Step 5: The full gates, once**
 
 | Run | Expected |
 |---|---|
