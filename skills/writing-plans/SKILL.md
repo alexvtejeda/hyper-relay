@@ -153,9 +153,10 @@ The executor reads the whole plan, so a task has an **Interfaces** block only wh
 
 A step is done when the executor can write exactly one reasonable thing from it: unambiguous, not complete. Each kind of step carries what makes it unambiguous and nothing more:
 
-- **A test step:** the test's name and its assertions, as code, with the spec's exact values in them.
+- **A test step:** the test's name and its assertions, as code, with the spec's exact values in them, and the setup its assertions depend on: which fixtures it calls, with which values.
+- **A fixture:** a helper that writes test data is given as its signature (its name and arguments) and one sample of what it writes, as data, not as the code that writes it: for a record format, one record with every field the tested code reads, nested as the real format nests it, showing where each argument goes. The executor writes the helper. The test harness (pass and fail counters, assert helpers) is named by the existing suite whose harness to follow, not written out. A fixture is written in full only when its exact bytes are what the test checks: a cut-off line, an escape, a malformed record.
 - **A code step:** the exact signature (name, parameters, return type), the file it lives in, and the values the spec pins. The executor writes the body. A body appears only for an algorithm the signature and the tests do not determine.
-- **A text step:** the exact text, in full, and where it goes, wherever the words are the product: a skill file or a file beside it that agents read, a doc, a message a person or an agent reads, a config value. "Create X with exactly this content" and "Replace X with Y" are the forms for these.
+- **A text step:** the exact text, in full, and where it goes, wherever the words are the product: a skill file or a file beside it that agents read, a doc, a message a person or an agent reads, a config value. "Create X with exactly this content" and "Replace X with Y" are the forms for these. A test file is never a text step: "Create X with exactly this content" is for files whose words are the product.
 - **A verification step:** the command, and the output that means it passed.
 - **A reference to another task:** that task's Interfaces block, not a copy of its code.
 
@@ -167,13 +168,13 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 **1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
 
-**2. Step scan:** Every step lets the executor write exactly one reasonable thing, and carries no more than that. A line that decides nothing is a gap; a body the signature and the tests already determine is a transcript. Fix both. Text steps keep their text in full.
+**2. Step scan:** Every step lets the executor write exactly one reasonable thing, and carries no more than that. A line that decides nothing is a gap; a body the signature and the tests already determine is a transcript. Fix both. A fixture helper's body that its signature and sample already determine is a transcript; replace it. Text steps keep their text in full.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
 
 **4. Review Focus:** For each input class or failure mode the spec implies, a task's tests exercise it, or it is in Review Focus and its test, with its assertions, is in the test step of the task that owns the code.
 
-**5. Proportion:** Compare the plan's length with the spec's. When code blocks are most of the plan, replace bodies with signatures, test names and assertions, and check that each step is still unambiguous. Text steps do not count against the plan here.
+**5. Proportion:** Compare the plan's length with the spec's. When code blocks are most of the plan, replace bodies with signatures, test names and assertions, and fixture helpers with their signature and a sample, and check that each step is still unambiguous. Text steps do not count against the plan here (a test file is never one).
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
