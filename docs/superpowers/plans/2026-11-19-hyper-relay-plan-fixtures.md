@@ -737,7 +737,7 @@ when the session died), after one whole call of 1,000,000 input and 100,000 outp
 `cost: $6.00`."
 ```
 
-- [ ] **Step 1 (`reviewer`): The suites and the manifest (spec §8 step 1).**
+- [x] **Step 1 (`reviewer`): The suites and the manifest (spec §8 step 1).**
 
 | Run | PASS |
 |---|---|
@@ -748,7 +748,7 @@ when the session died), after one whole call of 1,000,000 input and 100,000 outp
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 | `git show HEAD:.claude-plugin/plugin.json \| grep -F '"version"'` | `"version": "0.2.2",` (the release is after the merge) |
 
-- [ ] **Step 2 (`reviewer`): Real data (spec §8 step 2).** From the checkout's top, one command per run:
+- [x] **Step 2 (`reviewer`): Real data (spec §8 step 2).** From the checkout's top, one command per run:
 
 | Run | PASS |
 |---|---|
@@ -759,13 +759,13 @@ when the session died), after one whole call of 1,000,000 input and 100,000 outp
   verdict. A cell that differs is a FAIL, with both rows: the orchestrator settles with the owner whether the tool or
   the hand sum is wrong before a fix round.
 
-- [ ] **Step 3 (`reviewer`): No agent (spec §8 step 3).**
+- [x] **Step 3 (`reviewer`): No agent (spec §8 step 3).**
 
 | Run | PASS |
 |---|---|
 | `scripts/benchmark/plan-usage.sh --config ~/.claude docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md; echo "exit $?"` | exactly `plan-usage: no agent wrote docs/superpowers/plans/2026-11-17-hyper-relay-a-forks-home.md (transcripts under /home/noob_master/.claude/projects)`, then `exit 1` |
 
-- [ ] **Step 4 (`reviewer`): Only the planned files (spec §1, §9).**
+- [x] **Step 4 (`reviewer`): Only the planned files (spec §1, §9).**
 
 | Run | PASS |
 |---|---|
@@ -774,7 +774,7 @@ when the session died), after one whole call of 1,000,000 input and 100,000 outp
 | `git diff main...HEAD -- tests/benchmark/run-tests.sh \| grep -c '^-[^-]'` | `5`: only the header's five old lines are removed; every existing assertion stays |
 | `git diff main...HEAD -- skills \| grep -c -E '^\+.*(/home/\|~/\|/tmp/\|/Users/)'` | `0` |
 
-- [ ] **Step 5 (`reviewer`): The skill text against spec §4 and §5 (P11, P12).** Read
+- [x] **Step 5 (`reviewer`): The skill text against spec §4 and §5 (P11, P12).** Read
   `git diff main...HEAD -- skills/writing-plans`. PASS: exactly Task 2's five replacements, word for word: the test
   step gains the setup its assertions depend on; the fixture bullet follows it with every element of §4 (signature and
   one sample, as data; for a record format, one record with every field the tested code reads, nested, showing where
@@ -784,7 +784,7 @@ when the session died), after one whole call of 1,000,000 input and 100,000 outp
   Focus, Interfaces, the text step's other words, the acceptance task and Skill tests are unchanged (§4's
   "Unchanged"). A sentence that contradicts the spec beyond the P-notes is a FAIL, with its line.
 
-- [ ] **Step 6 (`skill-test`): S1, a planner writes tests that need fixture transcripts (§7 S1).**
+- [x] **Step 6 (`skill-test`): S1, a planner writes tests that need fixture transcripts (§7 S1).**
 
 Situation:
 
@@ -812,7 +812,7 @@ nested as the transcript nests them; name the harness by reference to `tests/wt/
 RED is expected to: write the whole suite in full, the harness and the helpers' `printf` bodies included, often as
 "Create `tests/session-cost/run-tests.sh` with exactly this content".
 
-- [ ] **Step 7 (`skill-test`): S2, the same spec plus a cut-short line (§7 S2). A guard on the cut line.**
+- [x] **Step 7 (`skill-test`): S2, the same spec plus a cut-short line (§7 S2). A guard on the cut line.**
 
 Situation:
 
@@ -839,7 +839,7 @@ suite.
 RED is expected to: write everything in full, the cut line included. The cut line in full is expected on both: a
 GREEN that gives it only as a signature is a fix round.
 
-- [ ] **Step 8 (`skill-test`): S3, the self-review finds a test file given as a text step (§7 S3; P11, P13).**
+- [x] **Step 8 (`skill-test`): S3, the self-review finds a test file given as a text step (§7 S3; P11, P13).**
 
 Situation:
 
@@ -897,7 +897,7 @@ sample record; the harness by reference to `tests/wt/run-tests.sh`'s; the cut li
 RED is expected to: keep Step 1 as it stands: "Create … with exactly this content" makes it a text step, which check 5
 does not count.
 
-- [ ] **Step 9 (`skill-test`): S4, the plan reviewer meets a test file given as a text step (§7 S4; P12).**
+- [x] **Step 9 (`skill-test`): S4, the plan reviewer meets a test file given as a text step (§7 S4; P12).**
 
 Situation:
 
@@ -1027,12 +1027,12 @@ its signature and one sample (the harness written out instead of named may be fl
 
 RED is expected to: give **Status:** Ready, with at most an advisory note on the plan's proportion.
 
-- [ ] **Step 10 (`owner`): Read the new text.** Read
+- [x] **Step 10 (`owner`): Read the new text.** Read
   `git -C /home/noob_master/hyper-relay diff main...hyper-relay-plan-fixtures -- skills/writing-plans`, with stop 4's
   skill-test results, Step 2's two rows and the P-notes, P11 and P12 above all. PASS: the owner agrees with them as
   written. A change goes to the executor as a finding.
 
-- [ ] **Step 11 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
+- [x] **Step 11 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly.**
 
 | Run | PASS |
@@ -1042,7 +1042,7 @@ RED is expected to: give **Status:** Ready, with at most an advisory note on the
 On exit 1 it names the conflicted files: tell the owner before merging. The merge runs as the installed relay says:
 `relay-merge` from the main checkout on `main`.
 
-- [ ] **Step 12 (`after merge`): Re-check on `main`.**
+- [x] **Step 12 (`after merge`): Re-check on `main`.**
 
 | Run | PASS |
 |---|---|
@@ -1052,7 +1052,7 @@ On exit 1 it names the conflicted files: tell the owner before merging. The merg
 | `cd /home/noob_master/hyper-relay && claude plugin validate .` | passes; warnings the root `CLAUDE.md` one, `ICON_MISSING` and `PRIVACY_URL_MISSING` |
 | `git -C /home/noob_master/hyper-relay status --porcelain --untracked-files=no` | nothing |
 
-- [ ] **Step 13 (`after merge`): The baseline (spec §8, PF5, PF7).** One command per line, in order:
+- [x] **Step 13 (`after merge`): The baseline (spec §8, PF5, PF7).** One command per line, in order:
 
 ```bash
 E=$(mktemp -d)
@@ -1073,7 +1073,7 @@ cd /home/noob_master/sat.pentraze.com && h= && for p in docs/superpowers/plans/*
   Then the orchestrator copies the rows of `$E/hyper-relay.md` into its token log, outside the repo. SAT's rows stay
   in `~/sat-benchmark/plan-usage-baseline.md`, never in a repo, a commit, the token log or this plan (PF5).
 
-- [ ] **Step 14 (`after merge`): The note on card `93e7a9dc` (spec §8; P15).** The baseline's test-code lines per plan,
+- [x] **Step 14 (`after merge`): The note on card `93e7a9dc` (spec §8; P15).** The baseline's test-code lines per plan,
   each repo apart. One command per line:
 
 ```bash
@@ -1095,7 +1095,7 @@ against SAT's figures, recorded on this card when that plan lands.
 
   PASS: the note is on the card, and it names no SAT plan.
 
-- [ ] **Step 15 (`after merge`): The release, 0.2.3 (spec §8; `.hyper-relay/agents.md`, Releases, (1) and (2)).** The
+- [x] **Step 15 (`after merge`): The release, 0.2.3 (spec §8; `.hyper-relay/agents.md`, Releases, (1) and (2)).** The
   owner approves this push at stop 4: it also takes `main`'s earlier unpushed commits (this spec and plan among them),
   which is expected. In the main checkout on `main` (no `MERGE_HEAD`), one command per Bash call:
 
@@ -1122,7 +1122,7 @@ git -C /home/noob_master/hyper-relay push origin main v0.2.3
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v0.2.3` | one line |
 
-- [ ] **Step 16 (`after merge`): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [x] **Step 16 (`after merge`): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session).
 
@@ -1135,7 +1135,7 @@ If the update says it is already at the latest version, the owner runs `claude p
 and the update again, and the record says so. If a check still fails, stop and tell the owner; delete or uninstall
 nothing.
 
-- [ ] **Step 17 (`after merge`): The role agents, regenerated here and in SAT (spec §8; P16).** With the installed
+- [x] **Step 17 (`after merge`): The role agents, regenerated here and in SAT (spec §8; P16).** With the installed
   0.2.3 generator, so the agents' version marker matches the installed plugin:
 
 | Run | PASS |
@@ -1154,7 +1154,7 @@ owner first (P16).
 A `refused` line (a hand-edited agent) stops the step: tell the owner. The new agents load in a new session. SAT's
 `.hyper-relay/agents.md` is left alone.
 
-- [ ] **Step 18 (`after merge`, last): Record.** Append to this plan, in the main checkout (on `main`), with no SAT
+- [x] **Step 18 (`after merge`, last): Record.** Append to this plan, in the main checkout (on `main`), with no SAT
   figure or SAT plan name in it (PF5):
 
 ```markdown
