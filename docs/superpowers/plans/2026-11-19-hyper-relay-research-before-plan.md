@@ -512,7 +512,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Interfaces:**
 - Consumes: Task 1's `skills/brainstorming/research-prompt.md`.
 
-- [ ] **Step 1: The questions (§7).** In `skills/orchestrating/planning.md`, replace:
+- [x] **Step 1: The questions (§7).** In `skills/orchestrating/planning.md`, replace:
 
 ```text
 - each decision the owner must make;
@@ -526,7 +526,7 @@ with:
   "research it" (below);
 ```
 
-- [ ] **Step 2: The report line (§7).** Replace:
+- [x] **Step 2: The report line (§7).** Replace:
 
 ```text
 - the external facts it re-verified, and any differences.
@@ -538,7 +538,7 @@ with:
 - the facts it re-checked (those the spec flagged), and any differences.
 ```
 
-- [ ] **Step 3: Four answers (§7).** Replace:
+- [x] **Step 3: Four answers (§7).** Replace:
 
 ```text
 The answer leads one of three ways:
@@ -550,7 +550,7 @@ with:
 The answer leads one of four ways:
 ```
 
-- [ ] **Step 4: The "research it" answer (§7; P9).** Replace:
+- [x] **Step 4: The "research it" answer (§7; P9).** Replace:
 
 ```text
 - **Changes:** the planner revises the plan (resumed, or fresh with the owner's list) and commits it again. Then §2
@@ -577,7 +577,7 @@ with:
      in the same order as after a plan review.
 ```
 
-- [ ] **Step 5: Check it.**
+- [x] **Step 5: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -590,7 +590,7 @@ with:
 | `grep -c -i 're-verif' skills/orchestrating/planning.md` | `0` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/orchestrating/planning.md
@@ -599,7 +599,7 @@ Co-Authored-By: <the line your instructions give>
 Claude-Session: <the URL your dispatch prompt gives>"
 ```
 
-- [ ] **Step 7: The full gates, once.**
+- [x] **Step 7: The full gates, once.**
 
 | Run | Expected |
 |---|---|
