@@ -376,7 +376,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Produces: the section heading `## Facts about outside systems`, which Task 3's template names as
   `hyper-relay:writing-plans`' "Facts about outside systems".
 
-- [ ] **Step 1: The new section (§5; P5–P7).** In `skills/writing-plans/SKILL.md`, replace:
+- [x] **Step 1: The new section (§5; P5–P7).** In `skills/writing-plans/SKILL.md`, replace:
 
 ```text
 ## Stacked plans
@@ -398,7 +398,7 @@ Your report names the facts you re-checked (those the spec flagged) and any diff
 ## Stacked plans
 ```
 
-- [ ] **Step 2: The reviewer's External facts row (§6; P5, P8).** In
+- [x] **Step 2: The reviewer's External facts row (§6; P5, P8).** In
   `skills/writing-plans/plan-document-reviewer-prompt.md`, replace this line (four leading spaces, as in the file):
 
 ```text
@@ -411,7 +411,7 @@ with:
     | External facts | Each fact the spec flags for re-check is cited with its URL and the date it was checked, and a difference is listed as a deviation. A fact about an outside system (a file format, a CLI, an API, docs) that the plan states as settled, and that neither the spec's `## How it works` (in an older spec, its External facts) nor a cited re-check gives, is flagged: it should be an assumption in the plan's deviations table and a question for the owner. This blocks: a wrong outside fact builds the wrong thing. |
 ```
 
-- [ ] **Step 3: Check it.**
+- [x] **Step 3: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -423,7 +423,7 @@ with:
 | `git diff -- skills/writing-plans \| grep -c '^-[^-]'` | `1` (the old row) |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 
-- [ ] **Step 4: Commit.**
+- [x] **Step 4: Commit.**
 
 ```bash
 git add skills/writing-plans/SKILL.md skills/writing-plans/plan-document-reviewer-prompt.md
