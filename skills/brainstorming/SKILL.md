@@ -183,6 +183,26 @@ beats a question.
 would help, go look: deeper into their codebase or project, their own
 files and data, or the web. Say what you looked for and what you found.
 
+**Find out how it works.** When the design depends on how something
+outside the project's own code works (a file format the work reads,
+how a command-line tool behaves, a third-party API, outside docs, data
+on this machine), find out before you lay out the approaches, or before
+the short design in your first message. Never leave it to the planner:
+a planner can't run code and isn't in this conversation. Reading the
+project's own code stays as Look Before You Ask and Do recon say. Run a
+small check yourself: a command or two, or a single docs page. A bigger
+investigation goes to a fresh subagent, on Sonnet, with
+`${CLAUDE_SKILL_DIR}/research-prompt.md`
+(`research-prompt.md` beside this SKILL.md), filled in with the
+questions the design hinges on and where to look. Without a subagent
+tool, do it yourself.
+
+Then explain what you found to your human partner, so they understand
+how the system works and not only your conclusion: how it works, what
+you found, and the evidence for it. Each decision it raises comes as
+its own question, one at a time. What you found goes in the design,
+each fact with its source (see The Written Design).
+
 **Lay out the approaches.** Once you understand what they want, and
 before you write anything up, put the ways of building it in a message
 of its own. Come up with several real alternatives and drop the weak
@@ -273,9 +293,23 @@ from without going back to your human partner. Cover:
 - intent and the why
 - goals, non-goals, anti-goals
 - constraints
+- how the outside systems it depends on work (see Find out how it
+  works): each fact with its source (a URL, a command, a file) and the
+  date you checked it
 - approaches (above)
 - the parts of the how they decided, as they decided them
 - what's left to the builder
+
+In the full design, those facts go in a section titled
+`## How it works`; in a short design, a line or two each. They are
+settled: the planner builds on them and does not look them up again.
+The exception is a fact that may change before the plan runs (a docs
+page in flux, a version, a beta API): flag it there for the planner to
+re-check, with your reason. Most designs flag none. Never write down a
+fact for the planner to find out: find it out now. When you hand the
+design over (stop 2, or the short design in your first message), list
+the flagged facts, if any, so your human partner sees them before
+approving.
 
 For a small change, the short design covers the same points in a line
 or two each and goes straight to your human partner, without the
@@ -325,7 +359,8 @@ with `${CLAUDE_SKILL_DIR}/builder-check-prompt.md`
 (`builder-check-prompt.md` beside this SKILL.md). When you tell your human
 partner you're writing it up, say a reviewer will read it first and you
 may come back once with a few questions. Don't hand over the document
-until the check is back. Sort what the builder asks into three piles:
+until the check is back. Sort what the builder asks into three piles,
+and the outside facts it lists into a fourth:
 
 - **Answered already** by the conversation or the project: put the answer
   in the document.
@@ -333,6 +368,9 @@ until the check is back. Sort what the builder asks into three piles:
   built. Settle it yourself and mark it in the document as your call.
 - **Theirs:** only your human partner can answer it, and the answer changes
   what gets built.
+- **Outside facts** it would have to look up or guess: research to do
+  (see Find out how it works). Put what you find in `## How it works`,
+  and any decision it raises joins the "theirs" pile.
 
 Bring the "theirs" pile in one message, most important first. Update the
 document with their answers, then hand it over with a short list of the
@@ -375,6 +413,7 @@ invoke `writing-plans`.
 | "I should explain the process first" | Ask your question. The process shows itself. |
 | "They said 'sounds good' to the idea" | Approval covers what you showed them. A design doc you haven't written isn't approved. |
 | "The spike works, I'll keep building on it" | Keeping it is a new request. Back through the gate. |
+| "The planner can look that up" | A planner can't run code and isn't in this conversation. Find out now, and explain it to your human partner. |
 
 ## Visual Companion
 
