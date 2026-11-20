@@ -16,8 +16,8 @@ const started = [];
 
 function check(name, fn) {
   try {
-    fn();
-    console.log('ok  ' + name);
+    const r = fn();
+    console.log('ok  ' + name + (r === 'skip-proc' ? ' (skipped: no /proc)' : ''));
   } catch (e) {
     failures.push(name + ': ' + e.message);
     console.error('FAIL ' + name + ': ' + e.message);
@@ -25,12 +25,14 @@ function check(name, fn) {
 }
 
 function start(args) {
-  const r = spawnSync('bash', [START, '--project-dir', root, ...args], { encoding: 'utf8' });
+  const r = spawnSync('bash', [START, '--project-dir', root, ...args], {
+    encoding: 'utf8', env: { ...process.env, GIT_CEILING_DIRECTORIES: os.tmpdir() },
+  });
   return { code: r.status, out: (r.stdout || '').trim(), err: (r.error && r.error.message) || r.stderr };
 }
 
 function sessionDir(name) {
-  return path.join(root, '.superpowers', 'brainstorm', name);
+  return path.join(root, '.hyper-relay', 'companion', name);
 }
 
 function stop(name) {
@@ -91,6 +93,73 @@ check('stop removes server-info', () => {
   assert(fs.existsSync(info), 'precondition failed — no server-info existed before the stop');
   stop('alpha-topic');
   assert(!fs.existsSync(info), 'server-info survived a clean stop — liveness checks will lie');
+});
+
+// Lifetime, owner, files and arguments (spec 2026-11-19-hyper-relay-companion-hardening).
+function st(name) {
+  return path.join(sessionDir(name), 'state');
+}
+const hasProc = fs.existsSync('/proc/self/cmdline');
+function needsProc(fn) {
+  return () => {
+    if (!hasProc) return 'skip-proc';
+    return fn();
+  };
+}
+
+check("the owner is the script's grandparent", () => {
+  const r = start(['--session', 'owner-check']); started.push('owner-check');
+  const info = JSON.parse(r.out);
+  assert(info.owner_pid === process.ppid, `owner_pid ${info.owner_pid}, expected ${process.ppid}`);
+  assert(info.idle_timeout_ms === null, 'idle_timeout_ms ' + info.idle_timeout_ms);
+});
+check('the state files are owner-only', () => {
+  for (const f of ['token', 'server-info', 'server.log', 'server-instance-id']) {
+    const mode = fs.statSync(path.join(st('owner-check'), f)).mode;
+    assert((mode & 0o077) === 0, f + ' is ' + (mode & 0o777).toString(8));
+  }
+});
+check("node runs with this start's instance id", needsProc(() => {
+  const id = fs.readFileSync(path.join(st('owner-check'), 'server-instance-id'), 'utf8').trim();
+  assert(/^[0-9a-f]{48}$/.test(id), 'id ' + id);
+  const pid = fs.readFileSync(path.join(st('owner-check'), 'server.pid'), 'utf8').trim();
+  const args = fs.readFileSync(`/proc/${pid}/cmdline`, 'utf8').split('\0');
+  assert(args.includes('--companion-id=' + id) && args.some((a) => a.endsWith('server.cjs')), args.join(' '));
+}));
+check('server-stopped is cleared on start', () => {
+  stop('owner-check');
+  assert(fs.existsSync(path.join(st('owner-check'), 'server-stopped')), 'precondition: no server-stopped after a stop');
+  assert(start(['--session', 'owner-check']).code === 0);
+  assert(!fs.existsSync(path.join(st('owner-check'), 'server-stopped')), 'server-stopped survived the start');
+});
+check('a restart keeps the port and the key', () => {
+  const before = JSON.parse(fs.readFileSync(path.join(st('owner-check'), 'server-info'), 'utf8')).url;
+  stop('owner-check');
+  const r = start(['--session', 'owner-check']);
+  assert(JSON.parse(r.out).url === before, `${before} -> ${r.out}`);
+});
+check('--idle-timeout-minutes reaches node', needsProc(() => {
+  start(['--session', 'idle-flag', '--idle-timeout-minutes', '7']); started.push('idle-flag');
+  const pid = fs.readFileSync(path.join(st('idle-flag'), 'server.pid'), 'utf8').trim();
+  assert(fs.readFileSync(`/proc/${pid}/environ`, 'utf8').split('\0').includes('BRAINSTORM_IDLE_TIMEOUT_MS=420000'));
+}));
+for (const bad of ['0', '-3', 'abc', '1.5', '08']) {
+  check(`--idle-timeout-minutes refuses ${bad}`, () => {
+    const r = start(['--session', 'idle-bad', '--idle-timeout-minutes', bad]);
+    assert(r.code === 1 && r.out === '{"error": "--idle-timeout-minutes must be a positive integer"}', r.out);
+  });
+}
+check('a relative --project-dir and one with a space both work', () => {
+  const env = { ...process.env, GIT_CEILING_DIRECTORIES: os.tmpdir() };
+  const rel = path.join(root, 'rel');
+  fs.mkdirSync(rel);
+  for (const [dir, cwd, top] of [['.', rel, rel], [path.join(root, 'with space'), root, path.join(root, 'with space')]]) {
+    const r = spawnSync('bash', [START, '--project-dir', dir, '--session', 'rel-check'], { encoding: 'utf8', cwd, env });
+    assert(r.status === 0, r.stdout);
+    const info = JSON.parse(r.stdout);
+    assert(info.state_dir.startsWith(top + path.sep) && fs.existsSync(info.screen_dir), info.state_dir);
+    spawnSync('bash', [STOP, path.dirname(info.state_dir)], { encoding: 'utf8' });
+  }
 });
 
 // 6. Bad names are refused rather than silently coerced into a path.

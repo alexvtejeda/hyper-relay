@@ -72,7 +72,7 @@ you need complete control over the page.
 
 **Name the session first, and confirm the name with the user.** The name is the directory the
 session's screens live in, so it is how the user finds them again later — `ls
-<project>/.superpowers/brainstorm/` should read as a table of contents, not a list of
+<project>/.hyper-relay/companion/` should read as a table of contents, not a list of
 timestamps. Propose a kebab-case name from the topic and ask before launching:
 
 > "I'll open a browser companion for this. I'd name the session `certificate-1c-redesign` so
@@ -83,18 +83,20 @@ Then start it. Use the **absolute** script path — your cwd is the user's proje
 skill's directory (the script is `scripts/start-server.sh` beside this SKILL.md):
 
 ```bash
-# Named session — the directory and port are stable across restarts
+# Named session — the directory, the port and the key are stable across restarts
 ${CLAUDE_SKILL_DIR}/scripts/start-server.sh \
   --project-dir /path/to/project --session certificate-1c-redesign
 
 # Returns: {"type":"server-started","port":52341,"host":"127.0.0.1",
-#           "url_host":"localhost","url":"http://localhost:52341",
-#           "screen_dir":".../content","state_dir":".../state"}
+#           "url_host":"localhost","url":"http://localhost:52341/?key=3f9c…0d",
+#           "screen_dir":".../content","state_dir":".../state",
+#           "owner_pid":48213,"idle_timeout_ms":null}
 ```
 
-Save `screen_dir` and `state_dir` from the response. **Tell the user the URL once** — with a
-named session the port is remembered, so it does not change between restarts and does not need
-repeating every turn.
+Save `screen_dir` and `state_dir` from the response. **Give the user the full link once:** the
+`url`, key included, exactly as printed. The companion answers nothing without its key: a link
+without it shows only "Ask the agent for the full link." A named session keeps its port and its
+key, so the link keeps working across restarts and does not need repeating every turn.
 
 Names must match `^[a-z0-9][a-z0-9-]{0,63}$` — one path segment, lowercase. Anything else is
 refused, because the string becomes a directory. `--session ""` is refused too.
@@ -103,23 +105,39 @@ refused, because the string becomes a directory. `--session ""` is refused too.
 the same `--session`:
 
 - reuses the directory — **every screen you already wrote is still there and still served**;
-- reuses the port, so the user's open tab stays valid;
+- reuses the port and the key, so the user's open tab carries on by itself;
 - returns the running server's info instead of starting a second one, if it is still alive.
 
-So if the server has idled out (30 minutes), just start it again with the same name. Nothing is
-lost and there is usually no new URL to announce — only if something else took the port in the
-meantime, in which case the returned JSON carries the new one.
+**How long it runs.** The companion stays up while the Claude Code session that started it runs,
+open tab or not, and stops when that session ends. When it cannot tell which session started it
+(`owner_pid` is `null` in its JSON), it stops instead after 4 hours with no visit from the tab
+and no new screen; `--idle-timeout-minutes <n>` sets that limit. If it has stopped, start it
+again with the same name. Nothing is lost and there is usually no new link to announce — only if
+something else took the port in the meantime, in which case the returned JSON's `url` carries a
+new port: give the user that link.
 
 **Without `--session` you get the old behaviour:** a fresh `<pid>-<timestamp>` directory and a
 new random port on every launch, which orphans every screen you had written. Always pass a name.
 
 **Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`.
-If you launched it in the background and didn't capture stdout, read that file for the URL
-and port. With `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session dir.
+If you launched it in the background and didn't capture stdout, read that file for the full
+link and the port. With `--project-dir`, check `<project>/.hyper-relay/companion/` for the
+session dir.
 
 **Note:** Pass the project root as `--project-dir` so mockups persist in
-`.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp`
-and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if needed.
+`.hyper-relay/companion/<session>/` and survive server restarts. Without it, files go to `/tmp`
+and get cleaned up.
+
+**Git.** In a git repo the script keeps `.hyper-relay/companion/` out of git: when the folder is
+not ignored yet, it adds it to the repo's local exclude file (`.git/info/exclude`, shared by
+every worktree), and its JSON carries `"git_exclude": "added"`. Then tell the user in one line
+that the companion's folder is now ignored through the repo's local exclude file. Never edit
+`.gitignore` for the companion.
+
+**A session from before the move.** Sessions used to live in another folder. Starting such a
+session again moves it into `.hyper-relay/companion/` first, with its screens and its port, and
+the JSON carries `"moved_from": "<old path>"`. Say in one line that the session's screens moved
+to the new folder, and give the user the full link: the old link had no key, so it is new.
 
 **Launching by platform:**
 
@@ -142,13 +160,13 @@ scripts/start-server.sh --project-dir /path/to/project --host 0.0.0.0 --url-host
 
 ## The Loop
 
-1. **Check the server is alive**, then **write HTML** to a new file in `screen_dir`:
-   - If the server has stopped (`$STATE_DIR/server-stopped` exists, or `server-info` is
-     gone), restart it with the **same `--session` name**. Restarting costs nothing: same
-     directory, same screens, same URL. It exits for **two** reasons, and `server-stopped`
-     records which: `"idle timeout"` after 30 minutes of no requests, or
-     `"owner process exited"` — it is tied to the lifetime of the session that launched it,
-     so it does not outlive your Claude Code session.
+1. **Check the server is running**, then **write HTML** to a new file in `screen_dir`:
+   - It is running when `$STATE_DIR/server-info` exists and `$STATE_DIR/server-stopped` does
+     not. Then just write the screen: no restart, and no new link to announce.
+   - Otherwise restart it with the **same `--session` name**. Restarting costs nothing: same
+     directory, same screens, same link. `server-stopped` records why it stopped:
+     `"owner process exited"` when the Claude Code session that started it ended,
+     `"idle timeout"` when it could not tell which session that was, or `"stopped by signal"`.
    - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`.
    - **Never reuse filenames** — each screen gets a fresh file. The server serves the
      newest by modification time, and the browser reloads to it on its next poll.
@@ -160,7 +178,7 @@ scripts/start-server.sh --project-dir /path/to/project --host 0.0.0.0 --url-host
      (`curl` the URL) against the file on disk.
 
 2. **Tell the user what to expect, then end your turn:**
-   - The URL is stable for the whole session — state it once when you start, not every step.
+   - The link is stable for the whole session — give it once when you start, not every step.
    - Give a brief text summary of what's on screen ("Showing 3 layout options for the home page").
    - Ask them to **answer in the terminal**: "Take a look and tell me what you think."
 
@@ -181,6 +199,16 @@ scripts/start-server.sh --project-dir /path/to/project --host 0.0.0.0 --url-host
    ```
 
 6. Repeat until done.
+
+**When the user reports a notice in the tab.** The tab keeps the last screen and lays a notice
+over it when it cannot get a new one:
+
+- **"Paused — the agent will bring it back."** The server has stopped. Restart it with the same
+  session name and tell the user it is back: the tab reloads by itself, and the link is
+  unchanged (unless the returned JSON's `url` carries a new port: then give the user that link).
+- **"Ask the agent for the full link."** The tab does not have the key, usually because the
+  link was opened without it. Give the user the full link again: the `url` in
+  `$STATE_DIR/server-info`. Do not restart.
 
 ## Writing Content Fragments
 
@@ -304,7 +332,7 @@ The frame template provides these classes for your content.
 scripts/stop-server.sh $SESSION_DIR
 ```
 
-If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/`
+If the session used `--project-dir`, mockup files persist in `.hyper-relay/companion/`
 for later reference. Only `/tmp` sessions are deleted on stop.
 
 ## Reference

@@ -47,8 +47,9 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 - **Quartz-first, not Quartz-required.** Every Quartz step falls back to plain Markdown when Quartz is absent.
 - **No machine paths in skills.** A skill reaches its own files as `${CLAUDE_SKILL_DIR}/...` and also names them
   relative to its `SKILL.md`, because OpenCode does not expand the variable.
-- **`docs/superpowers/` and `.superpowers/` keep their names.** Quartz accepts specs and plans only under
-  `docs/superpowers/`, and visual-companion keeps its screens in `.superpowers/`.
+- **`docs/superpowers/` keeps its name,** because Quartz accepts specs and plans only under it. The visual companion
+  keeps its sessions in `.hyper-relay/companion/`, git-ignored, and older sessions may still sit in
+  `.superpowers/brainstorm/`.
 - **voice-to-specs stops at writing briefs.** Never extend it to write specs, plans or code: those belong to the
   downstream skills. Its setup and script interface are in `skills/voice-to-specs/CLAUDE.md`.
 - Stage named files only, never `git add -A` or `git add .`. `.env`, `.envrc` and `.mcp.json` hold this checkout's

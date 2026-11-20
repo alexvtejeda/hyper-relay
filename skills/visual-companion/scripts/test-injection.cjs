@@ -28,8 +28,9 @@ document.getElementById('stage').innerHTML = PAGE_HTML;
 fs.writeFileSync(path.join(dir, 'content', 'scene.html'), screen);
 
 const PORT = 41999;
+const TOKEN = 'ab'.repeat(32);
 const srv = spawn('node', [path.join(SCRIPTS, 'server.cjs')], {
-  env: { ...process.env, BRAINSTORM_DIR: dir, BRAINSTORM_PORT: String(PORT), BRAINSTORM_OWNER_PID: '' },
+  env: { ...process.env, BRAINSTORM_DIR: dir, BRAINSTORM_PORT: String(PORT), BRAINSTORM_OWNER_PID: '', BRAINSTORM_TOKEN: TOKEN },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 
@@ -43,7 +44,7 @@ setTimeout(async () => {
   const fail = [];
   let served;
   try {
-    served = await (await fetch(`http://127.0.0.1:${PORT}/`)).text();
+    served = await (await fetch(`http://127.0.0.1:${PORT}/`, { headers: { cookie: `companion-key-${PORT}=${TOKEN}` } })).text();
   } catch (e) {
     console.error('FAIL: could not reach server:', e.message);
     return done(1);
