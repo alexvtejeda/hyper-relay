@@ -1180,3 +1180,21 @@ git -C /home/noob_master/hyper-relay commit -m "docs: plan fixtures last-task re
 ```
 
 Push it with the next push of `main` (the owner's call).
+
+## Last-task record (Task 3)
+
+- **Before the merge:** acceptance reviewer 4/5 PASS, then 5/5. Step 3's expected refusal rested on a wrong spec
+  premise: `2026-11-17-hyper-relay-a-forks-home.md` has a real `relay-planner` transcript (so does every plan in this
+  repo), so Step 3 ran against `docs/plans/2025-11-22-opencode-support-design.md` instead (exit 1, the no-agent line),
+  a deviation the owner accepted. Real data (Step 2): both rows matched in every compared cell. Fix rounds: 0. Code
+  review: Ready, 0 Critical, 0 Important, 4 Minor, made into proposed cards and kept (plus a third card from the
+  baseline: `claude-opus-4-8` has no row in `prices.tsv`). Skill tests GREEN 4/4; RED failed in S2 and S4;
+  non-discriminating S1 and S3 (today's text already gave the helpers as signatures, and its check 2 already caught
+  the pasted test file); in S4 both runs also flagged the toy plan's missing prices file, a flaw in the scenario. Token
+  counts: executor 110,528, acceptance reviewer 71,566, code reviewer 80,745, skill tests 485,803 over 8 runs.
+- **Owner steps:** Step 10 agreed, P11 and P12 kept as written; Step 11 `merge-tree` exit 0. Merged in `a09f5cd`.
+- **After merge:** suites on `main` 110/0 and 28/0, validate passes; baseline 14 rows here (in the token log) and
+  SAT's in `~/sat-benchmark/`; card note posted, this repo's line 13 plans, total 1773, median 16, largest 519 (some
+  SAT plans were refused for that missing price row, as the card note says); released v0.2.3 in `865d62f`, tagged,
+  pushed; the owner's update put 0.2.3 in the cache; agents regenerated here (all four files unchanged), and in SAT
+  `--check` was already silent, so nothing was rewritten there while a SAT plan is in flight in a worktree.
