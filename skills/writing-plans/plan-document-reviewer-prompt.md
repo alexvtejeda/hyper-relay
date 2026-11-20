@@ -20,7 +20,7 @@ Agent tool (general-purpose, model: sonnet):
     | Check | What to look for |
     |---|---|
     | Spec coverage | Every requirement in the spec has a task that implements it. The plan's **Spec coverage** table maps every `## ` section of the spec to at least one task, and those tasks do that section's work. |
-    | Step contents | A step that decides nothing ("TBD", "TODO", "implement later", "fill in details", "handle edge cases", "Similar to Task N", a name no task defines); a code body that the step's signature and tests already determine; a text step (a skill, a doc, a message) that does not give its text in full. |
+    | Step contents | A step that decides nothing ("TBD", "TODO", "implement later", "fill in details", "handle edge cases", "Similar to Task N", a name no task defines); a code body that the step's signature and tests already determine; a fixture helper written out instead of its signature and one sample of what it writes (unless its exact bytes are what the test checks); a test file given as a text step ("Create X with exactly this content"); a text step (a skill, a doc, a message) that does not give its text in full. |
     | Consistent names | A file, function, flag, heading or section named one way in one task and another way in a later one. |
     | `Plan-Task:` trailers | Each task with a commit step: its final commit carries `Plan-Task: <this plan's path>#<N>` once, with its own task number and this plan's own path. |
     | The acceptance task | It is the last task. Each of its steps says who runs it (`reviewer`, `owner`, `after merge` or `skill-test`), with its command or action and the result that counts as PASS; a `skill-test` step gives a situation, what GREEN must do and what RED is expected to do. |

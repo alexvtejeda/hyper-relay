@@ -321,3 +321,42 @@ Write `docs/benchmarks/<date>-superpowers-baseline.md` in this repo, with:
 Copy `run-log-c1.md`, `run-log-c2.md`, `usage-c1.md` and `usage-c2.md` to `docs/benchmarks/runs/` and commit
 them with it. Card G takes its numbers from it. This repo is public: the results and the logs carry
 numbers, one-line findings and commit hashes, never SAT's code, data or secrets.
+
+## Measuring one plan
+
+`scripts/benchmark/plan-usage.sh` measures one implementation plan after the fact, from Claude Code's transcripts, at
+no cost. It finds every subagent whose transcript wrote the plan (a `Write`, `Edit` or `MultiEdit` of its path in the
+repo's main checkout, or in a worktree under `.worktrees/`) and prints a Markdown table of one row:
+
+- **What those agents spent:** their types (`relay-planner ×2` when a fresh planner revised the plan; a planner
+  resumed for a revision is one agent), their models, API calls, output, cache writes, cache reads and uncached input;
+  the final context, the last call's whole prompt, which a task notification reports as `subagent_tokens`; their tool
+  uses; their active time, from each prompt an agent was given to its last record before the next one, so a planner
+  waiting at stop 3 is not charged the wait; and the cost, priced from `prices.tsv` as `run-usage.sh` prices a run.
+- **The plan's shape:** its lines, its spec's lines (the file its `**Spec:**` line names), and its code blocks' lines
+  in three classes: test code (a block in a step about writing a test, or whose first file is a test file), other
+  code, and text (`markdown`, `text` or no language).
+
+From a repo's top (`$HR` as in Paths):
+
+```sh
+"$HR/scripts/benchmark/plan-usage.sh" docs/superpowers/plans/<plan>.md
+```
+
+`--config <folder>` reads another config folder than `$CLAUDE_CONFIG_DIR` (or `~/.claude`). `--no-header` prints the
+row alone, so a loop builds one table; in this one, the first plan it can measure prints the header:
+
+```sh
+h=
+for p in docs/superpowers/plans/*.md; do
+    "$HR/scripts/benchmark/plan-usage.sh" ${h:+--no-header} "$p" && h=1
+done
+```
+
+- **It measures only plans an agent wrote.** For a plan written in the main session it prints
+  `plan-usage: no agent wrote …` and exits 1. Upstream superpowers writes its plans in the main session:
+  `run-usage.sh` measures that run instead.
+- **Transcripts expire after 30 days** (`cleanupPeriodDays`), and a plan's row with them: measure a plan within 30
+  days of its writing.
+- **SAT's rows stay in `~/sat-benchmark/`,** never in this repo or SAT's: SAT's plan names carry its internals. Run
+  the loop from `"$SAT"`, with its output in `"$BENCH/plan-usage-<date>.md"`.
