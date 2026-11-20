@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // The browser stays in sync via HTTP polling (see helper.js + the /poll route
 // below), not WebSockets — the user answers in the terminal, so no live
@@ -34,6 +35,14 @@ h1 { color: #333; } p { color: #666; }</style>
 <body><h1>Brainstorm Companion</h1>
 <p>Waiting for the agent to push a screen...</p></body></html>`;
 
+const FORBIDDEN_PAGE = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Visual companion</title>
+<style>body { font-family: system-ui, sans-serif; padding: 2rem; max-width: 800px; margin: 0 auto; }
+h1 { color: #333; font-size: 1.4rem; }</style>
+</head>
+<body><h1>Ask the agent for the full link.</h1></body></html>`;
+
 const frameTemplate = fs.readFileSync(path.join(__dirname, 'frame-template.html'), 'utf-8');
 const helperScript = fs.readFileSync(path.join(__dirname, 'helper.js'), 'utf-8');
 const helperInjection = '<script>\n' + helperScript + '\n</script>';
@@ -46,16 +55,73 @@ function isFullDocument(html) {
 }
 
 function wrapInFrame(content) {
-  return frameTemplate.replace('<!-- CONTENT -->', content);
+  // A function replacement: a string would read $&, $` and $' in the content as patterns.
+  return frameTemplate.replace('<!-- CONTENT -->', () => content);
+}
+
+function securityHeaders(extra = {}) {
+  return {
+    'Cache-Control': 'no-store',
+    'Referrer-Policy': 'no-referrer',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Content-Security-Policy': "frame-ancestors 'self'",
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    ...extra
+  };
+}
+
+// The per-session key. Set in startServer(); the bound port in the 'listening' handler.
+let sessionKey = '';
+let boundPort = null;
+
+function keyMatches(given) {
+  const a = Buffer.from(String(given));
+  const b = Buffer.from(sessionKey);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function splitUrl(url) {
+  const i = url.indexOf('?');
+  return i === -1 ? { pathname: url, query: new URLSearchParams('') }
+                  : { pathname: url.slice(0, i), query: new URLSearchParams(url.slice(i + 1)) };
+}
+
+function cookieValue(req, name) {
+  for (const part of String(req.headers.cookie || '').split(';')) {
+    const eq = part.indexOf('=');
+    if (eq !== -1 && part.slice(0, eq).trim() === name) return part.slice(eq + 1).trim();
+  }
+  return null;
+}
+
+// A ?key= decides alone, so a wrong one fails even beside a valid cookie.
+function isAuthorized(req, query) {
+  if (query.has('key')) return keyMatches(query.get('key'));
+  const c = cookieValue(req, 'companion-key-' + boundPort);
+  return c !== null && keyMatches(c);
+}
+
+// The path of a plain file in CONTENT_DIR, or null: not a dotfile, not a link (symbolic or
+// hard), not a directory, and really inside CONTENT_DIR.
+function servableFile(name) {
+  try {
+    if (!name || name.startsWith('.')) return null;
+    const fp = path.join(CONTENT_DIR, name);
+    const st = fs.lstatSync(fp);
+    if (!st.isFile() || st.nlink !== 1) return null;
+    const real = fs.realpathSync(fp);
+    return real.startsWith(fs.realpathSync(CONTENT_DIR) + path.sep) ? fp : null;
+  } catch (e) {
+    return null;
+  }
 }
 
 function getNewestScreen() {
   const files = fs.readdirSync(CONTENT_DIR)
     .filter(f => f.endsWith('.html'))
-    .map(f => {
-      const fp = path.join(CONTENT_DIR, f);
-      return { path: fp, mtime: fs.statSync(fp).mtime.getTime() };
-    })
+    .map(f => servableFile(f))
+    .filter(fp => fp !== null)
+    .map(fp => ({ path: fp, mtime: fs.statSync(fp).mtime.getTime() }))
     .sort((a, b) => b.mtime - a.mtime);
   return files.length > 0 ? files[0].path : null;
 }
@@ -63,8 +129,20 @@ function getNewestScreen() {
 // ========== HTTP Request Handler ==========
 
 function handleRequest(req, res) {
+  const { pathname, query } = splitUrl(req.url);
+  if (!isAuthorized(req, query)) {
+    res.writeHead(403, securityHeaders({ 'Content-Type': 'text/html; charset=utf-8' }));
+    res.end(FORBIDDEN_PAGE);
+    return;
+  }
   touchActivity();
-  if (req.method === 'GET' && req.url === '/') {
+  if (req.method === 'GET' && pathname === '/' && query.has('key')) {
+    res.writeHead(302, securityHeaders({
+      'Location': '/',
+      'Set-Cookie': `companion-key-${boundPort}=${query.get('key')}; HttpOnly; SameSite=Strict; Path=/`
+    }));
+    res.end();
+  } else if (req.method === 'GET' && pathname === '/') {
     const screenFile = getNewestScreen();
     let html = screenFile
       ? (raw => isFullDocument(raw) ? raw : wrapInFrame(raw))(fs.readFileSync(screenFile, 'utf-8'))
@@ -81,32 +159,41 @@ function handleRequest(req, res) {
       ? html + helperInjection
       : html.slice(0, bodyClose) + helperInjection + '\n' + html.slice(bodyClose);
 
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.writeHead(200, securityHeaders({ 'Content-Type': 'text/html; charset=utf-8' }));
     res.end(html);
-  } else if (req.method === 'GET' && req.url === '/poll') {
+  } else if (req.method === 'GET' && pathname === '/poll') {
     // Reload signal for the browser: newest screen's filename + mtime.
     // The client reloads when either changes (see helper.js).
     const screenFile = getNewestScreen();
     const stamp = screenFile
       ? { file: path.basename(screenFile), mtime: fs.statSync(screenFile).mtime.getTime() }
       : { file: null, mtime: 0 };
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    res.writeHead(200, securityHeaders({ 'Content-Type': 'application/json' }));
     res.end(JSON.stringify(stamp));
-  } else if (req.method === 'GET' && req.url.startsWith('/files/')) {
-    const fileName = req.url.slice(7);
-    const filePath = path.join(CONTENT_DIR, path.basename(fileName));
-    if (!fs.existsSync(filePath)) {
-      res.writeHead(404);
+  } else if (req.method === 'GET' && pathname.startsWith('/files/')) {
+    const filePath = servableFile(path.basename(pathname.slice(7)));
+    if (!filePath) {
+      res.writeHead(404, securityHeaders());
       res.end('Not found');
       return;
     }
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': contentType });
+    res.writeHead(200, securityHeaders({ 'Content-Type': contentType }));
     res.end(fs.readFileSync(filePath));
   } else {
-    res.writeHead(404);
+    res.writeHead(404, securityHeaders());
     res.end('Not found');
+  }
+}
+
+function safeHandleRequest(req, res) {
+  try {
+    handleRequest(req, res);
+  } catch (e) {
+    console.error(JSON.stringify({ type: 'request-error', error: e.message }));
+    if (!res.headersSent) res.writeHead(500, securityHeaders({ 'Content-Type': 'text/plain' }));
+    res.end('Server error');
   }
 }
 
@@ -129,6 +216,23 @@ function startServer() {
   if (!fs.existsSync(CONTENT_DIR)) fs.mkdirSync(CONTENT_DIR, { recursive: true });
   if (!fs.existsSync(STATE_DIR)) fs.mkdirSync(STATE_DIR, { recursive: true });
 
+  // The key: BRAINSTORM_TOKEN as given (never written), else the one in state/token, else a
+  // new one. A restart keeps it, so the user's link keeps working.
+  const tokenFile = path.join(STATE_DIR, 'token');
+  if (process.env.BRAINSTORM_TOKEN) {
+    sessionKey = process.env.BRAINSTORM_TOKEN;
+  } else {
+    let saved = '';
+    try { saved = fs.readFileSync(tokenFile, 'utf-8').trim(); } catch (e) {}
+    if (/^[0-9a-f]{64}$/.test(saved)) {
+      sessionKey = saved;
+    } else {
+      sessionKey = crypto.randomBytes(32).toString('hex');
+      fs.writeFileSync(tokenFile, sessionKey + '\n', { mode: 0o600 });
+    }
+    fs.chmodSync(tokenFile, 0o600);
+  }
+
   // Track known files to distinguish new screens from updates.
   // macOS fs.watch reports 'rename' for both new files and overwrites,
   // so we can't rely on eventType alone.
@@ -136,7 +240,7 @@ function startServer() {
     fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.html'))
   );
 
-  const server = http.createServer(handleRequest);
+  const server = http.createServer(safeHandleRequest);
 
   const watcher = fs.watch(CONTENT_DIR, (eventType, filename) => {
     if (!filename || !filename.endsWith('.html')) return;
@@ -228,13 +332,14 @@ function startServer() {
 
   // 'listening' rather than the listen() callback, so this fires again after a retry.
   server.on('listening', () => {
+    boundPort = Number(port);
     const info = JSON.stringify({
       type: 'server-started', port: Number(port), host: HOST,
-      url_host: URL_HOST, url: 'http://' + URL_HOST + ':' + port,
+      url_host: URL_HOST, url: 'http://' + URL_HOST + ':' + port + '/?key=' + sessionKey,
       screen_dir: CONTENT_DIR, state_dir: STATE_DIR
     });
     console.log(info);
-    fs.writeFileSync(path.join(STATE_DIR, 'server-info'), info + '\n');
+    fs.writeFileSync(path.join(STATE_DIR, 'server-info'), info + '\n', { mode: 0o600 });
     fs.writeFileSync(path.join(STATE_DIR, 'port'), String(port) + '\n');
   });
 
