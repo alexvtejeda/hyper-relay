@@ -771,7 +771,7 @@ git commit -m "feat(visual-companion): stop only our own server, owner-only file
 - Produces: `BRAINSTORM_GIT_EXCLUDE` and `BRAINSTORM_MOVED_FROM` (node's env; empty when they do not apply); the
   printed line's `git_exclude` (`"added"`) and `moved_from` (the old folder's absolute path).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `test-session.cjs`, `sessionDir(name)` becomes `path.join(root, '.hyper-relay', 'companion', name)`.
 
@@ -866,14 +866,14 @@ await check("a linked worktree: the line goes once into the main repo's exclude 
 });
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `node skills/visual-companion/scripts/test-folder.cjs`, then `node skills/visual-companion/scripts/test-session.cjs`
 Expected: `FAIL a new session lives in .hyper-relay/companion/…` (the folder is still `.superpowers/brainstorm/`) and
 the move and exclude checks failing, exit 1; `test-session.cjs` fails its first check (no folder at the new path),
 exit 1.
 
-- [ ] **Step 3: Implement it in `start-server.sh`, `server.cjs` and `stop-server.sh`**
+- [x] **Step 3: Implement it in `start-server.sh`, `server.cjs` and `stop-server.sh`**
 
 1. With `--project-dir`, `SESSION_DIR` is `$PROJECT_DIR/.hyper-relay/companion/$SESSION_ID`, and `OLD_DIR` is
    `$PROJECT_DIR/.superpowers/brainstorm/$SESSION_ID`. Without it, `/tmp/brainstorm-$SESSION_ID` as today.
@@ -897,13 +897,13 @@ exit 1.
    `<path>/.hyper-relay/companion/<session>/`, moving an older one from `<path>/.superpowers/brainstorm/` the first
    time it is started again; `stop-server.sh`'s persistent folders are `.hyper-relay/companion/`.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `node skills/visual-companion/scripts/test-folder.cjs`, `node skills/visual-companion/scripts/test-session.cjs`,
 `bash -n skills/visual-companion/scripts/start-server.sh`, then `bash skills/visual-companion/scripts/run-tests.sh`
 Expected: every line `ok` and exit 0 from the tests; `bash -n` silent.
 
-- [ ] **Step 5: `CLAUDE.md`'s rule (spec §5).** In `CLAUDE.md`, replace:
+- [x] **Step 5: `CLAUDE.md`'s rule (spec §5).** In `CLAUDE.md`, replace:
 
 ```text
 - **`docs/superpowers/` and `.superpowers/` keep their names.** Quartz accepts specs and plans only under
@@ -918,7 +918,7 @@ with:
   `.superpowers/brainstorm/`.
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add skills/visual-companion/scripts/start-server.sh skills/visual-companion/scripts/server.cjs skills/visual-companion/scripts/stop-server.sh skills/visual-companion/scripts/test-session.cjs skills/visual-companion/scripts/test-folder.cjs CLAUDE.md
