@@ -441,7 +441,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Interfaces:**
 - Consumes: Task 2's section heading, `## Facts about outside systems`.
 
-- [ ] **Step 1: The template's bullet.** In `templates/agents/planner.md`, replace:
+- [x] **Step 1: The template's bullet.** In `templates/agents/planner.md`, replace:
 
 ```text
 - **External facts** the spec says to re-verify: check them with WebFetch/WebSearch, cite URL + date in the plan,
@@ -455,7 +455,7 @@ with:
   `## How it works` is settled; re-check only the facts it flags; a gap is a stated assumption, not an investigation.
 ```
 
-- [ ] **Step 2: The template's report.** Replace:
+- [x] **Step 2: The template's report.** Replace:
 
 ```text
 Commit hash (or why not committed); task count per plan; every spec ambiguity/deviation and your resolution;
@@ -470,7 +470,7 @@ facts re-checked (those the spec flagged) and any differences; assumptions made 
 owner must decide before execution.
 ```
 
-- [ ] **Step 3: This repo's facts.** In `.hyper-relay/agents.md`, replace:
+- [x] **Step 3: This repo's facts.** In `.hyper-relay/agents.md`, replace:
 
 ```text
 - External facts to re-verify are usually Claude Code's, OpenCode's or GitHub's.
@@ -482,7 +482,7 @@ with:
 - The outside systems this repo's specs depend on are usually Claude Code, OpenCode and GitHub.
 ```
 
-- [ ] **Step 4: Check it.**
+- [x] **Step 4: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -494,7 +494,7 @@ with:
 | `sh tests/hyper-relay-agents/run-tests.sh \| tail -n 1` | ends `0 failed` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `28 passed, 0 failed` |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add templates/agents/planner.md .hyper-relay/agents.md
