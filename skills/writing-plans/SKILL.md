@@ -24,6 +24,16 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 Before writing, compare the number of plans you intend to write with the spec's `**Plans:** <n>` header line. A spec without the line means 1. If they differ, stop before writing any plan and report the mismatch to the orchestrator: the number you would write, and why. It asks the owner, updates the spec's `**Plans:**` line itself (`hyper-relay:orchestrating`'s `planning.md`), and dispatches you again. Never edit the spec: you write plans only.
 
+## Facts about outside systems
+
+The spec's `## How it works` section holds the facts about outside systems that its design rests on (a file format, a CLI, an API, docs, data on the machine), each with its source and the date it was checked. They are settled: build on them. Do not work them out again or re-check them, except the facts the section flags for re-check: check each of those with WebFetch or WebSearch, cite its URL and the date in the plan, quote only what decides something, and list a difference as a deviation, never a silent design change. A spec written before this rule may keep such facts under another heading, such as External facts: they are settled the same way, and those it asks you to re-check count as flagged.
+
+Reading the repo's own code is your job, as always.
+
+When the plan needs a fact about an outside system that the spec does not settle, read at most one file or one page to confirm a detail. Do not investigate: no series of searches, no digging through data, no working out a format from samples. Write the plan on a stated assumption, list it in the plan's table of spec ambiguities and deviations, marked **Assumption**, and put it in your report among what the owner must decide. The owner accepts it, corrects it, or has it researched and sends you back with the facts (`hyper-relay:orchestrating`'s `planning.md`).
+
+Your report names the facts you re-checked (those the spec flagged) and any differences, and the assumptions you made where the spec was silent.
+
 ## Stacked plans
 
 When the spec's list of plans says your plan builds on another, your plan's header carries `**Builds on:** <base plan path>`, beside its `**Spec:**` line, above its first `---`. The orchestrator dispatches you once the base plan is committed: read it, and plan against the files as the base plan leaves them (its tasks' files, signatures and text), not as `main` has them. A plan builds on exactly one plan. Its branch is cut from the base's branch (`hyper-relay:orchestrating`'s `parallel.md`).
