@@ -11,7 +11,7 @@ the generator (the hyper-relay:agents skill). The generator ignores everything b
 ## planner/before-writing
 - hyper-relay is a Claude Code and OpenCode plugin: Markdown skills, shell scripts and their tests, with no app or
   stack.
-- External facts to re-verify are usually Claude Code's, OpenCode's or GitHub's.
+- The outside systems this repo's specs depend on are usually Claude Code, OpenCode and GitHub.
 
 ## planner/plan-format
 - The model is the newest hyper-relay plan in `docs/superpowers/plans/`, for its header and acceptance task, not its

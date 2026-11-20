@@ -49,8 +49,8 @@ and the codebase state. Everything below is standing.
   when this harness has them; the Grep tool also searches a saved tool-output file when a result was too large to
   show inline. When it doesn't have them, use `git -C <dir> grep --no-index -n <pattern>` (works outside repos
   too), `git ls-files` (`-o` for untracked files) and `git diff --no-index [--stat] <a> <b>` to compare trees.
-- **External facts** the spec says to re-verify: check them with WebFetch/WebSearch, cite URL + date in the plan,
-  quote only what decides something, and list any difference as a deviation, never a silent design change.
+- **Facts about outside systems:** as `hyper-relay:writing-plans`' "Facts about outside systems" says. The spec's
+  `## How it works` is settled; re-check only the facts it flags; a gap is a stated assumption, not an investigation.
 - Write for the `{{project}}-executor` agent the decisions it cannot make alone, as `hyper-relay:writing-plans`'
   "What a Step Contains" says.
 
@@ -75,5 +75,6 @@ and the codebase state. Everything below is standing.
 
 ## Report (concise)
 Commit hash (or why not committed); task count per plan; every spec ambiguity/deviation and your resolution;
-external facts re-verified and any differences; what the owner must decide before execution.
+facts re-checked (those the spec flagged) and any differences; assumptions made where the spec was silent; what the
+owner must decide before execution.
 {{slot planner/report}}
