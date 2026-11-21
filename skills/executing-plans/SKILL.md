@@ -20,6 +20,10 @@ setup, its full gates, its constraints and its acceptance steps.
 - the plan's path (absolute when the plan is not committed on `main`), and which of its tasks are yours;
 - the **mode**: `branch` (a new branch in the repo's main checkout) or `worktree` (the branch's own worktree);
 - the checkout's path and the branch;
+- the plan's **run folder**, `.hyper-relay/runs/<branch>/` in the repo's main checkout, which git ignores: your full
+  report and your gates' output go there;
+- when the repo uses Quartz, the plan's cards and its initiative, for the cards you file (Proposed cards, below);
+  otherwise "Run no Quartz command and use no Quartz tool.";
 - the Claude-Session URL for your commit trailers;
 - anything unusual, for example `main` having moved since the plan was written.
 
@@ -53,17 +57,26 @@ setup, its full gates, its constraints and its acceptance steps.
 4. **When the code is not what the plan expects** (an expected line differs, a file moved): adapt as little as
    possible, and record it as a deviation with the reason. A step that fails twice the same way: stop and report.
 5. **Full gates, once,** after your last task: the ones the plan's Execution notes name, and your agent's own
-   ("Full gates").
+   ("Full gates"). Run each through `relay-plan gate <plan> '<command>'`, from the checkout's top, the command quoted
+   as one argument: it runs the command, appends its output to the run folder's `gates.log`, prints the last lines
+   and exits with the command's code. From then on, name each gate by that exact command.
 6. **Acceptance:** follow your agent's acceptance steps for your mode, under "In a worktree" or "On a branch", when
-   it has them. Then copy the plan's acceptance checklist (its last task) into your report.
-7. **Report, then stop.** The orchestrator verifies every line of it:
+   it has them. The plan's acceptance task is not yours: do not copy it into your report.
+7. **Report, then stop.** Write your full report to `executor.md` in the run folder, as a new file (replace one an
+   earlier run left):
    - tasks done (n/N), each with its commit hash;
-   - each gate, with its pass/fail counts;
+   - each gate, by its command, with its pass/fail counts;
    - every deviation from the plan, and why;
    - the calls you made where the plan left a choice open, one line each;
    - every `quartz:` line, verbatim;
    - the acceptance output: URLs, logins, anything left running;
-   - anything left for the owner: a task that is theirs, a step you stopped at.
+   - anything left for the owner: a task that is theirs, a step you stopped at;
+   - the cards you filed (Proposed cards, below).
+
+   Then hand back only a short summary, at most about 15 lines: tasks n/N; one line per gate, its command and its
+   counts, and the path of `gates.log`; each deviation and each open call, one line each; every `quartz:` line,
+   verbatim; what you left running or left for the owner; the cards you filed; the path of `executor.md`. The
+   orchestrator verifies every line of it, and reads `executor.md` only for what the summary does not settle.
 
 ## Never, in either mode
 
@@ -72,12 +85,35 @@ setup, its full gates, its constraints and its acceptance steps.
   `hyper-relay:finishing-a-development-branch`: the owner decides the merge.
 - Start a live `claude -p` or `opencode run` session, install or uninstall a plugin, or add a marketplace.
 - Call a real third-party API or use real credentials: tests use fakes.
-- Touch anything outside your checkout: `~/.claude/`, `~/.config/opencode/`, other repos, other worktrees. A task
-  marked as the owner's or the orchestrator's is not yours, even when it gives commands.
+- Touch anything outside your checkout: `~/.claude/`, `~/.config/opencode/`, other repos, other worktrees. The one
+  exception is your run folder, from any checkout: `executor.md` and `cards.md`, and `gates.log` through
+  `relay-plan gate`. A task marked as the owner's or the orchestrator's is not yours, even when it gives commands.
 - Wait with a self-matching `pgrep`, or `pkill -f` a pattern that appears in your own command line. Stop a server
   you started by its PID.
 
 Read files in targeted ranges, and pipe long output through `tail` or `grep`: the owner rations usage.
+
+## Fix rounds
+
+After your tasks, the orchestrator may resume you, or dispatch a fresh executor with the plan, for fix round `<k>`:
+findings from the acceptance check, the code review or the skill tests, each named by its evidence path in the run
+folder. In your checkout and on your branch (process step 1):
+
+1. Fix root causes. Commit each fix staging named files only, with the attribution lines your instructions give, in
+   one final paragraph, and no `Plan-Task:` trailer.
+2. Rerun only the tests that pin the fix, not the full gates: each through `relay-plan gate <plan> '<command>'`, as
+   in process step 5.
+3. Append a `## Fix round <k>` section to `executor.md`: each fix with its commit, each test with its counts, any
+   deviation. Then hand back the short summary (process step 7), naming the tests by their commands.
+
+## Proposed cards
+
+An issue you notice outside your plan (a bug in code the plan does not touch, a doc that says something the repo no
+longer does) is not yours to fix: file it as a proposed card. When the prompt gives the plan's initiative, call
+`add_tasks` with the card: the label `proposed`, kind `bug` or `change`, that initiative, and a body naming the plan,
+the file and the evidence (the file and line, or a path in the run folder). When `add_tasks` fails, or the prompt
+says to use no Quartz tool, append the card to the run folder's `cards.md` instead, as a `## <title>` section with
+its kind, the file, the evidence and why. Your summary lists the cards' ids, or says they are in `cards.md`.
 
 ## Catch-up and conflict rounds
 
@@ -103,7 +139,9 @@ Either way, in your checkout and on your branch (process step 1):
    `git commit -m "Merge branch '<base>' into <branch>" -m "<the same attribution lines>"`. When the two sides cannot
    both hold, run `git merge --abort`, then stop and report the files and why.
 3. Rerun the full gates (process step 5).
-4. Report: the merge commit's hash, each conflict and how you resolved it, and the gates with their counts.
+4. Append a `## Catch-up round` or `## Conflict round` section to `executor.md`: the merge commit's hash, each
+   conflict and how you resolved it, and the gates with their counts. Then hand back the short summary (process
+   step 7).
 
 Never merge your branch into `main` or any other branch: the orchestrator lands it with `relay-merge`.
 
