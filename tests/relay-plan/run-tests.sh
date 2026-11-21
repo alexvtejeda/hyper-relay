@@ -3,7 +3,7 @@
 # so no git config, hook or state of this machine is used. Nothing here touches the
 # repo this suite lives in.
 # Usage: sh tests/relay-plan/run-tests.sh   (RELAY_PLAN_BIN overrides the script under test)
-# Expect: "112 passed, 0 failed"
+# Expect: "121 passed, 0 failed"
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -423,6 +423,47 @@ fails_alone "contract" "FAIL contract: $SIB differs, first at: Both plans share 
 fixture_repo
 fails_alone "builds-on" "FAIL builds-on: the header's **Builds on:** does not name $OBASE" \
     --spec "$S" --sibling "$SIB" --base "$OBASE"
+
+echo '--- overlap'
+fixture_repo
+B=docs/superpowers/plans/2026-01-03-b.md
+files_plan "$B" '- Modify: `src/main.sh`' '- Modify: `src/fenced.sh`' '- Create: `src/b.sh`'
+commit_all b
+rp "$MAIN" overlap "$P" "$B"
+assert_eq "overlap: a shared file, without :lines; a fenced path is not the plan's" "shared src/main.sh ($B)" "$OUT"
+assert_eq "overlap: found: exit 1" 1 "$RC"
+
+M1=docs/superpowers/plans/2026-01-03-m1.md
+M2=docs/superpowers/plans/2026-01-03-m2.md
+files_plan "$M1" '- Create: `db/000097_orders.sql`' '- Create: `docs/2026-01-03-a.md`' '- Test: `tests/m1.sh`'
+files_plan "$M2" '- Create: `db/000097_coupons.sql`' '- Create: `docs/2026-01-03-b.md`' '- Modify: `tests/m1.sh`'
+commit_all m
+rp "$MAIN" overlap "$M1" "$M2"
+assert_eq "overlap: shared, then numbered; a date is not a number" "shared tests/m1.sh ($M2)
+numbered db/000097 ($M2)" "$OUT"
+
+C=docs/superpowers/plans/2026-01-03-c.md
+files_plan "$C" '- Modify: `ui/x.sh`'
+commit_all c
+rp "$MAIN" overlap "$M1" "$C"
+assert_eq "overlap: none: no output" "" "$OUT"
+assert_eq "overlap: none: exit 0" 0 "$RC"
+rp "$MAIN" overlap "$P" "$C" "$B"
+assert_eq "overlap: several others, in the order given" "shared src/main.sh ($B)" "$OUT"
+
+files_plan docs/superpowers/plans/2026-01-03-b-branch.md '- Modify: `ui/x.sh`'
+commit_all 'the b-branch plan'
+git -C "$MAIN" switch -q -c b-branch
+commit_in "$MAIN" tests/m1.sh 'changed'
+commit_in "$MAIN" db/000097_extra.sql 'added'
+git -C "$MAIN" switch -q main
+rp "$MAIN" overlap "$M1" b-branch
+assert_eq "overlap: a branch's diff counts" "shared tests/m1.sh (b-branch)
+numbered db/000097 (b-branch)" "$OUT"
+rp "$MAIN" overlap "$C" b-branch
+assert_eq "overlap: a branch's plan counts" "shared ui/x.sh (b-branch)" "$OUT"
+rp "$MAIN" overlap "$M1" no-such-thing
+assert_eq "overlap: neither a plan nor a branch: exit 2" 2 "$RC"
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]

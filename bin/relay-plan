@@ -565,6 +565,65 @@ cmd_check() {
     exit "$CHECK_FAILED"
 }
 
+# plan_paths <file> <P|C>: the inline-code items on the plan's "- Create:", "- Modify:" and
+# "- Test:" lines outside fences (P), or on its "- Create:" lines (C), without those starting
+# with ":" and with a ":<digits, commas, dashes>" suffix dropped.
+plan_paths() {
+    scan "$1" | awk -F'\t' -v want="$2" "$CHECK_LIB"'
+    $2 == "prose" {
+        t = rtext()
+        if (t !~ /^[ \t]*- (Create|Modify|Test):/) next
+        if (want == "C" && t !~ /^[ \t]*- Create:/) next
+        while ((i = index(t, "`")) > 0) {
+            t = substr(t, i + 1); j = index(t, "`"); if (!j) break
+            s = substr(t, 1, j - 1); t = substr(t, j + 1)
+            if (s == "" || s ~ /^:/) continue
+            sub(/:[0-9,-]+$/, "", s); print s
+        }
+    }' | sort -u
+}
+
+# overlap_one <other> <paths file> <created file>: prints the shared and numbered lines.
+overlap_one() {
+    other=$1
+    if [ -f "$(abs_path "$other")" ]; then
+        plan_paths "$(abs_path "$other")" P > "$TMP/o.paths"
+        plan_paths "$(abs_path "$other")" C > "$TMP/o.created"
+    else
+        git -C "$TOP" rev-parse -q --verify "refs/heads/$other" > /dev/null ||
+            die "neither a plan nor a branch: $other"
+        oplan=$(ls "$TOP"/docs/superpowers/plans/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-"$other".md 2> /dev/null | sort | head -n 1)
+        [ -n "$oplan" ] || die "no plan for branch $other"
+        {
+            plan_paths "$oplan" P
+            git -C "$TOP" diff --name-only "main...$other"
+        } | sort -u > "$TMP/o.paths"
+        {
+            plan_paths "$oplan" C
+            git -C "$TOP" diff --name-only --diff-filter=A "main...$other"
+        } | sort -u > "$TMP/o.created"
+    fi
+    comm -12 "$2" "$TMP/o.paths" | sed "s#\$# ($other)#; s#^#shared #"
+    for side in "$3" "$TMP/o.created"; do
+        sed -E -n 's#^(.*/)?([0-9]+)[_.][^/]*$#\1\2#p' "$side" | sort -u > "$TMP/keys.$(basename "$side")"
+    done
+    comm -12 "$TMP/keys.$(basename "$3")" "$TMP/keys.o.created" | sed "s#\$# ($other)#; s#^#numbered #"
+}
+
+cmd_overlap() {
+    [ $# -ge 2 ] || usage_error "overlap takes a plan and at least one other"
+    need_file "$1"
+    plan_paths "$(abs_path "$1")" P > "$TMP/paths"
+    plan_paths "$(abs_path "$1")" C > "$TMP/created"
+    shift
+    : > "$TMP/overlap.out"
+    for other in "$@"; do
+        overlap_one "$other" "$TMP/paths" "$TMP/created" >> "$TMP/overlap.out" || exit $?
+    done
+    cat "$TMP/overlap.out"
+    [ ! -s "$TMP/overlap.out" ]
+}
+
 [ $# -ge 1 ] || usage_error "no command"
 COMMAND=$1
 shift
@@ -582,6 +641,7 @@ case $COMMAND in
     gate) cmd_gate "$@" ;;
     gates) cmd_gates "$@" ;;
     check) cmd_check "$@" ;;
+    overlap) cmd_overlap "$@" ;;
     steps) cmd_steps "$@" ;;
     step) cmd_step "$@" ;;
     scenarios) cmd_scenarios "$@" ;;
