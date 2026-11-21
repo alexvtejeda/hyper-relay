@@ -1234,7 +1234,7 @@ Each step is marked with who runs it:
 In a command inside a table cell, `\|` is a plain `|`. `<C>` is
 `docs/superpowers/plans/2026-11-19-hyper-relay-companion-hardening.md`, and `<E>` is the reviewer's evidence folder.
 
-- [ ] **Step 1 (`reviewer`): `relay-plan` on the companion-hardening plan (spec §1, §10).**
+- [x] **Step 1 (`reviewer`): `relay-plan` on the companion-hardening plan (spec §1, §10).**
 
 | Run | PASS |
 |---|---|
@@ -1245,7 +1245,7 @@ In a command inside a table cell, `\|` is a plain `|`. `<C>` is
 | `dash bin/relay-plan scenarios <C> <E>/scenarios` | 5 lines, ids 5–9, files `<E>/scenarios/step-5.txt` to `step-9.txt`; exit 0 |
 | `head -n 1 <E>/scenarios/step-5.txt`, then `tail -n 1 <E>/scenarios/step-9.txt` | `<CONTEXT>`; then `step), and your next message to your human partner, verbatim.` |
 
-- [ ] **Step 2 (`reviewer`): `relay-plan` on every other plan (spec §10; P16).** For each file
+- [x] **Step 2 (`reviewer`): `relay-plan` on every other plan (spec §10; P16).** For each file
   `git ls-files docs/superpowers/plans` lists, other than `<C>`, run `dash bin/relay-plan check <plan>` and
   `dash bin/relay-plan steps <plan>`, one command per run. For the plan of this branch's sibling,
   `docs/superpowers/plans/2026-11-20-hyper-relay-lighter-orchestrator-skills.md`, and for this plan, also run
@@ -1256,7 +1256,7 @@ In a command inside a table cell, `\|` is a plain `|`. `<C>` is
   and this plan prints only `ok` lines. A misreading is a FAIL, with the plan, its line and why. A real gap in the
   sibling plan is a finding against that plan, for the orchestrator, not a FAIL here.
 
-- [ ] **Step 3 (`reviewer`): A live run in a scratch repo (the Contract's `run-dir`, `gate`, `gates`).** `<S>` is
+- [x] **Step 3 (`reviewer`): A live run in a scratch repo (the Contract's `run-dir`, `gate`, `gates`).** `<S>` is
   `<E>/scratch`; `<B>` is the absolute path of the branch's checkout. These git commands write only in `<S>`. One
   command per run, in order.
 
@@ -1276,7 +1276,7 @@ In a command inside a table cell, `\|` is a plain `|`. `<C>` is
 | `git -C <S> -c core.hooksPath=/dev/null -c user.name=reviewer -c user.email=reviewer@example.invalid commit -q --allow-empty -m next` | exit 0 |
 | `cd <S> && dash <B>/bin/relay-plan gates docs/superpowers/plans/2026-11-19-demo.md 'echo ok-one'` | `FAIL echo ok-one: exit 0 at <the earlier 7>: ok-one` (older than the tip); exit 1 |
 
-- [ ] **Step 4 (`reviewer`): Only the planned files, and the text as planned (spec §1, §2; P17).**
+- [x] **Step 4 (`reviewer`): Only the planned files, and the text as planned (spec §1, §2; P17).**
 
 | Run | PASS |
 |---|---|
@@ -1287,11 +1287,11 @@ In a command inside a table cell, `\|` is a plain `|`. `<C>` is
 | `git diff main...HEAD -- docs/relay-plan.md CLAUDE.md .hyper-relay/merge.conf` | each hunk is one of Task 6's "with exactly this content" or "Replace X with Y" texts, word for word, and nothing else differs |
 | `git diff main...HEAD -- bin/hyper-relay-agents` | only Task 1 Step 3's two changes |
 
-- [ ] **Step 5 (`owner`): Read the reference and the calls made here.** Read `docs/relay-plan.md` on the branch, with
+- [x] **Step 5 (`owner`): Read the reference and the calls made here.** Read `docs/relay-plan.md` on the branch, with
   P1, P3, P7, P12 and P17 above. PASS: the owner agrees with them as written. A change goes to the executor as a
   finding.
 
-- [ ] **Step 6 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
+- [x] **Step 6 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch merges
   cleanly.**
 
 | Run | PASS |
@@ -1300,7 +1300,7 @@ In a command inside a table cell, `\|` is a plain `|`. `<C>` is
 
 The merge runs as the installed relay says: `relay-merge` from the main checkout on `main`.
 
-- [ ] **Step 7 (`after merge`): Re-check on `main`, and the role agents (spec §10; P15).** `main`'s `merge.conf` did
+- [x] **Step 7 (`after merge`): Re-check on `main`, and the role agents (spec §10; P15).** `main`'s `merge.conf` did
   not yet name `relay-plan`'s suite when this branch merged, so it runs here.
 
 | Run | PASS |
@@ -1314,7 +1314,7 @@ The merge runs as the installed relay says: `relay-merge` from the main checkout
 
 A line from `--check` stops the step: tell the owner.
 
-- [ ] **Step 8 (`after merge`): The release, 0.2.6 (spec §11; `.hyper-relay/agents.md`, Releases, (1) and (2)).** The
+- [x] **Step 8 (`after merge`): The release, 0.2.6 (spec §11; `.hyper-relay/agents.md`, Releases, (1) and (2)).** The
   owner approves this push at stop 4: it also takes `main`'s earlier unpushed commits (the spec and both plans among
   them), which is expected. In the main checkout on `main` (no `MERGE_HEAD`), one command per Bash call, with `<x.y.z>`
   the version `--check` shows with its patch number raised by one (`0.2.6` from `0.2.5`), unless the owner names another:
@@ -1342,7 +1342,7 @@ git -C /home/noob_master/hyper-relay push origin main v<x.y.z>
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v<x.y.z>` | one line |
 
-- [ ] **Step 9 (`after merge`; the owner runs the `ln`, which is the owner's shell setup): The symlink (P17).** As
+- [x] **Step 9 (`after merge`; the owner runs the `ln`, which is the owner's shell setup): The symlink (P17).** As
   `wt` and `relay-merge` are linked, so that an OpenCode orchestrator or the owner's shell finds `relay-plan` by name.
   First, `test -e /home/noob_master/.local/bin/relay-plan || test -L /home/noob_master/.local/bin/relay-plan; echo $?`
   must print `1` (nothing there yet); if it prints `0`, stop and ask the owner. Then the owner runs:
@@ -1358,7 +1358,7 @@ ln -sfn /home/noob_master/hyper-relay/bin/relay-plan /home/noob_master/.local/bi
 | `relay-plan; echo "exit $?"`, in the owner's shell | the `usage: relay-plan` line, then `exit 2` |
 | `RELAY_PLAN_BIN=/home/noob_master/.local/bin/relay-plan sh /home/noob_master/hyper-relay/tests/relay-plan/run-tests.sh \| tail -n 1` | ends `0 failed` |
 
-- [ ] **Step 10 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [x] **Step 10 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session). Plan 2 runs only after this step passes: its executor and orchestrator call `relay-plan` by
   name.
