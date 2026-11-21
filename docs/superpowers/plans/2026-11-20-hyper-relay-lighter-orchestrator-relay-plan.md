@@ -898,7 +898,7 @@ git commit -m "feat: relay-plan check runs a new plan's hand-back checks" -m "Pl
 **Interfaces:**
 - Consumes: Task 3's `scan`; Task 2's `files_plan`, `commit_all`, `commit_in`; Task 3's `fixture_repo`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```sh
 echo '--- overlap'
@@ -943,12 +943,12 @@ rp "$MAIN" overlap "$M1" no-such-thing
 assert_eq "overlap: neither a plan nor a branch: exit 2" 2 "$RC"
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `sh tests/relay-plan/run-tests.sh | grep -c '^FAIL'`
 Expected: a number above 0 (`overlap` is a usage error today); the earlier sections still `ok`.
 
-- [ ] **Step 3: Implement `overlap <plan> <other>…` in `bin/relay-plan`** (P7)
+- [x] **Step 3: Implement `overlap <plan> <other>…` in `bin/relay-plan`** (P7)
 
 At least one `<other>`, else `usage_error`. A plan's paths and its `- Create:` paths come from its `prose` records; a
 branch adds `git diff --name-only main...<branch>` to its plan's paths and
@@ -957,12 +957,12 @@ branch adds `git diff --name-only main...<branch>` to its plan's paths and
 `shared <path> (<other>)` line per path in both lists, sorted, then a `numbered <key> (<other>)` line per key in both,
 sorted; `<other>` as given on the command line.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `sh tests/relay-plan/run-tests.sh | tail -n 1`, then `dash -n bin/relay-plan`
 Expected: `<n> passed, 0 failed` (the header's `Expect:` updated); `dash -n` silent.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add bin/relay-plan tests/relay-plan/run-tests.sh
