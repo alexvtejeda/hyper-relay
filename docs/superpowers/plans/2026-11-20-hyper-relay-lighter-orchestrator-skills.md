@@ -348,7 +348,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `templates/agents/executor.md:7-8`, `:17-20`
 - Test: `tests/orchestrating/run-tests.sh`
 
-- [ ] **Step 1: Write the failing check.** A section `# --- 9. The executor's gates go through relay-plan, and it
+- [x] **Step 1: Write the failing check.** A section `# --- 9. The executor's gates go through relay-plan, and it
   copies no checklist.` with `executor_gates_through_relay_plan`: it passes when `skills/executing-plans/SKILL.md` has
   a line holding the fixed string `relay-plan gate <plan>`, and `none -i -F 'acceptance checklist'
   skills/executing-plans`. Add it to `CHECKS`. Its broken case: `broken "the executor copying the acceptance checklist
@@ -356,12 +356,12 @@ Claude-Session: <the URL your dispatch prompt gives>"
   `$CASE/skills/executing-plans/SKILL.md`; `expect_fail executor_gates_through_relay_plan`. `Expect:` becomes
   `"32 passed, 0 failed"`.
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `sh tests/orchestrating/run-tests.sh | tail -n 4`
 Expected: `FAIL executor_gates_through_relay_plan` above, and the last line `31 passed, 1 failed`.
 
-- [ ] **Step 3: The text, in `skills/executing-plans/SKILL.md`.** Insert after the line
+- [x] **Step 3: The text, in `skills/executing-plans/SKILL.md`.** Insert after the line
   `- the checkout's path and the branch;` (line 22):
 
 ```text
@@ -454,7 +454,7 @@ with:
    step 7).
 ```
 
-- [ ] **Step 4: The text, in `templates/agents/executor.md`.** Replace:
+- [x] **Step 4: The text, in `templates/agents/executor.md`.** Replace:
 
 ```text
   conflict round merges main into its own branch. The dispatch prompt names the plan, the mode, the checkout and
@@ -488,7 +488,7 @@ yours, and the plan's run folder: your full report goes to its `executor.md` and
 {{project}}.
 ```
 
-- [ ] **Step 5: Check it.**
+- [x] **Step 5: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -499,7 +499,7 @@ yours, and the plan's run folder: your full report goes to its `executor.md` and
 | `sh tests/hyper-relay-agents/run-tests.sh \| tail -n 1` | ends `0 failed` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `32 passed, 0 failed` |
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add skills/executing-plans/SKILL.md templates/agents/executor.md tests/orchestrating/run-tests.sh
