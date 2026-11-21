@@ -61,7 +61,11 @@ each leg by a fresh agent), and slanted boxes are the files handed from leg to l
 
 `orchestrating` runs the legs from an approved spec to the merge: it dispatches the planner, the executor and the
 reviewers, checks what each hands back, and stops for you at four points (the design, the spec, the plan and the
-merge).
+merge). Each agent writes its full report to the plan's run folder (`.hyper-relay/runs/<branch>/`, ignored by git) and
+hands back a short summary, and the orchestrator reads a plan through `relay-plan`, never whole. No check runs twice
+before the merge: the executor's gates are saved to a log the orchestrator reads, and `relay-merge` runs them once
+more on the merged result. A finding that still fails after the repo's fix-round cap (two rounds unless
+`.hyper-relay/agents.md` sets `fix-rounds`) becomes a card instead of another round.
 
 Several plans can be in flight at once, each in its own worktree. Before each dispatch, the orchestrator's
 `parallel.md` checks them for shared files and clashing numbered names: a plan that shares files with another waits
@@ -94,9 +98,15 @@ With Quartz connected:
   hook ticks that task on the board.
 - **Cards move with the work:** brainstorming, In progress (`quartz link-branch`), In review (`quartz review`), and
   merged (a git hook).
+- **The board holds the state.** Each card's status says where each of its plans stands, what comes next and which
+  agents are running, and your decisions go on it as notes as you make them. You can clear the conversation at any
+  moment without asking for notes first: a fresh session picks up from the board.
+- **Issues found on the way become proposed cards,** labelled `proposed` and filed by the agent that found them, for
+  you to prune on the board.
 
-Without Quartz, nothing breaks. Every Quartz step falls back to plain Markdown, and the skills work on their own. But
-the board is half the point: it is what lets a long-running, multi-agent pipeline stay legible.
+Without Quartz, nothing breaks. Every Quartz step falls back to plain Markdown and files (a plan's status and its
+proposed cards go to its run folder), and the skills work on their own. But the board is half the point: it is what
+lets a long-running, multi-agent pipeline stay legible.
 
 When the `quartz` CLI is installed but a repo is not connected yet, the relay sets the repo up itself and asks you
 only for the steps that are yours: a project, a token and the repo's name. `git config hyper-relay.quartz off` turns
