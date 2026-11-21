@@ -1156,20 +1156,20 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Interfaces:**
 - Consumes: Task 4's moments and section names (its Interfaces block).
 
-- [ ] **Step 1: Write the failing check.** A section `# --- 13. The orchestrator asks relay-plan instead of grepping
+- [x] **Step 1: Write the failing check.** A section `# --- 13. The orchestrator asks relay-plan instead of grepping
   the plan.` with `no_plan_greps`: it passes when `none -F -e "'^### Task'" -e '^- (Create|Modify|Test)' -e "grep -n
   -o 'Plan-Task:" skills/orchestrating`. Add it to `CHECKS`. Its broken case: `broken "the acceptance grep back in
   planning.md"`; append a line holding exactly
   ``\`grep -n '^### Task' <plan> | tail -n 1\` names the last task.`` to `$CASE/skills/orchestrating/planning.md`;
   `expect_fail no_plan_greps`. `Expect:` becomes `"41 passed, 0 failed"`.
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `sh tests/orchestrating/run-tests.sh | tail -n 8`
 Expected: `FAIL no_plan_greps` above (naming lines of `planning.md` and `parallel.md`), and the last line
 `40 passed, 1 failed`.
 
-- [ ] **Step 3: The text.** In `skills/orchestrating/planning.md`, replace:
+- [x] **Step 3: The text.** In `skills/orchestrating/planning.md`, replace:
 
 ```text
 the owner approved, dispatch the planners in the background. The approval is the go-ahead: do not ask again. Then tell
@@ -1342,7 +1342,7 @@ prints one line per overlap, and nothing when there is none:
 
 ```
 
-- [ ] **Step 4: Check it.**
+- [x] **Step 4: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -1354,7 +1354,7 @@ prints one line per overlap, and nothing when there is none:
 | `grep -c -F 'relay-plan overlap' skills/orchestrating/parallel.md` | `1` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `41 passed, 0 failed` |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/orchestrating/planning.md skills/orchestrating/dispatching.md skills/orchestrating/parallel.md tests/orchestrating/run-tests.sh
