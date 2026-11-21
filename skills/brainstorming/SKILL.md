@@ -62,6 +62,14 @@ fails, report the failure and carry on. The card's body and its notes
 are context your human partner gave you: read them before your first
 message, like anything else they pointed at.
 
+**Decisions go on the card as they happen.** Whenever your human partner
+decides something (an answer that changes the design, the approach they
+pick, a part of the playback they confirm), add a note on the card in
+that turn, with the decision and the reason they gave, and update the
+card's status to say where the brainstorm stands and what comes next.
+The forms, and where both go without Quartz, are in the same
+`quartz.md`, §4. Your human partner never has to ask for notes.
+
 In an existing project, or when they've given you context (a spec, a plan,
 a handoff, files they pointed at, earlier conversation), dig in before your
 first message. Read what they referred to and the code or material it
