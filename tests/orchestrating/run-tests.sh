@@ -6,7 +6,7 @@
 # under skills/. It reads the working tree, not git's index, so an untracked new file
 # counts and it runs the same in a worktree. Each check also runs on a copy of the tree
 # broken on purpose, where it must fail.
-# Usage: sh tests/orchestrating/run-tests.sh      Expect: "28 passed, 0 failed"
+# Usage: sh tests/orchestrating/run-tests.sh      Expect: "30 passed, 0 failed"
 set -u
 LC_ALL=C
 export LC_ALL
@@ -166,10 +166,26 @@ no_superpowers_skill_names() (
     none -E 'superpowers:[A-Za-z]' skills
 )
 
+# --- 8. Skill-test situations are whole and fenced, and no reviewer step reruns the gates.
+skill_test_situations_fenced() (
+    cd "$1" || exit 2
+    f=skills/writing-plans/SKILL.md
+    rc=0
+    if ! grep -q -F '```text' "$f"; then
+        echo "$f has no line holding a text fence"
+        rc=1
+    fi
+    if ! grep -q -F 'No `reviewer` step reruns the full gates' "$f"; then
+        echo "$f has no line holding: No \`reviewer\` step reruns the full gates"
+        rc=1
+    fi
+    exit "$rc"
+)
+
 CHECKS='no_old_dispatching_pointer dispatching_pointers_name_orchestrating old_dispatching_gone
 no_subagent_driven code_review_not_per_task brainstorming_never_invokes_writing_plans orchestrating_folder
 no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_in_quartz_md
-no_finishing_branch_in_orchestrating no_superpowers_skill_names'
+no_finishing_branch_in_orchestrating no_superpowers_skill_names skill_test_situations_fenced'
 
 # --- the repo's tree passes every check
 for check in $CHECKS; do
@@ -256,6 +272,10 @@ expect_fail no_finishing_branch_in_orchestrating
 broken "brainstorming invoking superpowers:writing-plans"
 printf '\nInvoke the superpowers:writing-plans skill.\n' >> "$CASE/skills/brainstorming/SKILL.md"
 expect_fail no_superpowers_skill_names
+
+broken "writing-plans without the fence rule"
+sed -i '/```text/d' "$CASE/skills/writing-plans/SKILL.md"
+expect_fail skill_test_situations_fenced
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]

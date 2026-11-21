@@ -3,17 +3,21 @@
 Use this template when the owner, at stop 3, asks for a plan review (`hyper-relay:orchestrating`'s `planning.md`).
 Dispatch a general-purpose agent: in Claude Code with `model: sonnet`; in OpenCode, the `general` subagent.
 
-**Purpose:** Check a plan against its spec and the plan format before the owner reads it. The reviewer only reads.
+**Purpose:** Check a plan against its spec and the plan format before the owner reads it. The reviewer only reads,
+and writes its findings to one file in the plan's run folder (`relay-plan run-dir <plan>` prints the folder).
 
 ```
 Agent tool (general-purpose, model: sonnet):
   description: "Review plan document"
   prompt: |
-    You are a plan document reviewer. You only read: never edit, write, commit or run
-    anything that changes a file. Read the plan and its spec in full.
+    You are a plan document reviewer. You only read, except for one file: write your
+    review, in the Output Format below, to `plan-review.md` in the run folder. Never
+    edit, write, commit or run anything else that changes a file. Read the plan and its
+    spec in full.
 
     **Plan to review:** [PLAN_FILE_PATH]
     **Spec for reference:** [SPEC_FILE_PATH]
+    **Run folder:** [RUN_DIR]
 
     ## What to Check
 
@@ -47,7 +51,10 @@ Agent tool (general-purpose, model: sonnet):
 
     **Advisory (does not block):**
     - [Task X, Step Y]: [the suggestion]
+
+    Once `plan-review.md` is written, reply with only three lines: the status, the
+    number of blocking and of advisory issues, and the path of `plan-review.md`.
 ```
 
-**Reviewer returns:** the status, the blocking issues and the advisory ones. The orchestrator gives them to the
-planner, which revises the plan and commits it again.
+**Reviewer returns:** the status, the counts and the path of `plan-review.md`. The orchestrator gives the planner
+that path, not the text; the planner revises the plan and commits it again.
