@@ -94,7 +94,7 @@ The spec flags no fact for re-check, and no assumption about an outside system w
 | P14 | §2: the generator accepts `fix-rounds` | Valid is one digit from 1 to 9; an empty value is refused too. The unknown-key message lists `fix-rounds` after `execute`. |
 | P15 | §1: `merge.conf` gains `relay-plan`'s lines | `relay-merge` reads `main`'s committed `merge.conf`, so the new lines gate later branches: this branch's merge runs `main`'s current lines (`bin/hyper-relay-agents`, `tests/hyper-relay-agents/`, `CLAUDE.md`), and Task 7 Step 7 runs `relay-plan`'s suite on `main` after the merge. |
 | P16 | §10: the reviewer "runs `relay-plan` against this repo's own merged plans … and reports what it prints"; L2: no reviewer step reruns the gates | The reviewer runs no gate. Step 1 is PASS or FAIL on the companion-hardening plan (§1: it passes every check). Step 2 runs `check` and `steps` on every other plan and judges each FAIL: a real gap in an older plan, or a misreading by `relay-plan` (which is the FAIL). Step 3 is a live run of `run-dir`, `gate` and `gates` in a scratch repo. |
-| P17 | §1: `docs/relay-plan.md`, "as `docs/relay-merge.md` is `relay-merge`'s" | It gives the symlink line for a shell's `PATH`, as that doc does. No step makes one: the orchestrator runs `relay-plan` inside Claude Code, which puts the plugin's `bin/` on `PATH`. An OpenCode orchestrator would need it (the owner's to decide, with Plan 2). |
+| P17 | §1: `docs/relay-plan.md`, "as `docs/relay-merge.md` is `relay-merge`'s" | It gives the symlink line for a shell's `PATH`, as that doc does. The owner (stop 3, 2026-11-20): Task 7 Step 9, after the release, links `~/.local/bin/relay-plan` to this main checkout's `bin/relay-plan`, as `wt` and `relay-merge` are linked, so that an OpenCode orchestrator or the owner's shell finds `relay-plan` by name; `CLAUDE.md`'s "How a change reaches the owner" gains its bullet (Task 6 Step 3). |
 
 ## Contract
 
@@ -159,7 +159,7 @@ absent means 2. The generator accepts it and changes no generated file for it; a
 | Approaches | No task: Approach A is this plan and its sibling |
 | The plans | 1–6 (Plan 1's list); 7 (the release) |
 | Contract | 1 (`fix-rounds`); 2 (the run folder, `gates.log`, `run-dir`, `gate`, `gates`); 3 (`steps`, `step`, `scenarios`); 4 (`check`); 5 (`overlap`); 6 (the user reference). The label: Plan 2's |
-| 1. `bin/relay-plan` (Plan 1) | 2–5 (the command and its suite), 6 (`docs/relay-plan.md`, `merge.conf`, `CLAUDE.md`) |
+| 1. `bin/relay-plan` (Plan 1) | 2–5 (the command and its suite), 6 (`docs/relay-plan.md`, `merge.conf`, `CLAUDE.md`), 7 (Step 9, the symlink) |
 | 2. `fix-rounds` (Plan 1) | 1 |
 | 3. The board holds the state (Plan 2) | No task: Plan 2's |
 | 4. The run folder and short hand-backs (Plan 2) | No task: Plan 2's (this plan's `run-dir` makes the folder) |
@@ -169,7 +169,7 @@ absent means 2. The generator accepts it and changes no generated file for it; a
 | 8. The other files (Plan 2) | No task: Plan 2's |
 | 9. Pressure scenarios (Plan 2's skill tests) | No task: Plan 2's |
 | 10. Testing and acceptance | 6 (the executor's gates); 7 (Steps 1–4 the reviewer's, 7 the re-check on `main`) |
-| 11. Releases | 7 (Steps 8–9: 0.2.6) |
+| 11. Releases | 7 (Steps 8 and 10: 0.2.6) |
 | 12. Out of scope, and left to the builder | No task; the builder's calls are P1–P17 |
 
 ## File structure
@@ -974,7 +974,8 @@ git commit -m "feat: relay-plan overlap finds shared files and numbered collisio
 **Files:**
 - Create: `docs/relay-plan.md`
 - Modify: `.hyper-relay/merge.conf:17` and `:45-47`
-- Modify: `CLAUDE.md:21-27` (Layout) and the Checks table's `relay-merge` row
+- Modify: `CLAUDE.md:21-27` (Layout), `:83-84` (How a change reaches the owner) and the Checks table's `relay-merge`
+  row
 
 - [ ] **Step 1: The user reference.** Create `docs/relay-plan.md` with exactly this content:
 
@@ -1182,6 +1183,20 @@ with:
 | relay-plan | `sh tests/relay-plan/run-tests.sh` | `0 failed` |
 ```
 
+Replace:
+
+```text
+  `bin/relay-merge`, as `wt`'s is: a change reaches it as soon as it merges.
+```
+
+with:
+
+```text
+  `bin/relay-merge`, as `wt`'s is: a change reaches it as soon as it merges.
+- **`relay-plan`** in the owner's shell is `~/.local/bin/relay-plan`, a symlink to this main checkout's
+  `bin/relay-plan`, as `relay-merge`'s is: a change reaches it as soon as it merges.
+```
+
 Then commit:
 
 ```bash
@@ -1205,7 +1220,7 @@ git commit -m "docs: relay-plan's user reference, its gates and its place in CLA
 | `git diff --name-only main...HEAD` | exactly the ten files of Task 7 Step 4 |
 | `git status --short` | nothing (on a branch run, nothing but untracked files under `docs/superpowers/` that you did not create) |
 
-### Task 7: Acceptance (spec §10, §11; P15, P16). Not the executor's
+### Task 7: Acceptance (spec §10, §11; P15–P17). Not the executor's
 
 Each step is marked with who runs it:
 - **`reviewer`**: the acceptance reviewer, before the merge, from the top of the checkout on the branch
@@ -1214,7 +1229,7 @@ Each step is marked with who runs it:
   gates (spec L2, §10: the executor ran them).
 - **`owner`**: the owner, at the click-through (Steps 5–6); the orchestrator runs the commands.
 - **`after merge`**: the orchestrator with the owner, once the branch is merged and the main checkout
-  `/home/noob_master/hyper-relay` is on `main` (Steps 7–9).
+  `/home/noob_master/hyper-relay` is on `main` (Steps 7–10).
 
 In a command inside a table cell, `\|` is a plain `|`. `<C>` is
 `docs/superpowers/plans/2026-11-19-hyper-relay-companion-hardening.md`, and `<E>` is the reviewer's evidence folder.
@@ -1327,7 +1342,23 @@ git -C /home/noob_master/hyper-relay push origin main v<x.y.z>
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v<x.y.z>` | one line |
 
-- [ ] **Step 9 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [ ] **Step 9 (`after merge`; the owner runs the `ln`, which is the owner's shell setup): The symlink (P17).** As
+  `wt` and `relay-merge` are linked, so that an OpenCode orchestrator or the owner's shell finds `relay-plan` by name.
+  First, `test -e /home/noob_master/.local/bin/relay-plan || test -L /home/noob_master/.local/bin/relay-plan; echo $?`
+  must print `1` (nothing there yet); if it prints `0`, stop and ask the owner. Then the owner runs:
+
+```bash
+ln -sfn /home/noob_master/hyper-relay/bin/relay-plan /home/noob_master/.local/bin/relay-plan
+```
+
+| Run | PASS |
+|---|---|
+| `readlink /home/noob_master/.local/bin/relay-plan` | `/home/noob_master/hyper-relay/bin/relay-plan` |
+| `command -v relay-plan`, in the owner's shell | `/home/noob_master/.local/bin/relay-plan` |
+| `relay-plan; echo "exit $?"`, in the owner's shell | the `usage: relay-plan` line, then `exit 2` |
+| `RELAY_PLAN_BIN=/home/noob_master/.local/bin/relay-plan sh /home/noob_master/hyper-relay/tests/relay-plan/run-tests.sh \| tail -n 1` | ends `0 failed` |
+
+- [ ] **Step 10 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session). Plan 2 runs only after this step passes: its executor and orchestrator call `relay-plan` by
   name.
