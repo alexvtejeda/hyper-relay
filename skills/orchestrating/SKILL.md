@@ -20,9 +20,10 @@ leg. You dispatch it, check what it hands back, and stop for the owner where thi
 | Handoff and executor | `dispatching.md` | a verified hand-back (no stop) |
 | Review, click-through, merge | `reviewing.md` | stop 4, then the merge |
 
-The three leg files, `parallel.md` and `quartz.md` are beside this SKILL.md. Read each leg file when the loop reaches
-its leg, not before; `parallel.md` whenever a second plan would be in flight or a spec has several plans; and
-`quartz.md` at the start of every leg (Quartz duties, below):
+The three leg files, `parallel.md` and `quartz.md` are beside this SKILL.md. Read each of them once per session, when
+the loop first needs it, and not again: a leg file when the loop reaches its leg; `parallel.md` when a second plan
+would be in flight or a spec has several plans; `quartz.md` at the session's first leg (Quartz duties, below). A
+cleared conversation is a new session:
 
 - `${CLAUDE_SKILL_DIR}/planning.md` (`planning.md` beside this SKILL.md);
 - `${CLAUDE_SKILL_DIR}/dispatching.md` (`dispatching.md` beside this SKILL.md);
@@ -37,20 +38,37 @@ its leg, not before; `parallel.md` whenever a second plan would be in flight or 
 | 1. Design | The approaches, then the design played back part by part (`brainstorming`) | the spec |
 | 2. Spec | The written spec (`brainstorming`); skipped when the owner approved a short design in brainstorming's first message, which covers stops 1 and 2 | the planner leg: approval is the go-ahead, no second ask |
 | 3. Plan ready | Its questions first: the decisions the owner must make, the assumptions the planner made where the spec was silent, the plan-review offer, the handoff question. Then the hand-back check's result and the planner's deviations (`planning.md` §3) | execution, a plan review, plan changes, or "research it" |
-| 4. Ready to merge | Its questions first: the proposed cards, the steps that are the owner's, where to click through. Then gate, acceptance and skill-test results, fixes made, Critical findings fixed or dropped (`reviewing.md` §4) | the click-through and the merge |
+| 4. Ready to merge | Its questions first: each finding that reached the fix-round cap (merge with its card open, hold the branch, or one more round), the steps that are the owner's, where to click through. Then gate, acceptance and skill-test results, fixes made, Critical findings fixed or dropped, and the number of proposed cards filed (`reviewing.md` §4) | the click-through and the merge |
 
 A stop that asks anything opens with its questions, numbered, before any report: every question, and every decision
 the owner must make. The report follows, short: one line per item, and nothing the board shows. No question comes
 after the report.
 
 A stop ends the message: the next leg never starts in the message that reaches a stop. Between stop 3 and stop 4 the
-loop runs on its own, except for a gap in the spec or plan and a second failed fix round, which go to the owner
-(`reviewing.md` §2).
+loop runs on its own, except for a gap in the spec or plan, which goes to the owner at once (`reviewing.md` §2). A
+finding that still fails after the repo's fix-round cap gets no further round: it becomes a card, the loop carries
+on, and stop 4 opens with it.
+
+Before sending stop 3 or stop 4, post the status note (`quartz.md` §4). The stop's report then ends with one line:
+"The board is current, so this is a good moment to clear." Without Quartz, the line is "Everything is written down,
+so this is a good moment to clear."
 
 ## Finding where work stands
 
-After a `/clear` or in a new session, find the leg from files and git, never from memory. With Quartz, the card's
-column is a cross-check.
+After a `/clear` or in a new session, find the leg from the card and the run folder first, then from files and git,
+never from memory. In a repo that uses Quartz, with its MCP loaded (`quartz.md` §1 and §2), the card's status
+(`get_task`) holds a line for each of its plans in flight: where it stands, what comes next and the agents still
+running (`quartz.md` §4). Without Quartz, the plan's run folder holds that line in its `status` file. A plan's run
+folder is `.hyper-relay/runs/<branch>/` in the main checkout (`dispatching.md` §3).
+
+- **A notice from an agent this conversation did not dispatch:** find its id in the status, and carry on from that
+  agent's leg with its reply: for an executor, `dispatching.md` §7, from its summary and `executor.md`.
+- **The status names an agent whose report is not in the run folder** (its file, or for a round, that round's
+  section): tell the owner, in one line, that if they only cleared, the agent is still running and its notice will
+  arrive here, and that if Claude Code was restarted, it stopped and will be dispatched again. Wait for their answer.
+- **Otherwise,** carry on at the plan's `next:`.
+
+Without a status line that has `next:` for a plan, the files and git decide:
 
 | State | Leg |
 |---|---|
@@ -61,16 +79,15 @@ column is a cross-check.
 | A plan's branch with all its executor tasks committed | By its review status (below) |
 | The branch merged, with an `after merge` step of the plan's acceptance task left (that task is not ticked) | `reviewing.md` §5 |
 
-**A branch with all its executor tasks committed** goes by its review status. In a repo that uses Quartz, with its MCP
-loaded (`quartz.md` §1 and §2), that is the current status note on the plan's cards (`get_task`), counted only when it
-names this plan's path (`reviewing.md` §2 and §3 post it). Otherwise the last row applies.
+**A branch with all its executor tasks committed** goes by its review status: a status line on the plan's cards
+written before `next:` existed, counted only when it names this plan's path, or none.
 
 | Review status | Leg |
 |---|---|
 | None, and no fix commits on the branch | `dispatching.md` §7 (verify), then `reviewing.md` §1 |
 | "acceptance done" | `reviewing.md` §3 |
 | "code review done" | Stop 4 (`reviewing.md` §4) |
-| The repo does not use Quartz or its MCP is not loaded, or no status but fix commits | **Ask the owner** which review legs ran, naming the fix commits. Rerun nothing on your own. |
+| None, but fix commits (no Quartz and no `status` file) | **Ask the owner** which review legs ran, naming the fix commits. Rerun nothing on your own. |
 
 A fix commit is a commit on `main..<branch>` with no `Plan-Task:` trailer, after the branch's last `Plan-Task:`
 commit: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>` lists the branch's commits, newest
@@ -84,10 +101,25 @@ commits, and the same with `main` in place of `main..<branch>` lists the merged 
 **A branch run is active exactly when the main checkout is not on `main`.** While one is, `dispatching.md` §6's
 hold-back rules bind you, in every leg.
 
+**No private state.** The card and the run folder are the record of where work stands, and nothing else is:
+you never keep relay state in a memory file or a handoff note of your own. When the owner says they are about to
+clear, post any status note you owe, then say in one line that the board (without Quartz, the run folder) is
+current and nothing needs writing.
+
+## Plans and reports by path
+
+You never read a plan whole. `relay-plan`, a command beside `relay-merge` (hyper-relay's `docs/relay-plan.md`),
+answers your questions about a plan: its checks, its overlaps with plans in flight, its task count, its acceptance
+steps by who runs them, one step's text, its skill-test situations and its gates' runs. Claude Code puts it on
+`PATH`; elsewhere the owner links it. When `command -v relay-plan` finds nothing, tell the owner and stop.
+
+Each agent writes its full report to the plan's run folder and hands back a short summary, and findings pass between
+agents by their paths there. Open a report only for a line its summary does not settle.
+
 ## Quartz duties
 
-Read `quartz.md` beside this file (`${CLAUDE_SKILL_DIR}/quartz.md`) at the start of every leg. Every Quartz step runs
-only when its §1 says the repo uses Quartz.
+Read `quartz.md` beside this file (`${CLAUDE_SKILL_DIR}/quartz.md`) at the session's first leg. Every Quartz step runs
+only when its §1 says the repo uses Quartz, and each has a plain-file fallback.
 
 ## Fallbacks
 
@@ -96,9 +128,9 @@ only when its §1 says the repo uses Quartz.
   its skill: `hyper-relay:writing-plans` for the planner, `hyper-relay:executing-plans` for the executor (in OpenCode,
   the `general` subagent, told to load the skill first). The acceptance reviewer, which has no skill, gets the
   standing brief in `reviewing.md` §1.
-- **Models:** the generated agents carry their own. The plan reviewer, the code reviewer and the skill-test runs
-  (`reviewing.md` §3) run on Sonnet: in Claude Code, `model: sonnet` on the dispatch; in OpenCode, which sets a model
-  per agent and not per dispatch, the `general` subagent's configured model.
+- **Models:** the generated agents carry their own. The plan reviewer, the code reviewer, the skill-test runs and
+  their judge (`reviewing.md` §3) run on Sonnet: in Claude Code, `model: sonnet` on the dispatch; in OpenCode, which
+  sets a model per agent and not per dispatch, the `general` subagent's configured model.
 - **Resuming an agent** with its context: in Claude Code, `SendMessage` to the agent's ID or name; in OpenCode, the
   `subagent` tool given the child's `sessionID`. Otherwise, or when the agent is gone, a fresh agent gets what it needs
   in its prompt.

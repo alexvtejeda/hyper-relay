@@ -37,10 +37,14 @@ A general-purpose agent, with `model: sonnet` in Claude Code (in OpenCode, the `
 - `{SPEC}` - The spec's path
 - `{BASE_SHA}` - Starting commit
 - `{HEAD_SHA}` - Ending commit
+- `{RUN_DIR}` - The plan's run folder, where the review goes ("none" outside the relay)
+- `{INITIATIVE}` - The plan's initiative, for the cards the reviewer files ("none" without Quartz)
 
 **3. Act on feedback:**
+
+In the relay, the reviewer writes its full review to the run folder's `code-review.md` and hands back a short summary.
 - **Critical:** fixed before the merge. In the relay, the executor fixes it, after the orchestrator checks it against the code with `hyper-relay:receiving-code-review`.
-- **Important and Minor:** proposed cards for the owner to keep or drop, or noted in the report. They do not block the merge.
+- **Important and Minor:** in the relay, the reviewer files each as a proposed card, labelled `proposed`, which the owner prunes on the board; outside it, noted in the review. They do not block the merge.
 - Push back if the reviewer is wrong (with reasoning).
 
 ## Example
@@ -57,24 +61,24 @@ HEAD_SHA=$(git rev-parse index-repair)
   SPEC: docs/superpowers/specs/2026-11-18-index-repair-design.md
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
+  RUN_DIR: <main checkout>/.hyper-relay/runs/index-repair/
+  INITIATIVE: v1
 
-[Subagent returns]:
-  Strengths: Clean architecture, real tests
-  Issues:
-    Critical: repairIndex() deletes entries it cannot parse (data loss)
-    Important: Missing progress indicators
-    Minor: Magic number (100) for reporting interval
-  Assessment: With fixes
+[Subagent writes code-review.md in the run folder, files the Important and Minor issues as proposed cards, and returns]:
+  Ready to merge: With fixes. Critical 1, Important 1, Minor 1.
+  Critical: repairIndex() deletes entries it cannot parse (data loss), src/repair.ts:88
+  Cards: 3f2a9c10, 8b7e6d54
+  Review: <main checkout>/.hyper-relay/runs/index-repair/code-review.md
 
-You: [Check the Critical issue against the code: it is real, so the executor fixes it]
-[Important and Minor: proposed cards]
+You: [Read the Critical issue in code-review.md and check it against the code: it is real, so the executor fixes it]
+[Important and Minor: already on the board as proposed cards]
 ```
 
 ## Integration with Workflows
 
 **In the relay:**
 - `hyper-relay:orchestrating`'s `reviewing.md` runs it once per branch, last: after the acceptance check and its fixes, so it reads the final diff
-- Critical goes to the executor; Important and Minor become proposed cards
+- Critical goes to the executor; the reviewer files Important and Minor as proposed cards, labelled `proposed`
 
 **Ad hoc:**
 - Before a merge outside the relay

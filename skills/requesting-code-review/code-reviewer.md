@@ -35,6 +35,28 @@ Agent tool (general-purpose, model: sonnet):
     git diff {BASE_SHA}..{HEAD_SHA}
     ```
 
+    ## Where Your Review Goes
+
+    **Run folder:** {RUN_DIR}
+    **Initiative:** {INITIATIVE}
+
+    Write your full review, in the Output Format below, to `code-review.md` in the
+    run folder. File each Important and Minor issue as a proposed card: `add_tasks`
+    with the label `proposed`, kind `bug` or `change`, the initiative above, and a
+    body naming the plan, the file and line, and `code-review.md`. A Critical issue
+    is never a card: it is fixed before the merge. When `add_tasks` fails, or the
+    initiative is "none", append the card to the run folder's `cards.md` instead, as
+    a `## <title>` section with its kind, the file, the evidence and why. Change no
+    other file.
+
+    Then reply with only a short summary: Ready to merge (Yes / No / With fixes); the
+    number of Critical, Important and Minor issues; each Critical issue in one line,
+    with its file and line; the cards you filed (their ids, or that they are in
+    `cards.md`); and the path of `code-review.md`.
+
+    When the run folder is "none" (a review outside the relay), file no cards, write
+    no file, and reply with the whole review instead.
+
     ## What to Check
 
     **Plan and spec alignment:**
@@ -141,8 +163,12 @@ Agent tool (general-purpose, model: sonnet):
 - `{SPEC}` — the spec's path (for ad hoc work without one: "none")
 - `{BASE_SHA}` — starting commit: for a branch, `git merge-base main <branch>`
 - `{HEAD_SHA}` — ending commit: the branch's head
+- `{RUN_DIR}` — the plan's run folder, which `hyper-relay:orchestrating` names (for ad hoc work: "none")
+- `{INITIATIVE}` — the plan's initiative, for the cards the reviewer files ("none" when the repo does not use Quartz)
 
-**Reviewer returns:** Strengths, Issues (Critical / Important / Minor), Recommendations, Assessment
+**Reviewer returns:** a short summary: the verdict, the counts, each Critical issue, the cards it filed and the path
+of `code-review.md`, which holds the full review (Strengths, Issues (Critical / Important / Minor), Recommendations,
+Assessment). With no run folder, the whole review.
 
 ## Example Output
 

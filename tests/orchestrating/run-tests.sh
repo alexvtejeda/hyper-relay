@@ -6,7 +6,7 @@
 # under skills/. It reads the working tree, not git's index, so an untracked new file
 # counts and it runs the same in a worktree. Each check also runs on a copy of the tree
 # broken on purpose, where it must fail.
-# Usage: sh tests/orchestrating/run-tests.sh      Expect: "28 passed, 0 failed"
+# Usage: sh tests/orchestrating/run-tests.sh      Expect: "48 passed, 0 failed"
 set -u
 LC_ALL=C
 export LC_ALL
@@ -166,10 +166,124 @@ no_superpowers_skill_names() (
     none -E 'superpowers:[A-Za-z]' skills
 )
 
+# --- 8. Skill-test situations are whole and fenced, and no reviewer step reruns the gates.
+skill_test_situations_fenced() (
+    cd "$1" || exit 2
+    f=skills/writing-plans/SKILL.md
+    rc=0
+    if ! grep -q -F '```text' "$f"; then
+        echo "$f has no line holding a text fence"
+        rc=1
+    fi
+    if ! grep -q -F 'No `reviewer` step reruns the full gates' "$f"; then
+        echo "$f has no line holding: No \`reviewer\` step reruns the full gates"
+        rc=1
+    fi
+    exit "$rc"
+)
+
+# --- 9. The executor's gates go through relay-plan, and it copies no checklist.
+executor_gates_through_relay_plan() (
+    cd "$1" || exit 2
+    if ! grep -q -F 'relay-plan gate <plan>' skills/executing-plans/SKILL.md; then
+        echo "skills/executing-plans/SKILL.md has no line holding: relay-plan gate <plan>"
+        exit 1
+    fi
+    none -i -F 'acceptance checklist' skills/executing-plans
+)
+
+# --- 10. Every agent that reports writes to the run folder.
+agents_write_to_the_run_folder() (
+    cd "$1" || exit 2
+    rc=0
+    for f in skills/executing-plans/SKILL.md templates/agents/executor.md \
+        templates/agents/reviewer-commands.md templates/agents/reviewer-browser.md \
+        skills/requesting-code-review/code-reviewer.md \
+        skills/writing-plans/plan-document-reviewer-prompt.md; do
+        if ! grep -q -F 'run folder' "$f"; then
+            echo "$f names no run folder"
+            rc=1
+        fi
+    done
+    exit "$rc"
+)
+
+# --- 11. The agent that finds an issue files it as a proposed card.
+proposed_cards_filed_by_finders() (
+    cd "$1" || exit 2
+    rc=0
+    for f in skills/executing-plans/SKILL.md templates/agents/reviewer-commands.md \
+        templates/agents/reviewer-browser.md skills/requesting-code-review/code-reviewer.md; do
+        if ! grep -q -F 'add_tasks' "$f"; then
+            echo "$f has no line holding add_tasks"
+            rc=1
+        fi
+        if ! grep -q -F '`proposed`' "$f"; then
+            echo "$f has no line holding \`proposed\`"
+            rc=1
+        fi
+    done
+    exit "$rc"
+)
+
+# --- 12. The card and the run folder are the record: no private state, and the leg files
+# are read once.
+no_private_state() (
+    cd "$1" || exit 2
+    if ! grep -q -F 'never keep relay state in a memory file' skills/orchestrating/SKILL.md; then
+        echo "skills/orchestrating/SKILL.md has no line holding: never keep relay state in a memory file"
+        exit 1
+    fi
+    none -F 'at the start of every leg' skills/orchestrating
+)
+
+# --- 13. The orchestrator asks relay-plan instead of grepping the plan.
+no_plan_greps() (
+    cd "$1" || exit 2
+    none -F -e "'^### Task'" -e '^- (Create|Modify|Test)' -e "grep -n -o 'Plan-Task:" skills/orchestrating
+)
+
+# --- 14. The orchestrator routes by path.
+relay_plan_routes_the_plan() (
+    cd "$1" || exit 2
+    rc=0
+    for s in 'relay-plan run-dir' 'relay-plan check' 'relay-plan overlap' 'relay-plan steps' \
+        'relay-plan step <' 'relay-plan scenarios' 'relay-plan gates'; do
+        if ! grep -r -q -F "$s" skills/orchestrating; then
+            echo "nothing under skills/orchestrating holds: $s"
+            rc=1
+        fi
+    done
+    exit "$rc"
+)
+
+# --- 15. No check runs twice.
+no_gate_reruns() (
+    cd "$1" || exit 2
+    none -i -F 'rerun the gates' skills/orchestrating
+)
+
+# --- 16. The fix-round cap.
+fix_cap() (
+    cd "$1" || exit 2
+    rc=0
+    for f in skills/orchestrating/reviewing.md skills/agents/SKILL.md; do
+        if ! grep -q -F 'fix-rounds' "$f"; then
+            echo "$f has no line holding fix-rounds"
+            rc=1
+        fi
+    done
+    none -i -E 'second (failed )?fix round' skills/orchestrating || rc=1
+    exit "$rc"
+)
+
 CHECKS='no_old_dispatching_pointer dispatching_pointers_name_orchestrating old_dispatching_gone
 no_subagent_driven code_review_not_per_task brainstorming_never_invokes_writing_plans orchestrating_folder
 no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_in_quartz_md
-no_finishing_branch_in_orchestrating no_superpowers_skill_names'
+no_finishing_branch_in_orchestrating no_superpowers_skill_names skill_test_situations_fenced
+executor_gates_through_relay_plan
+agents_write_to_the_run_folder proposed_cards_filed_by_finders
+no_private_state no_plan_greps relay_plan_routes_the_plan no_gate_reruns fix_cap'
 
 # --- the repo's tree passes every check
 for check in $CHECKS; do
@@ -256,6 +370,50 @@ expect_fail no_finishing_branch_in_orchestrating
 broken "brainstorming invoking superpowers:writing-plans"
 printf '\nInvoke the superpowers:writing-plans skill.\n' >> "$CASE/skills/brainstorming/SKILL.md"
 expect_fail no_superpowers_skill_names
+
+broken "writing-plans without the fence rule"
+sed -i '/```text/d' "$CASE/skills/writing-plans/SKILL.md"
+expect_fail skill_test_situations_fenced
+
+broken "the executor copying the acceptance checklist again"
+printf '\nThen copy the acceptance checklist into your report.\n' >> "$CASE/skills/executing-plans/SKILL.md"
+expect_fail executor_gates_through_relay_plan
+
+broken "a reviewer template that names no run folder"
+sed -i '/run folder/d' "$CASE/templates/agents/reviewer-browser.md"
+expect_fail agents_write_to_the_run_folder
+
+broken "a code reviewer that files no card"
+sed -i '/add_tasks/d' "$CASE/skills/requesting-code-review/code-reviewer.md"
+expect_fail proposed_cards_filed_by_finders
+
+broken "no record rule"
+sed -i '/never keep relay state in a memory file/d' "$CASE/skills/orchestrating/SKILL.md"
+expect_fail no_private_state
+
+broken "quartz.md read at every leg again"
+printf '\nRead quartz.md at the start of every leg.\n' >> "$CASE/skills/orchestrating/SKILL.md"
+expect_fail no_private_state
+
+broken "the acceptance grep back in planning.md"
+printf '%s\n' "\`grep -n '^### Task' <plan> | tail -n 1\` names the last task." >> "$CASE/skills/orchestrating/planning.md"
+expect_fail no_plan_greps
+
+broken "no relay-plan scenarios"
+sed -i '/relay-plan scenarios/d' "$CASE"/skills/orchestrating/*.md
+expect_fail relay_plan_routes_the_plan
+
+broken "the hand-back rerunning the gates"
+printf '\nRerun the gates the report names.\n' >> "$CASE/skills/orchestrating/dispatching.md"
+expect_fail no_gate_reruns
+
+broken "a second fix round going to the owner"
+printf '\nA step that fails again after its second fix round goes to the owner.\n' >> "$CASE/skills/orchestrating/reviewing.md"
+expect_fail fix_cap
+
+broken "the agents skill without fix-rounds"
+sed -i '/fix-rounds/d' "$CASE/skills/agents/SKILL.md"
+expect_fail fix_cap
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]

@@ -8,8 +8,9 @@ context.
 ## 1. Dispatch
 
 Straight after the owner approves the written spec, or `brainstorming` hands over a spec written from a short design
-the owner approved, dispatch the planners in the background. The approval is the go-ahead: do not ask again. Then tell
-the owner they are running, and carry on.
+the owner approved, dispatch the planners in the background. The approval is the go-ahead: do not ask again. Then add
+a decision note for the approval and post the status note, naming each planner by its id (`quartz.md` §4, moment 1),
+tell the owner they are running, and carry on.
 
 - **Plan paths.** You name them: `docs/superpowers/plans/<today>-<topic>.md`, where `<topic>` is the spec's file name
   without its date and `-design`. A spec with a `**Plans:** <n>` line gets n paths, each with the suffix the spec
@@ -39,33 +40,28 @@ the owner they are running, and carry on.
 
 ## 2. Check the hand-back
 
-Inline, with git and grep, before the owner sees anything. You do not read the whole plan line by line. For each
-plan:
+With `relay-plan` (`SKILL.md`, Plans and reports by path), before the owner sees anything: you never read the plan
+whole. For each plan, in the main checkout, run `relay-plan check <plan> --spec <spec>`, adding `--sibling <plan>`
+for each sibling plan and `--base <base plan>` for a stacked one. It prints one line per check, `ok <check>` or
+`FAIL <check>: <detail>`: the plan is committed (during a branch run, the file exists); it has its card line, when
+the spec names a card; each task that commits carries its own `Plan-Task:` trailer once; each acceptance step names
+who runs it; each `skill-test` step has its situation in a fence, `GREEN must:` and `RED is expected to:`; no
+placeholders; the Spec coverage table maps every section of the spec; sibling plans' Contract sections are
+identical; a stacked plan names its base in `**Builds on:**`. Then:
 
-1. **Committed:** `git log -1 --format=%h main -- <plan>` prints a commit. During a branch run: the file exists, and
-   the planner's report says it ran `quartz link-doc`; with the Quartz MCP, `get_task` on the card lists the plan
-   among its docs. When the repo does not use Quartz (`quartz.md` §1), the file exists.
-2. **Card line:** when the spec names a card, the plan's header (above its first `---` or `## `) has a `**Card:**` or
-   `**Cards:**` line, or a `**Spec:**` line naming the spec, through which it inherits the spec's cards.
-3. **Trailers:** `grep -n -o 'Plan-Task: [^ "]*' <plan>` lists them. Each task with a commit step carries
-   `Plan-Task: <plan path>#<N>` once, with its own number and the plan's own path.
-4. **Acceptance:** `grep -n '^### Task' <plan> | tail -n 1` names the last task, which is the acceptance task; each of
-   its steps says who runs it: `reviewer`, `owner`, `after merge` or `skill-test`.
-5. **Placeholders:** `grep -n -E 'TBD|TODO|implement later|fill in details|Similar to Task' <plan>` finds nothing
-   outside quoted text.
-6. **Spec coverage:** `grep -n '^## ' <spec>` lists the spec's sections. The plan's **Spec coverage** table maps every
-   one of them to at least one task.
-7. **Sibling plans:** their **Contract** sections are identical.
-8. **Stacked:** a plan the spec says builds on another has `**Builds on:** <base plan path>` in its header.
-9. **Several plans, or one joining a plan in flight:** `parallel.md` §2's conflict check. A numbered collision goes
-   back to the later plan's planner, like a failed check; shared files become lines in the handoff question.
+- **During a branch run:** the planner's report says it ran `quartz link-doc`, and with the Quartz MCP, `get_task` on
+  the card lists the plan among its docs. When the repo does not use Quartz (`quartz.md` §1), the file is enough.
+- **Several plans, or one joining a plan in flight:** `relay-plan overlap <plan> <other>…`, `parallel.md` §2's
+  conflict check. A numbered collision goes back to the later plan's planner, like a failed check; shared files
+  become lines in the handoff question.
 
-A failed check goes back to the planner before stop 3: resumed (`SKILL.md`, Fallbacks), or a fresh planner given the
-list.
+A `FAIL` line goes back to the planner before stop 3, verbatim: resumed (`SKILL.md`, Fallbacks), or a fresh planner
+given the lines.
 
 ## 3. Stop 3
 
-One message, which ends there. It opens with its questions, numbered, in this order (`SKILL.md`, The stops):
+Post the status note first (`quartz.md` §4, moment 2). Then one message, which ends there. It opens with its
+questions, numbered, in this order (`SKILL.md`, The stops):
 
 - each decision the owner must make;
 - each assumption the planner made where the spec was silent, which the owner can accept, correct, or answer with
@@ -76,19 +72,23 @@ One message, which ends there. It opens with its questions, numbered, in this or
 
 Then the report, short, one line per item:
 
-- the plan paths and their task counts;
+- the plan paths and their task counts (the first line `relay-plan steps <plan>` prints);
 - a line per plan, "plan N lines for an M-line spec", from `wc -l` on the plan and on its spec;
 - the planner's deviations and ambiguities, with its resolutions;
-- the facts it re-checked (those the spec flagged), and any differences.
+- the facts it re-checked (those the spec flagged), and any differences;
+- last, the line that says this is a good moment to clear (`SKILL.md`, The stops).
 
+When the owner answers, add a decision note for each thing they decide, and post the status note again (moment 2).
 The answer leads one of four ways:
 
 - **Approve, with a mode:** `dispatching.md` §2, for each plan that starts now (`parallel.md` §1 says when the others
   start). The answer is the go-ahead: do not ask again.
-- **A plan review:** dispatch a general-purpose agent on Sonnet (`SKILL.md`, Fallbacks) with `writing-plans`'
+- **A plan review:** create the plan's run folder with `relay-plan run-dir <plan>` (`dispatching.md` §3), and
+  dispatch a general-purpose agent on Sonnet (`SKILL.md`, Fallbacks) with `writing-plans`'
   `plan-document-reviewer-prompt.md` (`../writing-plans/plan-document-reviewer-prompt.md` from this file), filled in
-  with the plan's and the spec's paths. Its findings go to the planner, which revises the plan and commits it again.
-  Then §2, and a short stop 3 in the same order: any new decision and the handoff question again, then what
+  with the plan's and the spec's paths and the run folder. It writes its findings to `plan-review.md` there and
+  replies with its verdict and counts. The planner gets that file's path, not its text, revises the plan and commits
+  it again. Then §2, and a short stop 3 in the same order: any new decision and the handoff question again, then what
   changed.
 - **Changes:** the planner revises the plan (resumed, or fresh with the owner's list) and commits it again. Then §2
   and stop 3.

@@ -2,8 +2,9 @@
 
 Part of `orchestrating` (`SKILL.md` beside this file is the map). Quartz is the project board the relay keeps in step
 with its specs, plans and commits. This file says when a repo uses it (§1), how a repo gets set up (§2), what ticks a
-plan's tasks (§3), and the Quartz duties (§4). `orchestrating` reads it at the start of every leg, and
-`hyper-relay:brainstorming` runs §1 and §2 before its first message, before any other leg.
+plan's tasks (§3), and the Quartz duties, with the status and decision notes that make the board the record of where
+work stands (§4). `orchestrating` reads it once per session, at its first leg, and `hyper-relay:brainstorming` runs
+§1 and §2 before its first message, before any other leg, and keeps §4's notes during the brainstorm.
 
 ## 1. Does this repo use Quartz?
 
@@ -132,7 +133,8 @@ task by hand, tick every task that has a `Plan-Task:` commit in the same edit, a
 
 ## 4. The duties
 
-Each runs only when §1 says the repo uses Quartz.
+Each runs only when §1 says the repo uses Quartz. Without it, the status and the decisions go to files instead (the
+end of this section).
 
 - Every spec and plan carries its card line in its header, above its first `---` or `## `:
   ``**Card:** <title> (`<uuid>`)``, or `**Cards:**` with several, comma-separated. Card ids are full UUIDs only.
@@ -147,6 +149,50 @@ Each runs only when §1 says the repo uses Quartz.
 - A `quartz:` line printed by a commit is the only Quartz output to act on: do what it says.
 - **Don't report what the board shows:** never list done tasks, tick counts or per-task commits. Report failures, gate
   results, deviations and the decisions the owner must make.
-- After each review leg, a status note on each of the plan's cards (`reviewing.md` §2 and §3), which a resumed
-  orchestrator reads (`SKILL.md`, Finding where work stands).
-- The proposed cards the owner keeps are added through the Quartz MCP (`reviewing.md` §4).
+- **The status note,** at every step of the relay (below). A fresh session reads it (`SKILL.md`, Finding where work
+  stands), so the owner never has to ask for notes before a clear.
+- **A decision note** whenever the owner decides something, at a stop or in a brainstorm: at once, an ordinary note on
+  the card (`add_note` without `status`), `Decision (<where>): <what was decided>. Why: <the reason given>.`, where
+  `<where>` is the stop, `brainstorm` or the leg. When the owner gives no reason, write "no reason given".
+- **Proposed cards** are filed by the agent that found the issue, with the label `proposed` (`reviewing.md` §2). The
+  owner prunes them on the board, and stop 4 gives only their number.
+
+**The status note** is one `add_note` with `status: true` on each of the plan's cards (its card line, or its spec's),
+at most 500 characters; it replaces the card's previous status. It holds one line for each of the card's plans in
+flight:
+
+`` `<plan path>`: <where it stands>; next: <what>; agents: <id> (<role>), <id> (<role>) ``
+
+`agents:` names each agent dispatched for that plan whose report has not come back, by its id (in OpenCode, its
+`sessionID`), and is left out when none is running. The skill-test runs go by their number, as in
+`agents: 28 skill-test runs`, since their answer files say which are done. With several plans on one card, read the
+card's status first (`get_task`) and keep the other plans' lines. During a brainstorm, before any plan, the status is
+one line: `brainstorm: <where it stands>; next: <what>`.
+
+Post it at each of these moments, where the leg file says:
+
+| # | Moment | `<where it stands>` | `next:` |
+|---|---|---|---|
+| 1 | The planners are dispatched (`planning.md` §1) | `planning` | `stop 3` |
+| 2 | Stop 3 is sent, and the owner answers it (`planning.md` §3) | `at stop 3`; then `approved, <mode>`, `plan review`, `changes` or `research` | `the owner's answer`; then `the handoff` or `stop 3` |
+| 3 | The executor is dispatched (`dispatching.md` §5) | `executing on <branch> (<mode>)` | `verify the hand-back` |
+| 4 | The hand-back is verified (`dispatching.md` §7) | `hand-back verified` | `acceptance` |
+| 5 | The acceptance reviewer is dispatched, and each fix round (`reviewing.md` §1 and §2) | `acceptance`; `fix round <k> of <cap>: <step ids or findings>` | `the fix loop`; `verify the fix` |
+| 6 | The fix loop ends (`reviewing.md` §2) | `acceptance done, N/M PASS, K NEEDS-HUMAN, F fix rounds` | `the code review and the skill tests` |
+| 7 | The code review and the skill tests are dispatched (`reviewing.md` §3) | `code review and skill tests` | `stop 4` |
+| 8 | They are done (`reviewing.md` §3) | `code review done, C Critical (x fixed, y dropped), I Important, m Minor; skill tests G/S GREEN` | `stop 4` |
+| 9 | Stop 4 is sent, and the owner answers it (`reviewing.md` §4) | `at stop 4`; then `merge approved`, `held` or `one more round` | `the owner's answer`; then `the merge`, `the owner` or `verify the fix` |
+| 10 | The branch has merged, and the acceptance task is ticked (`reviewing.md` §5) | `merged in <short sha>`; then `done` | `after merge steps <ids>`; then `nothing` |
+
+A note that fails is reported once, in one line (§2), and the leg carries on.
+
+**Without Quartz,** the record is kept in files in the main checkout, never in a memory file:
+
+- the plan's line goes to its run folder's `status`, replacing what is there, from when the folder exists
+  (`dispatching.md` §3); before that, the files and git say where the plan stands;
+- the owner's decisions go to the run folder's `decisions.md`, one line each, appended; before the folder exists, to
+  the topic's `brainstorm.md` (next);
+- a brainstorm keeps its decisions and its status in `.hyper-relay/runs/<topic>/brainstorm.md`, appended, where
+  `<topic>` is the spec's file name without its date and `-design`. When `git check-ignore -q .hyper-relay/runs/`
+  fails in the main checkout, first add a `.hyper-relay/runs/` line to the file
+  `git rev-parse --git-path info/exclude` prints there.

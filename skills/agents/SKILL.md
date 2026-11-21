@@ -58,6 +58,7 @@ Notes for humans. The generator ignores everything before the first ## heading.
 | `project` (required) | Lowercase letters, digits and `-`. Names the files: `<project>-planner.md`. |
 | `reviewer` (required) | `browser` (a click-through of a running app) or `commands` (acceptance by running commands and live CLI sessions). |
 | `execute` | `branch` (an executor runs a plan on a new branch in the main checkout) or `worktree` (in its own worktree). The handoff in `hyper-relay:orchestrating`'s `dispatching.md` offers it as this repo's default; without it, the handoff asks. The generator only checks the value. |
+| `fix-rounds` | A whole number from 1 to 9: how many fix rounds a finding that keeps failing gets before the orchestrator files it as a card and stops working on it (`hyper-relay:orchestrating`'s `reviewing.md`). Without it, 2. The generator only checks the value. |
 | `model.planner`, `model.executor`, `model.reviewer` | A Claude Code model: `opus`, `sonnet`, `haiku` or a full model id. Defaults: planner `opus`, executor `sonnet`, reviewer `sonnet`. |
 
 Any other key is an error.
