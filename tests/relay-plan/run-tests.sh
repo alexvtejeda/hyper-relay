@@ -3,7 +3,7 @@
 # so no git config, hook or state of this machine is used. Nothing here touches the
 # repo this suite lives in.
 # Usage: sh tests/relay-plan/run-tests.sh   (RELAY_PLAN_BIN overrides the script under test)
-# Expect: "65 passed, 0 failed"
+# Expect: "112 passed, 0 failed"
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -94,17 +94,44 @@ exists() { if [ -e "$1" ]; then echo yes; else echo no; fi; }
 
 P=docs/superpowers/plans/2026-01-02-demo-plan.md
 
-# fixture_repo: a new_repo holding the fixture plan at $P and its two base plans. Sets P, BASE, OBASE.
+# fixture_repo [nocommit]: a new_repo holding the fixture plan at $P, the fixture spec at $S,
+# the sibling at $SIB and two base plans. Sets P, S, SIB, BASE, OBASE. With an argument the
+# plan is written after the commit and never committed.
 fixture_repo() {
     new_repo
     P=docs/superpowers/plans/2026-01-02-demo-plan.md
+    S=docs/superpowers/specs/2026-01-02-demo-design.md
+    SIB=docs/superpowers/plans/2026-01-02-demo-sibling.md
     BASE=docs/superpowers/plans/2026-01-01-demo-base.md
     OBASE=docs/superpowers/plans/2026-01-01-other-base.md
-    mkdir -p "$MAIN/docs/superpowers/plans"
-    cp "$HERE/fixtures/plan.md" "$MAIN/$P"
+    mkdir -p "$MAIN/docs/superpowers/plans" "$MAIN/docs/superpowers/specs"
+    cp "$HERE/fixtures/spec.md" "$MAIN/$S"
+    cp "$HERE/fixtures/sibling.md" "$MAIN/$SIB"
     printf '# Base\n' > "$MAIN/$BASE"
     printf '# Other base\n' > "$MAIN/$OBASE"
-    commit_all fixtures
+    if [ $# -eq 0 ]; then
+        cp "$HERE/fixtures/plan.md" "$MAIN/$P"
+        commit_all fixtures
+    else
+        commit_all fixtures
+        cp "$HERE/fixtures/plan.md" "$MAIN/$P"
+    fi
+}
+
+# fails_alone <name> <expected FAIL line> [<option>...]: check "$P" with the options (all of
+# them when none): exit 1, exactly one FAIL line, and it is the expected one.
+fails_alone() {
+    fa_name=$1
+    fa_want=$2
+    shift 2
+    if [ $# -eq 0 ]; then
+        rp "$MAIN" check "$P" --spec "$S" --sibling "$SIB" --base "$BASE"
+    else
+        rp "$MAIN" check "$P" "$@"
+    fi
+    assert_eq "check: $fa_name: exit 1" 1 "$RC"
+    assert_eq "check: $fa_name: one FAIL line" 1 "$(printf '%s\n' "$OUT" | grep -c '^FAIL ')"
+    assert_eq "check: $fa_name: the line" "$fa_want" "$(printf '%s\n' "$OUT" | grep '^FAIL ')"
 }
 
 # variant <sed program>: rewrites $MAIN/$P as the fixture plan with the edit, and commits it.
@@ -318,6 +345,84 @@ rp "$MAIN" scenarios "$P" "$CASE/sc3"
 assert_eq "scenarios: a fence without info still counts" 0 "$RC"
 rp "$MAIN" scenarios docs/superpowers/plans/2026-01-03-bare.md "$CASE/sc4"
 assert_eq "scenarios: no skill-test step: exit 1" 1 "$RC"
+
+echo '--- check'
+fixture_repo
+rp "$MAIN" check "$P" --spec "$S" --sibling "$SIB" --base "$BASE"
+assert_eq "check: the good plan passes every check, in order" "ok committed
+ok card
+ok trailers
+ok acceptance
+ok skill-tests
+ok placeholders
+ok coverage
+ok contract
+ok builds-on" "$OUT"
+assert_eq "check: the good plan: exit 0" 0 "$RC"
+rp "$MAIN" check "$P"
+assert_eq "check: without options, the five that need none" "ok committed
+ok trailers
+ok acceptance
+ok skill-tests
+ok placeholders" "$OUT"
+rp "$MAIN" check "$MAIN/$P" --spec "$MAIN/$S"
+assert_eq "check: absolute paths read the same" 0 "$RC"
+rp "$MAIN" check "$P" --spec docs/nope.md
+assert_eq "check: a missing spec: exit 2" 2 "$RC"
+rp "$MAIN" check "$P" --colour red
+assert_eq "check: an unknown option: exit 2" 2 "$RC"
+
+fixture_repo nocommit
+fails_alone "committed" "FAIL committed: main has no commit of $P"
+git -C "$MAIN" switch -q -c other
+rp "$MAIN" check "$P"
+assert_contains "check: committed on a branch run: the file existing is enough" "ok committed" "$OUT"
+
+fixture_repo
+variant '/^\*\*Spec:\*\*/d'
+fails_alone "card" "FAIL card: the spec names a card, and the plan's header has no **Card:**, **Cards:** or **Spec:** line naming $S"
+fixture_repo
+grep -v '^\*\*Card:\*\*' "$HERE/fixtures/spec.md" > "$MAIN/$S"
+variant '/^\*\*Spec:\*\*/d'
+rp "$MAIN" check "$P" --spec "$S"
+assert_contains "check: a spec without a card: ok card" "ok card" "$OUT"
+
+fixture_repo
+variant 's/\(feat: the tool.*demo-plan\.md#\)1/\12/'
+fails_alone "trailers: a wrong number" "FAIL trailers: Task 1: Plan-Task $P#2 is not $P#1"
+fixture_repo
+variant 's/2026-01-02-demo-plan\.md#1"/2026-01-02-other-plan.md#1"/'
+fails_alone "trailers: another plan's path" "FAIL trailers: Task 1: Plan-Task docs/superpowers/plans/2026-01-02-other-plan.md#1 is not $P#1"
+fixture_repo
+variant 's/ -m "Plan-Task: [^"]*#2"//'
+fails_alone "trailers: none" "FAIL trailers: Task 2 commits without a Plan-Task trailer"
+fixture_repo
+variant '/^git commit -m "feat: the tool"/p'
+fails_alone "trailers: two" "FAIL trailers: Task 1 carries 2 Plan-Task trailers"
+
+fixture_repo
+variant 's/(`owner`;/(`the owner`;/'
+fails_alone "acceptance" 'FAIL acceptance: Step 4: "the owner" is not reviewer, owner, after merge or skill-test'
+fixture_repo
+variant '/^\*\*Situation:\*\*$/,/^GREEN must: commit/ s/^```text$/```/'
+fails_alone "skill-tests: a fence without text" 'FAIL skill-tests: Step 3: no ```text fence after Situation:'
+fixture_repo
+variant '/^RED is expected to: skip it\.$/d'
+fails_alone "skill-tests: no RED" "FAIL skill-tests: Step 2: no RED is expected to: line"
+fixture_repo
+variant '/^\*\*Goal:\*\*/a\
+Fill this in: TBD.'
+fails_alone "placeholders" "FAIL placeholders: line $(grep -n '^Fill this in' "$MAIN/$P" | cut -d: -f1): Fill this in: TBD."
+fixture_repo
+variant '/^| 2. Acceptance | 3 |$/d'
+fails_alone "coverage" "FAIL coverage: not in the Spec coverage table: 2. Acceptance"
+fixture_repo
+sed 's/Both plans share this\./Both plans share that./' "$HERE/fixtures/sibling.md" > "$MAIN/$SIB"
+commit_all "sibling differs"
+fails_alone "contract" "FAIL contract: $SIB differs, first at: Both plans share that."
+fixture_repo
+fails_alone "builds-on" "FAIL builds-on: the header's **Builds on:** does not name $OBASE" \
+    --spec "$S" --sibling "$SIB" --base "$OBASE"
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]
