@@ -977,7 +977,7 @@ git commit -m "feat: relay-plan overlap finds shared files and numbered collisio
 - Modify: `CLAUDE.md:21-27` (Layout), `:83-84` (How a change reaches the owner) and the Checks table's `relay-merge`
   row
 
-- [ ] **Step 1: The user reference.** Create `docs/relay-plan.md` with exactly this content:
+- [x] **Step 1: The user reference.** Create `docs/relay-plan.md` with exactly this content:
 
 ````markdown
 # relay-plan: a plan's answers, for the relay
@@ -1106,7 +1106,7 @@ not 0 or the block ran at another commit than the tip of the plan's branch. A na
 after a fix round names the commands it reran.
 ````
 
-- [ ] **Step 2: This repo's gates.** In `.hyper-relay/merge.conf`, replace:
+- [x] **Step 2: This repo's gates.** In `.hyper-relay/merge.conf`, replace:
 
 ```text
 bin/relay-merge                 build  dash -n bin/relay-merge
@@ -1141,7 +1141,7 @@ tests/relay-plan/               test   sh tests/relay-plan/run-tests.sh
 
 Each prefix is padded with spaces to 32 characters, as the lines around it.
 
-- [ ] **Step 3: `CLAUDE.md`.** Replace:
+- [x] **Step 3: `CLAUDE.md`.** Replace:
 
 ```text
   repo's gates are `.hyper-relay/merge.conf`, which maps its paths to the Checks table below.
@@ -1204,7 +1204,7 @@ git add docs/relay-plan.md .hyper-relay/merge.conf CLAUDE.md
 git commit -m "docs: relay-plan's user reference, its gates and its place in CLAUDE.md" -m "Plan-Task: docs/superpowers/plans/2026-11-20-hyper-relay-lighter-orchestrator-relay-plan.md#6"
 ```
 
-- [ ] **Step 4: The full gates, once.** In a command inside a table cell, `\|` is a plain `|`.
+- [x] **Step 4: The full gates, once.** In a command inside a table cell, `\|` is a plain `|`.
 
 | Run | Expected |
 |---|---|
