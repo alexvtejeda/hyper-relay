@@ -743,7 +743,7 @@ git commit -m "feat: relay-plan lists a plan's acceptance steps, prints one, and
 **Interfaces:**
 - Consumes: Task 3's `scan`, `task_summary` and `acceptance_steps`, and `fixture_repo` and `variant`.
 
-- [ ] **Step 1: The fixtures, and the failing tests.** Create `tests/relay-plan/fixtures/spec.md` with exactly this
+- [x] **Step 1: The fixtures, and the failing tests.** Create `tests/relay-plan/fixtures/spec.md` with exactly this
   content:
 
 ````markdown
