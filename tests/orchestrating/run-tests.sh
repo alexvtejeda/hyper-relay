@@ -240,7 +240,7 @@ no_private_state() (
 # --- 13. The orchestrator asks relay-plan instead of grepping the plan.
 no_plan_greps() (
     cd "$1" || exit 2
-    none -E -e "'\^### Task'" -e '^- (Create|Modify|Test)' -e "grep -n -o 'Plan-Task:" skills/orchestrating
+    none -F -e "'^### Task'" -e '^- (Create|Modify|Test)' -e "grep -n -o 'Plan-Task:" skills/orchestrating
 )
 
 # --- 14. The orchestrator routes by path.
