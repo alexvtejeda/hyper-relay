@@ -191,7 +191,7 @@ absent means 2. The generator accepts it and changes no generated file for it; a
 - Test: `tests/hyper-relay-agents/run-tests.sh` (line 130's list; a new section after `--- the execute key`; the
   header's `Expect:`)
 
-- [ ] **Step 1: Write the failing tests.** Line 130's expected text becomes
+- [x] **Step 1: Write the failing tests.** Line 130's expected text becomes
   `(the keys are project, reviewer, execute, fix-rounds, model.planner, model.executor and model.reviewer)`. A new
   section, `echo '--- the fix-rounds key'`, after the execute key's, with the suite's own helpers:
 
@@ -224,23 +224,23 @@ for v in 0 10 two ''; do
 done
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `sh tests/hyper-relay-agents/run-tests.sh | grep -c '^FAIL'`
 Expected: a number above 0: `fix-rounds: 3 is accepted` fails (`unknown header key fix-rounds`), and so does line 130's.
 
-- [ ] **Step 3: Implement it in `validate`.** A `fix-rounds)` case beside `execute)`: a value that is not one digit
+- [x] **Step 3: Implement it in `validate`.** A `fix-rounds)` case beside `execute)`: a value that is not one digit
   from 1 to 9 (`[1-9]` as a `case` pattern) gets `problem "fix-rounds must be a whole number from 1 to 9"`; the value is
   not stored or used. The unknown-key problem becomes
   `unknown header key $key (the keys are project, reviewer, execute, fix-rounds, model.planner, model.executor and model.reviewer)`.
   Nothing else changes. The header's `Expect:` count becomes the suite's new total.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `sh tests/hyper-relay-agents/run-tests.sh | tail -n 1`, then `dash -n bin/hyper-relay-agents`
 Expected: `<n> passed, 0 failed`, with `<n>` the header's `Expect:` count; `dash -n` silent.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add bin/hyper-relay-agents tests/hyper-relay-agents/run-tests.sh
