@@ -3,7 +3,7 @@
 # writes, refusing hand edits, --force, --check and the SessionStart check (--check --hook).
 # Each case runs a copy of the plugin (bin, templates, and the manifest at version 1.0.0), so a
 # test can change a template or the version, against a fresh git repo whose path has a space.
-# Usage: sh tests/hyper-relay-agents/run-tests.sh      Expect: "153 passed, 0 failed"
+# Usage: sh tests/hyper-relay-agents/run-tests.sh      Expect: "173 passed, 0 failed"
 set -u
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
@@ -127,7 +127,7 @@ facts_sed 's/^model.executor: haiku$/colour: red/'
 gen "$R"
 assert_eq "unknown header key: exit 1" 1 "$RC"
 assert_contains "unknown header key: named" "unknown header key colour" "$OUT"
-assert_contains "unknown header key: the keys are listed, execute among them" "(the keys are project, reviewer, execute, model.planner, model.executor and model.reviewer)" "$OUT"
+assert_contains "unknown header key: the keys are listed, execute among them" "(the keys are project, reviewer, execute, fix-rounds, model.planner, model.executor and model.reviewer)" "$OUT"
 assert_eq "unknown header key: nothing written" no "$(exists "$R/.claude")"
 
 new_repo
@@ -333,6 +333,38 @@ gen "$R"
 assert_eq "execute: another value: exit 1" 1 "$RC"
 assert_contains "execute: another value: named" 'execute must be branch or worktree, not "solo"' "$OUT"
 assert_eq "execute: another value: nothing written" no "$(exists "$R/.claude")"
+
+echo '--- the fix-rounds key'
+new_plugin
+new_repo
+gen "$R"
+FRC="$TMP_ROOT/fr-copy"
+mkdir -p "$FRC"
+for f in "$AG/demo-planner.md" "$AG/demo-executor.md" "$AG/demo-reviewer.md" "$GD"; do cp "$R/$f" "$FRC/$(basename "$f")"; done
+facts_header 'fix-rounds: 3'
+gen "$R"
+assert_eq "fix-rounds: 3 is accepted" 0 "$RC"
+assert_eq "fix-rounds: nothing is rewritten" "unchanged .claude/agents/demo-planner.md
+unchanged .claude/agents/demo-executor.md
+unchanged .claude/agents/demo-reviewer.md
+unchanged .claude/hooks/hyper-relay-planner-guard.py" "$OUT"
+for f in "$AG/demo-planner.md" "$AG/demo-executor.md" "$AG/demo-reviewer.md" "$GD"; do
+    assert_eq "fix-rounds: $f is the same, byte for byte" yes "$(if cmp -s "$FRC/$(basename "$f")" "$R/$f"; then echo yes; else echo no; fi)"
+done
+for v in 1 9; do
+    new_repo
+    facts_header "fix-rounds: $v"
+    gen "$R"
+    assert_eq "fix-rounds: $v is accepted" 0 "$RC"
+done
+for v in 0 10 two ''; do
+    new_repo
+    facts_header "fix-rounds: $v"
+    gen "$R"
+    assert_eq "fix-rounds: \"$v\" is refused: exit 1" 1 "$RC"
+    assert_contains "fix-rounds: \"$v\" is refused: the message" "fix-rounds must be a whole number from 1 to 9" "$OUT"
+    assert_eq "fix-rounds: \"$v\" is refused: nothing written" no "$(exists "$R/.claude")"
+done
 
 echo '--- the acceptance slots'
 new_repo
