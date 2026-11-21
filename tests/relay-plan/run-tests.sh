@@ -3,7 +3,7 @@
 # so no git config, hook or state of this machine is used. Nothing here touches the
 # repo this suite lives in.
 # Usage: sh tests/relay-plan/run-tests.sh   (RELAY_PLAN_BIN overrides the script under test)
-# Expect: "45 passed, 0 failed"
+# Expect: "65 passed, 0 failed"
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -93,6 +93,25 @@ rp() {
 exists() { if [ -e "$1" ]; then echo yes; else echo no; fi; }
 
 P=docs/superpowers/plans/2026-01-02-demo-plan.md
+
+# fixture_repo: a new_repo holding the fixture plan at $P and its two base plans. Sets P, BASE, OBASE.
+fixture_repo() {
+    new_repo
+    P=docs/superpowers/plans/2026-01-02-demo-plan.md
+    BASE=docs/superpowers/plans/2026-01-01-demo-base.md
+    OBASE=docs/superpowers/plans/2026-01-01-other-base.md
+    mkdir -p "$MAIN/docs/superpowers/plans"
+    cp "$HERE/fixtures/plan.md" "$MAIN/$P"
+    printf '# Base\n' > "$MAIN/$BASE"
+    printf '# Other base\n' > "$MAIN/$OBASE"
+    commit_all fixtures
+}
+
+# variant <sed program>: rewrites $MAIN/$P as the fixture plan with the edit, and commits it.
+variant() {
+    sed "$1" "$HERE/fixtures/plan.md" > "$MAIN/$P"
+    commit_all variant
+}
 
 echo '--- usage'
 new_repo
@@ -235,6 +254,70 @@ assert_eq "gate in a worktree: the block, in the main checkout's run folder" "GA
 assert_eq "gate in a worktree: nothing in the worktree" no "$(exists "$CASE/wt/.hyper-relay")"
 rp "$MAIN" gates docs/superpowers/plans/2026-01-03-wt-plan.md
 assert_eq "gates from the main checkout reads the worktree's runs" 0 "$RC"
+
+STEP4='- [ ] **Step 4 (`owner`; the orchestrator runs the command at the click-through): The branch
+  merges cleanly.**
+
+| Run | PASS |
+|---|---|
+| `git merge-tree --write-tree main demo-plan` | exit 0 |'
+STEP5='- [ ] **Step 5 (`after merge`, last): The release.**
+
+```bash
+git -C /tmp/demo commit -m "chore: release v1.0.1"
+```'
+
+echo '--- steps'
+fixture_repo
+rp "$MAIN" steps "$P"
+assert_eq "steps: the summary, then every step of the last task, nothing fenced or after it" \
+  "$(printf 'tasks 3; acceptance task 3\n1\treviewer\tThe tool runs.\n2\tskill-test\tS1, the first scenario.\n3\tskill-test\tS2, the second scenario.\n4\towner\tThe branch merges cleanly.\n5\tafter merge\tThe release.')" "$OUT"
+assert_eq "steps: exit 0" 0 "$RC"
+rp "$MAIN" steps "$P" skill-test
+assert_eq "steps: one who's" "$(printf 'tasks 3; acceptance task 3\n2\tskill-test\tS1, the first scenario.\n3\tskill-test\tS2, the second scenario.')" "$OUT"
+rp "$MAIN" steps "$P" after-merge
+assert_eq "steps: after-merge selects after merge" "$(printf 'tasks 3; acceptance task 3\n5\tafter merge\tThe release.')" "$OUT"
+rp "$MAIN" steps "$P" owner
+assert_eq "steps: a wrapped title, on one line" "$(printf 'tasks 3; acceptance task 3\n4\towner\tThe branch merges cleanly.')" "$OUT"
+rp "$MAIN" steps "$P" nobody
+assert_eq "steps: an unknown who: exit 2" 2 "$RC"
+files_plan docs/superpowers/plans/2026-01-03-bare.md '- Modify: `x`'
+rp "$MAIN" steps docs/superpowers/plans/2026-01-03-bare.md
+assert_eq "steps: no step: the summary only" "tasks 1; acceptance task 1" "$OUT"
+assert_eq "steps: no step: exit 1" 1 "$RC"
+
+echo '--- step'
+rp "$MAIN" step "$P" 4
+assert_eq "step: its lines, to the next step" "$STEP4" "$OUT"
+rp "$MAIN" step "$P" 5
+assert_eq "step: the last one ends at the task's end" "$STEP5" "$OUT"
+rp "$MAIN" step "$P" 6
+assert_eq "step: not a step of the acceptance task: exit 1" 1 "$RC"
+
+echo '--- scenarios'
+rp "$MAIN" scenarios "$P" "$CASE/sc"
+assert_eq "scenarios: one line per skill-test step" \
+  "$(printf '2\t%s\tS1, the first scenario.\n3\t%s\tS2, the second scenario.' "$CASE/sc/step-2.txt" "$CASE/sc/step-3.txt")" "$OUT"
+assert_eq "scenarios: exit 0" 0 "$RC"
+cmp -s "$CASE/sc/step-2.txt" - <<'X' && ok "scenarios: step-2.txt is the fenced text" || bad "scenarios: step-2.txt is the fenced text" "differs"
+You are the orchestrator.
+
+The plan is done.
+X
+cmp -s "$CASE/sc/step-3.txt" - <<'X' && ok "scenarios: step-3.txt, a bold Situation label" || bad "scenarios: step-3.txt, a bold Situation label" "differs"
+You are the executor.
+X
+variant '/^\*\*Situation:\*\*$/,/^GREEN must: commit/ { /^```/d; }'
+rp "$MAIN" scenarios "$P" "$CASE/sc2"
+assert_eq "scenarios: a situation without a fence" \
+  "$(printf '2\t%s\tS1, the first scenario.\nFAIL 3: no fenced situation' "$CASE/sc2/step-2.txt")" "$OUT"
+assert_eq "scenarios: without a fence: exit 1" 1 "$RC"
+assert_eq "scenarios: without a fence: no file for it" no "$(exists "$CASE/sc2/step-3.txt")"
+variant '/^\*\*Situation:\*\*$/,/^GREEN must: commit/ s/^```text$/```/'
+rp "$MAIN" scenarios "$P" "$CASE/sc3"
+assert_eq "scenarios: a fence without info still counts" 0 "$RC"
+rp "$MAIN" scenarios docs/superpowers/plans/2026-01-03-bare.md "$CASE/sc4"
+assert_eq "scenarios: no skill-test step: exit 1" 1 "$RC"
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]

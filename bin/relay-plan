@@ -145,6 +145,193 @@ cmd_gates() {
         }' "$log"
 }
 
+# scan <file>: one record per line of <file>, tab-separated: line number, kind (prose,
+# open:<info>, code:<info>, close:<info>), task, step, then the line unchanged (so a tab in
+# it survives). A fence opens, outside a fence, on a line of at least three backticks or
+# tildes after optional blanks (a backtick line whose info holds a backtick is not one), and
+# closes on a line of the same character, at least as many, then only blanks. Fences do not
+# nest. A task is a "### Task <N>" heading outside a fence, to the next "## " or "### "
+# heading outside one; a step is a "- [ ] **Step <id>" line, to the next step or the task's end.
+scan() {
+    awk '
+    function trim(s) { sub(/^[ \t]+/, "", s); return s }
+    BEGIN { OFS = "\t"; fch = ""; flen = 0; finfo = ""; task = 0; step = 0 }
+    {
+        line = $0; kind = "prose"
+        t = trim(line); c = substr(t, 1, 1)
+        if (fch != "") {
+            kind = "code:" finfo
+            if (c == fch) {
+                n = 0
+                while (substr(t, n + 1, 1) == fch) n++
+                if (n >= flen && substr(t, n + 1) ~ /^[ \t]*$/) { kind = "close:" finfo; fch = "" }
+            }
+        } else if (c == "`" || c == "~") {
+            n = 0
+            while (substr(t, n + 1, 1) == c) n++
+            rest = substr(t, n + 1)
+            if (n >= 3 && !(c == "`" && index(rest, "`") > 0)) {
+                info = trim(rest); sub(/[ \t].*$/, "", info)
+                fch = c; flen = n; finfo = info; kind = "open:" info
+            }
+        }
+        if (kind == "prose") {
+            if (line ~ /^### Task [0-9]+/) {
+                s = line; sub(/^### Task /, "", s); sub(/[^0-9].*$/, "", s); task = s; step = 0
+            } else if (line ~ /^(##|###) /) {
+                task = 0; step = 0
+            } else if (task > 0 && line ~ /^- \[[ x]\] \*\*Step /) {
+                s = line; sub(/^- \[[ x]\] \*\*Step /, "", s); sub(/[ *(:].*$/, "", s); step = s
+            }
+        }
+        print NR, kind, task, step, line
+    }' "$1"
+}
+
+# task_summary <file>: "<count> <last task number>", "0 0" with no task.
+task_summary() {
+    scan "$1" | awk -F'\t' '
+        $2 == "prose" && $5 ~ /^### Task [0-9]+/ { n++; last = $3 }
+        END { print n + 0, last + 0 }'
+}
+
+# acceptance_steps <file>: <id>, tab, <who>, tab, <title> for each step of the last task.
+# The who is the first inline-code span in the parenthesis after "**Step <id>", "?" when
+# there is none; the title runs from the first "): " to the next "**", a wrapped line joined
+# with one space.
+acceptance_steps() {
+    scan "$1" | awk -F'\t' '
+    function trim(s) { sub(/^[ \t]+/, "", s); return s }
+    {
+        k[NR] = $2; tk[NR] = $3; st[NR] = $4
+        t = $0
+        for (q = 0; q < 4; q++) sub(/^[^\t]*\t/, "", t)
+        tx[NR] = t
+        if ($2 == "prose" && t ~ /^### Task [0-9]+/) m = $3
+    }
+    END {
+        for (i = 1; i <= NR; i++) {
+            if (k[i] != "prose" || tk[i] != m || tx[i] !~ /^- \[[ x]\] \*\*Step /) continue
+            acc = tx[i]; j = i
+            while (index(substr(acc, index(acc, "**Step") + 6), "**") == 0 && j < NR &&
+                   k[j + 1] == "prose" && tk[j + 1] == m && st[j + 1] == st[i] && tx[j + 1] !~ /^[ \t]*$/) {
+                j++; acc = acc " " trim(tx[j])
+            }
+            body = substr(acc, index(acc, "**Step ") + 7)
+            rest = substr(body, length(st[i]) + 1)
+            who = "?"
+            if (rest ~ /^ \(/) {
+                p = index(rest, "): ")
+                par = p ? substr(rest, 1, p) : rest
+                b1 = index(par, "`")
+                if (b1) { r2 = substr(par, b1 + 1); b2 = index(r2, "`"); if (b2) who = substr(r2, 1, b2 - 1) }
+                title = p ? substr(rest, p + 3) : ""
+            } else {
+                title = rest; sub(/^[: \t]+/, "", title)
+            }
+            e = index(title, "**"); if (e) title = substr(title, 1, e - 1)
+            print st[i] "\t" who "\t" title
+        }
+    }'
+}
+
+# step_text <file> <id>: the lines of the last task's step <id>, trailing blank lines
+# dropped. Returns 1 when there is no such step.
+step_text() {
+    scan "$1" | awk -F'\t' -v id="$2" '
+    {
+        t = $0
+        for (q = 0; q < 4; q++) sub(/^[^\t]*\t/, "", t)
+        tx[NR] = t; tk[NR] = $3; st[NR] = $4
+        if ($2 == "prose" && t ~ /^### Task [0-9]+/) m = $3
+    }
+    END {
+        for (i = 1; i <= NR; i++) if (tk[i] == m && st[i] == id) {
+            if (tx[i] == "" || tx[i] ~ /^[ \t]*$/) { held = held tx[i] "\n"; continue }
+            printf "%s", held; held = ""
+            print tx[i]; found = 1
+        }
+        exit found ? 0 : 1
+    }'
+}
+
+cmd_steps() {
+    [ $# -ge 1 ] && [ $# -le 2 ] || usage_error "steps takes a plan and optionally a who"
+    need_file "$1"
+    who=
+    if [ $# -eq 2 ]; then
+        case $2 in
+            reviewer | owner | skill-test) who=$2 ;;
+            after-merge) who='after merge' ;;
+            *) usage_error "unknown who: $2" ;;
+        esac
+    fi
+    file=$(abs_path "$1")
+    summary=$(task_summary "$file")
+    [ "$summary" != "0 0" ] || exit 1
+    printf 'tasks %s; acceptance task %s\n' "${summary% *}" "${summary#* }"
+    acceptance_steps "$file" > "$TMP/steps"
+    if [ -n "$who" ]; then
+        awk -F'\t' -v who="$who" '$2 == who' "$TMP/steps" > "$TMP/steps.w"
+        mv "$TMP/steps.w" "$TMP/steps"
+    fi
+    [ -s "$TMP/steps" ] || exit 1
+    cat "$TMP/steps"
+}
+
+cmd_step() {
+    [ $# -eq 2 ] || usage_error "step takes a plan and a step id"
+    need_file "$1"
+    step_text "$(abs_path "$1")" "$2"
+}
+
+# situation <file> <id> <out>: writes the first fenced block after the step's "Situation:"
+# label, without its fence lines, to <out>. Returns 1 when there is none.
+situation() {
+    scan "$1" | awk -F'\t' -v id="$2" -v out="$3" '
+    {
+        t = $0
+        for (q = 0; q < 4; q++) sub(/^[^\t]*\t/, "", t)
+        tx[NR] = t; k[NR] = $2; tk[NR] = $3; st[NR] = $4
+        if ($2 == "prose" && t ~ /^### Task [0-9]+/) m = $3
+    }
+    END {
+        for (i = 1; i <= NR; i++) {
+            if (tk[i] != m || st[i] != id) continue
+            if (!lab && k[i] == "prose" && tx[i] ~ /^(\*\*)?Situation:/) { lab = 1; continue }
+            if (lab && !inf && k[i] ~ /^open:/) { inf = 1; printf "" > out; continue }
+            if (inf && k[i] ~ /^code:/) { print tx[i] > out; continue }
+            if (inf && k[i] ~ /^close:/) { done = 1; break }
+        }
+        if (inf) close(out)
+        exit done ? 0 : 1
+    }'
+}
+
+cmd_scenarios() {
+    [ $# -eq 2 ] || usage_error "scenarios takes a plan and a folder"
+    need_file "$1"
+    file=$(abs_path "$1")
+    dir=$2
+    mkdir -p "$dir" || die "cannot make $dir"
+    acceptance_steps "$file" | awk -F'\t' '$2 == "skill-test"' > "$TMP/skill"
+    if [ ! -s "$TMP/skill" ]; then
+        printf 'relay-plan: no skill-test step in %s\n' "$1" >&2
+        exit 1
+    fi
+    rc=0
+    while IFS="$(printf '\t')" read -r id who title; do
+        if situation "$file" "$id" "$dir/step-$id.txt"; then
+            printf '%s\t%s\t%s\n' "$id" "$dir/step-$id.txt" "$title"
+        else
+            rm -f "$dir/step-$id.txt"
+            printf 'FAIL %s: no fenced situation\n' "$id"
+            rc=1
+        fi
+    done < "$TMP/skill"
+    exit "$rc"
+}
+
 [ $# -ge 1 ] || usage_error "no command"
 COMMAND=$1
 shift
@@ -161,5 +348,8 @@ case $COMMAND in
     run-dir) cmd_run_dir "$@" ;;
     gate) cmd_gate "$@" ;;
     gates) cmd_gates "$@" ;;
+    steps) cmd_steps "$@" ;;
+    step) cmd_step "$@" ;;
+    scenarios) cmd_scenarios "$@" ;;
     *) die "$COMMAND is not built yet" ;;
 esac
