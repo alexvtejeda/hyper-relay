@@ -31,7 +31,8 @@ runs). For acceptance: Claude Code general-purpose subagents on Sonnet, `relay-p
 
 **How this was checked:** written against `main` at `8fd43cf`, by reading only (the spec, the files below, and the
 newest plans for format); nothing was built, run, installed or generated. The spec flags no fact for re-check, so
-none was re-checked. The plan's one assumption is A1.
+none was re-checked. The plan makes no assumption: A1, written as one, was researched at stop 3 and is now a fact in
+the spec's `## How it works` (`00b271c`).
 
 ---
 
@@ -118,7 +119,7 @@ none was re-checked. The plan's one assumption is A1.
 | P18 | `.hyper-relay/agents.md`, Releases: the release steps come "last"; §10, §11 | After the release (Step 21) and the owner's update (Step 22): the agents regenerated with the installed generator, so their marker matches 0.2.7 (Step 23); the handoff memory retired with the owner's OK (Step 24), before the probe, so the fresh sessions cannot lean on it; the live probe last (Step 25), since it needs all of them. The acceptance task is ticked after the probe. |
 | P19 | §8: the executor template gains "the run folder, the cards, the short summary" | One sentence in its intro and its description: `executing-plans` holds the rules, as it holds the other rounds'. |
 | P20 | §9: the situations | The shop repo, its plans, cards, ids, outputs and paths are made up. |
-| A1 | **Assumption** | `relay-plan run-dir` and `relay-plan steps` accept any committed plan before the handoff too (stop 3's task count and plan review), as the Contract describes them for any `<plan>`. |
+| A1 | Checked (spec, How it works: "`run-dir` and `steps` need only the plan file, not a branch", `00b271c`) | `relay-plan run-dir` and `relay-plan steps` work on a committed plan before the handoff too (stop 3's task count and plan review): Plan 1's `run-dir` checks only that the plan file exists, and `steps` reads only the plan file; only `gates` needs the branch. |
 
 ## Spec coverage
 
