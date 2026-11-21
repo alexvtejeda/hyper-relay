@@ -1,0 +1,165 @@
+#!/bin/sh
+# relay-plan: the command the orchestrator asks about a plan instead of reading it,
+# and the keeper of each plan's run folder and its gates.log.
+# POSIX shell, run by dash. How to use it: docs/relay-plan.md in hyper-relay.
+#
+#   relay-plan run-dir <plan>                      the plan's run folder, made
+#   relay-plan check <plan> [--spec <spec>] [--sibling <plan>]... [--base <plan>]
+#   relay-plan overlap <plan> <other>...           paths shared with other plans
+#   relay-plan steps <plan> [reviewer|owner|after-merge|skill-test]
+#   relay-plan step <plan> <id>                    one acceptance step's text
+#   relay-plan scenarios <plan> <dir>              the skill-test situations, as files
+#   relay-plan gate <plan> <command>               run a gate, log its block
+#   relay-plan gates <plan> [<command>...]         each gate's latest block, judged
+#
+# Exit: 0 all ok; 1 a check failed or nothing was found; 2 a usage error or a missing file.
+# Not set -e: gate outlives its command's failure, and each step checks its own status.
+set -u
+LC_ALL=C
+export LC_ALL
+
+USAGE="usage: relay-plan run-dir|check|overlap|steps|step|scenarios|gate|gates <plan> ... (docs/relay-plan.md)"
+RUN_DIR_NAME=.hyper-relay/runs/
+
+TMP=$(mktemp -d) || exit 2
+trap 'rm -rf "$TMP"' EXIT INT TERM
+
+die() { printf 'relay-plan: %s\n' "$*" >&2; exit 2; }
+usage_error() { printf 'relay-plan: %s\n%s\n' "$*" "$USAGE" >&2; exit 2; }
+
+# abs_path <path>: a relative path is under TOP, an absolute one is unchanged.
+abs_path() {
+    case $1 in
+        /*) printf '%s\n' "$1" ;;
+        *) printf '%s/%s\n' "$TOP" "$1" ;;
+    esac
+}
+
+# rel_path <path>: an absolute path under TOP without "$TOP/", a relative one unchanged.
+rel_path() {
+    case $1 in
+        "$TOP"/*) printf '%s\n' "${1#"$TOP"/}" ;;
+        *) printf '%s\n' "$1" ;;
+    esac
+}
+
+# need_file <path>: exit 2 unless it is a file.
+need_file() {
+    [ -f "$(abs_path "$1")" ] || die "no such file: $1"
+}
+
+# branch_of <path>: the file name without its YYYY-MM-DD- prefix and .md, each only when present.
+branch_of() {
+    basename "$1" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//'
+}
+
+# ensure_run_dir <branch>: makes the run folder in the main checkout, and git-ignores
+# .hyper-relay/runs/ there when it is not ignored. Prints the folder, no trailing /.
+ensure_run_dir() {
+    git -C "$MAIN" check-ignore -q "$RUN_DIR_NAME"
+    case $? in
+        0) ;;
+        1)
+            exclude=$(git -C "$MAIN" rev-parse --path-format=absolute --git-path info/exclude) ||
+                die "cannot find the exclude file"
+            mkdir -p "$(dirname "$exclude")" || die "cannot make the exclude file's folder"
+            if [ -s "$exclude" ] && [ -n "$(tail -c 1 "$exclude")" ]; then
+                printf '\n' >> "$exclude" || die "cannot write $exclude"
+            fi
+            printf '%s\n' "$RUN_DIR_NAME" >> "$exclude" || die "cannot write $exclude"
+            ;;
+        *) die "git check-ignore failed in $MAIN" ;;
+    esac
+    mkdir -p "$MAIN/.hyper-relay/runs/$1" || die "cannot make the run folder for $1"
+    printf '%s\n' "$MAIN/.hyper-relay/runs/$1"
+}
+
+cmd_run_dir() {
+    [ $# -eq 1 ] || usage_error "run-dir takes a plan"
+    need_file "$1"
+    ensure_run_dir "$(branch_of "$1")"
+}
+
+cmd_gate() {
+    [ $# -eq 2 ] || usage_error "gate takes a plan and a command"
+    need_file "$1"
+    command_text=$2
+    case $command_text in
+        *'
+'*) die "a gate command cannot hold a newline" ;;
+    esac
+    dir=$(ensure_run_dir "$(branch_of "$1")") || exit $?
+    sha=$(git -C "$TOP" rev-parse HEAD) || die "no HEAD in $TOP"
+    (cd "$TOP" && sh -c "$command_text" < /dev/null > "$TMP/gate.out" 2>&1)
+    code=$?
+    if [ -s "$TMP/gate.out" ] && [ -n "$(tail -c 1 "$TMP/gate.out")" ]; then
+        printf '\n' >> "$TMP/gate.out"
+    fi
+    {
+        printf 'GATE %s %s\n' "$sha" "$command_text"
+        cat "$TMP/gate.out"
+        printf 'EXIT %s\n' "$code"
+    } >> "$dir/gates.log" || die "cannot write $dir/gates.log"
+    tail -n 5 "$TMP/gate.out"
+    printf 'EXIT %s\n' "$code"
+    exit "$code"
+}
+
+cmd_gates() {
+    [ $# -ge 1 ] || usage_error "gates takes a plan"
+    need_file "$1"
+    branch=$(branch_of "$1")
+    shift
+    tip=$(git -C "$TOP" rev-parse -q --verify "refs/heads/$branch") || die "no branch $branch"
+    log="$MAIN/.hyper-relay/runs/$branch/gates.log"
+    [ -f "$log" ] || die "no gates.log for $branch"
+    : > "$TMP/named"
+    for c in "$@"; do printf '%s\n' "$c" >> "$TMP/named"; done
+    awk -v tip="$tip" -v named="$TMP/named" -v logf="$log" '
+        BEGIN {
+            while ((getline l < named) > 0) want[++nw] = l
+            fail = 0
+        }
+        !inb && /^GATE [0-9a-f]+ / {
+            sha = $2
+            cmd = substr($0, 6 + length(sha) + 1)
+            inb = 1; last = ""; next
+        }
+        inb && /^EXIT [0-9]+$/ {
+            if (!(cmd in seen)) { seen[cmd] = 1; order[++no] = cmd }
+            lsha[cmd] = sha; lexit[cmd] = $2; llast[cmd] = last
+            inb = 0; nb++; next
+        }
+        inb && $0 != "" { last = $0 }
+        END {
+            if (nw == 0 && nb == 0) { print "relay-plan: no gate in " logf > "/dev/stderr"; exit 1 }
+            n = nw ? nw : no
+            for (i = 1; i <= n; i++) {
+                c = nw ? want[i] : order[i]
+                if (!(c in seen)) { print "FAIL " c ": not in gates.log"; fail = 1; continue }
+                state = (lexit[c] == 0 && lsha[c] == tip) ? "ok" : "FAIL"
+                if (state == "FAIL") fail = 1
+                print state " " c ": exit " lexit[c] " at " substr(lsha[c], 1, 7) ": " (llast[c] == "" ? "(no output)" : llast[c])
+            }
+            exit fail
+        }' "$log"
+}
+
+[ $# -ge 1 ] || usage_error "no command"
+COMMAND=$1
+shift
+case $COMMAND in
+    run-dir | check | overlap | steps | step | scenarios | gate | gates) ;;
+    *) usage_error "unknown command: $COMMAND" ;;
+esac
+
+TOP=$(git rev-parse --show-toplevel 2> /dev/null) || die "not inside a git repository"
+common=$(git rev-parse --path-format=absolute --git-common-dir) || die "not inside a git repository"
+MAIN=$(dirname "$common")
+
+case $COMMAND in
+    run-dir) cmd_run_dir "$@" ;;
+    gate) cmd_gate "$@" ;;
+    gates) cmd_gates "$@" ;;
+    *) die "$COMMAND is not built yet" ;;
+esac
