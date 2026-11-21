@@ -21,10 +21,15 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 - `bin/relay-merge`: `relay-merge`, which lands branches on `main` one at a time, each as a merge commit whose merged
   result must pass the repo's gates (POSIX shell, run by dash). `docs/relay-merge.md` is its user reference. This
   repo's gates are `.hyper-relay/merge.conf`, which maps its paths to the Checks table below.
+- `bin/relay-plan`: `relay-plan`, which answers the relay orchestrator's questions about a plan (its hand-back checks,
+  its overlap with plans in flight, its acceptance steps and skill-test situations) and keeps each plan's run folder,
+  `.hyper-relay/runs/<branch>/`, with the branch's gate runs (POSIX shell, run by dash). `docs/relay-plan.md` is its
+  user reference.
 - `tests/add-card-line/` tests brainstorming's `scripts/add-card-line.sh`. `skills/voice-to-specs/tests/` and
   `skills/visual-companion/scripts/run-tests.sh` test those skills' scripts. `tests/hyper-relay-agents/` tests the
   generator, its hook and the guard. `tests/wt/` tests `wt`, with a fake `docker` and `ss`. `tests/relay-merge/`
-  tests `relay-merge`, on temporary git repos with a fake `wt`.
+  tests `relay-merge`, on temporary git repos with a fake `wt`. `tests/relay-plan/` tests `relay-plan`, on temporary
+  git repos with fixture plans.
 - `tests/claude-code/`, `tests/explicit-skill-requests/`, `tests/skill-triggering/`:
   upstream's live suites. They run real `claude -p` sessions with `--plugin-dir`, which spends usage and loads the
   directory in place: run them from a worktree, never from a checkout that holds a `.mcp.json`. `docs/testing.md` is
@@ -82,6 +87,8 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
   as soon as it merges, and during a branch run the shell runs that branch's `wt`.
 - **`relay-merge`** in the owner's shell is `~/.local/bin/relay-merge`, a symlink to this main checkout's
   `bin/relay-merge`, as `wt`'s is: a change reaches it as soon as it merges.
+- **`relay-plan`** in the owner's shell is `~/.local/bin/relay-plan`, a symlink to this main checkout's
+  `bin/relay-plan`, as `relay-merge`'s is: a change reaches it as soon as it merges.
 
 ## Checks
 
@@ -94,6 +101,7 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 | visual-companion | `bash skills/visual-companion/scripts/run-tests.sh` | every case `ok`, exit 0 |
 | wt | `sh tests/wt/run-tests.sh` | `0 failed` |
 | relay-merge | `sh tests/relay-merge/run-tests.sh` | `0 failed` |
+| relay-plan | `sh tests/relay-plan/run-tests.sh` | `0 failed` |
 | benchmark | `sh tests/benchmark/run-tests.sh` | `0 failed` |
 | Relay skills | `sh tests/orchestrating/run-tests.sh` | `0 failed` |
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |
