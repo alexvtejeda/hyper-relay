@@ -517,7 +517,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 - Modify: `skills/requesting-code-review/SKILL.md:39` (two lines after it), `:41-44`, `:54-70`, `:77`
 - Test: `tests/orchestrating/run-tests.sh`
 
-- [ ] **Step 1: Write the failing checks.** A section `# --- 10. Every agent that reports writes to the run folder.`
+- [x] **Step 1: Write the failing checks.** A section `# --- 10. Every agent that reports writes to the run folder.`
   with `agents_write_to_the_run_folder`: it passes when each of `skills/executing-plans/SKILL.md`,
   `templates/agents/executor.md`, `templates/agents/reviewer-commands.md`, `templates/agents/reviewer-browser.md`,
   `skills/requesting-code-review/code-reviewer.md` and `skills/writing-plans/plan-document-reviewer-prompt.md` has a
@@ -532,13 +532,13 @@ Claude-Session: <the URL your dispatch prompt gives>"
   `$CASE/skills/requesting-code-review/code-reviewer.md`; `expect_fail proposed_cards_filed_by_finders`. `Expect:`
   becomes `"36 passed, 0 failed"`.
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `sh tests/orchestrating/run-tests.sh | tail -n 12`
 Expected: `FAIL agents_write_to_the_run_folder` (naming the two reviewer templates and `code-reviewer.md`) and
 `FAIL proposed_cards_filed_by_finders`, and the last line `34 passed, 2 failed`.
 
-- [ ] **Step 3: The text, in `templates/agents/reviewer-commands.md`.** Replace:
+- [x] **Step 3: The text, in `templates/agents/reviewer-commands.md`.** Replace:
 
 ```text
   they name) and reports PASS / FAIL / NEEDS-HUMAN per step plus everything that looked off. Report-only: never edits
@@ -638,7 +638,7 @@ with:
    `report.md`.
 ```
 
-- [ ] **Step 4: The text, in `templates/agents/reviewer-browser.md`.** Replace:
+- [x] **Step 4: The text, in `templates/agents/reviewer-browser.md`.** Replace:
 
 ```text
   Report-only: never edits code or docs, never ticks, merges, pushes or takes a stack down. The dispatch prompt
@@ -722,7 +722,7 @@ Replace `   - **Screenshots:** every path.` with:
    `report.md`.
 ```
 
-- [ ] **Step 5: The text, in `skills/requesting-code-review/code-reviewer.md`.** Insert before the line
+- [x] **Step 5: The text, in `skills/requesting-code-review/code-reviewer.md`.** Insert before the line
   `    ## What to Check` (line 38):
 
 ```text
@@ -771,7 +771,7 @@ of `code-review.md`, which holds the full review (Strengths, Issues (Critical / 
 Assessment). With no run folder, the whole review.
 ```
 
-- [ ] **Step 6: The text, in `skills/requesting-code-review/SKILL.md`.** Insert after the line
+- [x] **Step 6: The text, in `skills/requesting-code-review/SKILL.md`.** Insert after the line
   ``- `{HEAD_SHA}` - Ending commit`` (line 39):
 
 ```text
@@ -839,7 +839,7 @@ Replace `- Critical goes to the executor; Important and Minor become proposed ca
 - Critical goes to the executor; the reviewer files Important and Minor as proposed cards, labelled `proposed`
 ```
 
-- [ ] **Step 7: Check it.**
+- [x] **Step 7: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -850,7 +850,7 @@ Replace `- Critical goes to the executor; Important and Minor become proposed ca
 | `sh tests/hyper-relay-agents/run-tests.sh \| tail -n 1` | ends `0 failed` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `36 passed, 0 failed` |
 
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ```bash
 git add templates/agents/reviewer-commands.md templates/agents/reviewer-browser.md skills/requesting-code-review/code-reviewer.md skills/requesting-code-review/SKILL.md tests/orchestrating/run-tests.sh
