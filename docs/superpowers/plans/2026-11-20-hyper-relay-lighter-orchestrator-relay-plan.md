@@ -262,7 +262,7 @@ git commit -m "feat: the facts header accepts fix-rounds, 1 to 9" -m "Plan-Task:
 - Produces, in the suite: `RP`; `new_repo` (sets `CASE` and `MAIN`); `files_plan <path> <line>…`; `commit_all <message>`;
   `commit_in <checkout> <file> <text>`; `rp <dir> <arg>…` (sets `OUT`, `ERR`, `RC`); `exists <path>`.
 
-- [ ] **Step 1: Write the failing tests** in `tests/relay-plan/run-tests.sh`. The harness and isolation are
+- [x] **Step 1: Write the failing tests** in `tests/relay-plan/run-tests.sh`. The harness and isolation are
   `tests/relay-merge/run-tests.sh`'s (`ok`, `bad`, `assert_eq`, `assert_contains`, `assert_not_contains`, the summary
   line `<n> passed, <m> failed`, a non-zero exit on any failure; the Execution notes' git settings). The header says
   what it tests and `Expect: "<n> passed, 0 failed"`. Its fixtures:
@@ -433,13 +433,13 @@ rp "$MAIN" gates docs/superpowers/plans/2026-01-03-wt-plan.md
 assert_eq "gates from the main checkout reads the worktree's runs" 0 "$RC"
 ```
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `sh tests/relay-plan/run-tests.sh | tail -n 1`
 Expected: failures (`bin/relay-plan` does not exist, so only the cases that expect exit 2 can pass), and a non-zero
 exit.
 
-- [ ] **Step 3: Implement `bin/relay-plan`'s frame and the three commands**
+- [x] **Step 3: Implement `bin/relay-plan`'s frame and the three commands**
 
 - `#!/bin/sh`; a header comment, as `bin/relay-merge`'s, with the eight commands, the exit codes and
   `docs/relay-plan.md`; `set -u`, `LC_ALL=C`; a temporary folder for the run, removed on exit.
@@ -466,12 +466,12 @@ exit.
   Exit 1 when any line is `FAIL`, or when the log has no block and no command was named (stderr
   `relay-plan: no gate in <log>`).
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `sh tests/relay-plan/run-tests.sh | tail -n 1`, then `dash -n bin/relay-plan`
 Expected: `<n> passed, 0 failed`, with `<n>` the header's `Expect:`; `dash -n` silent.
 
-- [ ] **Step 5: Commit** (`bin/relay-plan` with mode `100755`: `chmod +x` before `git add`)
+- [x] **Step 5: Commit** (`bin/relay-plan` with mode `100755`: `chmod +x` before `git add`)
 
 ```bash
 git add bin/relay-plan tests/relay-plan/run-tests.sh
