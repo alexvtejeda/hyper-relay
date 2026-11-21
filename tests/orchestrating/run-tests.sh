@@ -6,7 +6,7 @@
 # under skills/. It reads the working tree, not git's index, so an untracked new file
 # counts and it runs the same in a worktree. Each check also runs on a copy of the tree
 # broken on purpose, where it must fail.
-# Usage: sh tests/orchestrating/run-tests.sh      Expect: "32 passed, 0 failed"
+# Usage: sh tests/orchestrating/run-tests.sh      Expect: "36 passed, 0 failed"
 set -u
 LC_ALL=C
 export LC_ALL
@@ -192,11 +192,46 @@ executor_gates_through_relay_plan() (
     none -i -F 'acceptance checklist' skills/executing-plans
 )
 
+# --- 10. Every agent that reports writes to the run folder.
+agents_write_to_the_run_folder() (
+    cd "$1" || exit 2
+    rc=0
+    for f in skills/executing-plans/SKILL.md templates/agents/executor.md \
+        templates/agents/reviewer-commands.md templates/agents/reviewer-browser.md \
+        skills/requesting-code-review/code-reviewer.md \
+        skills/writing-plans/plan-document-reviewer-prompt.md; do
+        if ! grep -q -F 'run folder' "$f"; then
+            echo "$f names no run folder"
+            rc=1
+        fi
+    done
+    exit "$rc"
+)
+
+# --- 11. The agent that finds an issue files it as a proposed card.
+proposed_cards_filed_by_finders() (
+    cd "$1" || exit 2
+    rc=0
+    for f in skills/executing-plans/SKILL.md templates/agents/reviewer-commands.md \
+        templates/agents/reviewer-browser.md skills/requesting-code-review/code-reviewer.md; do
+        if ! grep -q -F 'add_tasks' "$f"; then
+            echo "$f has no line holding add_tasks"
+            rc=1
+        fi
+        if ! grep -q -F '`proposed`' "$f"; then
+            echo "$f has no line holding \`proposed\`"
+            rc=1
+        fi
+    done
+    exit "$rc"
+)
+
 CHECKS='no_old_dispatching_pointer dispatching_pointers_name_orchestrating old_dispatching_gone
 no_subagent_driven code_review_not_per_task brainstorming_never_invokes_writing_plans orchestrating_folder
 no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_in_quartz_md
 no_finishing_branch_in_orchestrating no_superpowers_skill_names skill_test_situations_fenced
-executor_gates_through_relay_plan'
+executor_gates_through_relay_plan
+agents_write_to_the_run_folder proposed_cards_filed_by_finders'
 
 # --- the repo's tree passes every check
 for check in $CHECKS; do
@@ -291,6 +326,14 @@ expect_fail skill_test_situations_fenced
 broken "the executor copying the acceptance checklist again"
 printf '\nThen copy the acceptance checklist into your report.\n' >> "$CASE/skills/executing-plans/SKILL.md"
 expect_fail executor_gates_through_relay_plan
+
+broken "a reviewer template that names no run folder"
+sed -i '/run folder/d' "$CASE/templates/agents/reviewer-browser.md"
+expect_fail agents_write_to_the_run_folder
+
+broken "a code reviewer that files no card"
+sed -i '/add_tasks/d' "$CASE/skills/requesting-code-review/code-reviewer.md"
+expect_fail proposed_cards_filed_by_finders
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]
