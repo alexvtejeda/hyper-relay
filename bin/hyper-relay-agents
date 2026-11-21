@@ -188,7 +188,13 @@ validate() {
                     *) problem "execute must be branch or worktree, not \"$val\"" ;;
                 esac
                 ;;
-            *) problem "unknown header key $key (the keys are project, reviewer, execute, model.planner, model.executor and model.reviewer)" ;;
+            fix-rounds)
+                case $val in
+                    [1-9]) ;;
+                    *) problem "fix-rounds must be a whole number from 1 to 9" ;;
+                esac
+                ;;
+            *) problem "unknown header key $key (the keys are project, reviewer, execute, fix-rounds, model.planner, model.executor and model.reviewer)" ;;
         esac
     done < "$WORK/header"
     if [ "$have_project" = 0 ]; then

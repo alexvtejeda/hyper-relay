@@ -1,0 +1,657 @@
+#!/bin/sh
+# relay-plan: the command the orchestrator asks about a plan instead of reading it,
+# and the keeper of each plan's run folder and its gates.log.
+# POSIX shell, run by dash. How to use it: docs/relay-plan.md in hyper-relay.
+#
+#   relay-plan run-dir <plan>                      the plan's run folder, made
+#   relay-plan check <plan> [--spec <spec>] [--sibling <plan>]... [--base <plan>]
+#   relay-plan overlap <plan> <other>...           paths shared with other plans
+#   relay-plan steps <plan> [reviewer|owner|after-merge|skill-test]
+#   relay-plan step <plan> <id>                    one acceptance step's text
+#   relay-plan scenarios <plan> <dir>              the skill-test situations, as files
+#   relay-plan gate <plan> <command>               run a gate, log its block
+#   relay-plan gates <plan> [<command>...]         each gate's latest block, judged
+#
+# Exit: 0 all ok; 1 a check failed or nothing was found; 2 a usage error or a missing file.
+# Not set -e: gate outlives its command's failure, and each step checks its own status.
+set -u
+LC_ALL=C
+export LC_ALL
+
+USAGE="usage: relay-plan run-dir|check|overlap|steps|step|scenarios|gate|gates <plan> ... (docs/relay-plan.md)"
+RUN_DIR_NAME=.hyper-relay/runs/
+
+TMP=$(mktemp -d) || exit 2
+trap 'rm -rf "$TMP"' EXIT INT TERM
+
+die() { printf 'relay-plan: %s\n' "$*" >&2; exit 2; }
+usage_error() { printf 'relay-plan: %s\n%s\n' "$*" "$USAGE" >&2; exit 2; }
+
+# abs_path <path>: a relative path is under TOP, an absolute one is unchanged.
+abs_path() {
+    case $1 in
+        /*) printf '%s\n' "$1" ;;
+        *) printf '%s/%s\n' "$TOP" "$1" ;;
+    esac
+}
+
+# rel_path <path>: an absolute path under TOP without "$TOP/", a relative one unchanged.
+rel_path() {
+    case $1 in
+        "$TOP"/*) printf '%s\n' "${1#"$TOP"/}" ;;
+        *) printf '%s\n' "$1" ;;
+    esac
+}
+
+# need_file <path>: exit 2 unless it is a file.
+need_file() {
+    [ -f "$(abs_path "$1")" ] || die "no such file: $1"
+}
+
+# branch_of <path>: the file name without its YYYY-MM-DD- prefix and .md, each only when present.
+branch_of() {
+    basename "$1" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//'
+}
+
+# ensure_run_dir <branch>: makes the run folder in the main checkout, and git-ignores
+# .hyper-relay/runs/ there when it is not ignored. Prints the folder, no trailing /.
+ensure_run_dir() {
+    git -C "$MAIN" check-ignore -q "$RUN_DIR_NAME"
+    case $? in
+        0) ;;
+        1)
+            exclude=$(git -C "$MAIN" rev-parse --path-format=absolute --git-path info/exclude) ||
+                die "cannot find the exclude file"
+            mkdir -p "$(dirname "$exclude")" || die "cannot make the exclude file's folder"
+            if [ -s "$exclude" ] && [ -n "$(tail -c 1 "$exclude")" ]; then
+                printf '\n' >> "$exclude" || die "cannot write $exclude"
+            fi
+            printf '%s\n' "$RUN_DIR_NAME" >> "$exclude" || die "cannot write $exclude"
+            ;;
+        *) die "git check-ignore failed in $MAIN" ;;
+    esac
+    mkdir -p "$MAIN/.hyper-relay/runs/$1" || die "cannot make the run folder for $1"
+    printf '%s\n' "$MAIN/.hyper-relay/runs/$1"
+}
+
+cmd_run_dir() {
+    [ $# -eq 1 ] || usage_error "run-dir takes a plan"
+    need_file "$1"
+    ensure_run_dir "$(branch_of "$1")"
+}
+
+cmd_gate() {
+    [ $# -eq 2 ] || usage_error "gate takes a plan and a command"
+    need_file "$1"
+    command_text=$2
+    case $command_text in
+        *'
+'*) die "a gate command cannot hold a newline" ;;
+    esac
+    dir=$(ensure_run_dir "$(branch_of "$1")") || exit $?
+    sha=$(git -C "$TOP" rev-parse HEAD) || die "no HEAD in $TOP"
+    (cd "$TOP" && sh -c "$command_text" < /dev/null > "$TMP/gate.out" 2>&1)
+    code=$?
+    if [ -s "$TMP/gate.out" ] && [ -n "$(tail -c 1 "$TMP/gate.out")" ]; then
+        printf '\n' >> "$TMP/gate.out"
+    fi
+    {
+        printf 'GATE %s %s\n' "$sha" "$command_text"
+        cat "$TMP/gate.out"
+        printf 'EXIT %s\n' "$code"
+    } >> "$dir/gates.log" || die "cannot write $dir/gates.log"
+    tail -n 5 "$TMP/gate.out"
+    printf 'EXIT %s\n' "$code"
+    exit "$code"
+}
+
+cmd_gates() {
+    [ $# -ge 1 ] || usage_error "gates takes a plan"
+    need_file "$1"
+    branch=$(branch_of "$1")
+    shift
+    tip=$(git -C "$TOP" rev-parse -q --verify "refs/heads/$branch") || die "no branch $branch"
+    log="$MAIN/.hyper-relay/runs/$branch/gates.log"
+    [ -f "$log" ] || die "no gates.log for $branch"
+    : > "$TMP/named"
+    for c in "$@"; do printf '%s\n' "$c" >> "$TMP/named"; done
+    awk -v tip="$tip" -v named="$TMP/named" -v logf="$log" '
+        BEGIN {
+            while ((getline l < named) > 0) want[++nw] = l
+            fail = 0
+        }
+        function flush() {
+            if (!inb || ex == "") return
+            if (!(cmd in seen)) { seen[cmd] = 1; order[++no] = cmd }
+            lsha[cmd] = sha; lexit[cmd] = ex; llast[cmd] = before
+            nb++
+        }
+        # A block runs from its GATE line (a full sha) to the next one or the end; its exit is
+        # its last EXIT line, and its last output line the last non-empty line before that.
+        /^GATE [0-9a-f]+ / && length($2) == 40 {
+            flush()
+            sha = $2
+            cmd = substr($0, 6 + length(sha) + 1)
+            inb = 1; ex = ""; before = ""; prev = ""; next
+        }
+        inb {
+            if ($0 ~ /^EXIT [0-9]+$/) { ex = $2; before = prev }
+            if ($0 != "") prev = $0
+        }
+        END {
+            flush()
+            if (nw == 0 && nb == 0) { print "relay-plan: no gate in " logf > "/dev/stderr"; exit 1 }
+            n = nw ? nw : no
+            for (i = 1; i <= n; i++) {
+                c = nw ? want[i] : order[i]
+                if (!(c in seen)) { print "FAIL " c ": not in gates.log"; fail = 1; continue }
+                state = (lexit[c] == 0 && lsha[c] == tip) ? "ok" : "FAIL"
+                if (state == "FAIL") fail = 1
+                print state " " c ": exit " lexit[c] " at " substr(lsha[c], 1, 7) ": " (llast[c] == "" ? "(no output)" : llast[c])
+            }
+            exit fail
+        }' "$log"
+}
+
+# scan <file>: one record per line of <file>, tab-separated: line number, kind (prose,
+# open:<info>, code:<info>, close:<info>), task, step, then the line unchanged (so a tab in
+# it survives). A fence opens, outside a fence, on a line of at least three backticks or
+# tildes after optional blanks (a backtick line whose info holds a backtick is not one), and
+# closes on a line of the same character, at least as many, then only blanks. Fences do not
+# nest. A task is a "### Task <N>" heading outside a fence, to the next "## " or "### "
+# heading outside one; a step is a "- [ ] **Step <id>" line, to the next step or the task's end.
+scan() {
+    awk '
+    function trim(s) { sub(/^[ \t]+/, "", s); return s }
+    BEGIN { OFS = "\t"; fch = ""; flen = 0; finfo = ""; task = 0; step = 0 }
+    {
+        line = $0; kind = "prose"
+        t = trim(line); c = substr(t, 1, 1)
+        if (fch != "") {
+            kind = "code:" finfo
+            if (c == fch) {
+                n = 0
+                while (substr(t, n + 1, 1) == fch) n++
+                if (n >= flen && substr(t, n + 1) ~ /^[ \t]*$/) { kind = "close:" finfo; fch = "" }
+            }
+        } else if (c == "`" || c == "~") {
+            n = 0
+            while (substr(t, n + 1, 1) == c) n++
+            rest = substr(t, n + 1)
+            if (n >= 3 && !(c == "`" && index(rest, "`") > 0)) {
+                info = trim(rest); sub(/[ \t].*$/, "", info)
+                fch = c; flen = n; finfo = info; kind = "open:" info
+            }
+        }
+        if (kind == "prose") {
+            if (line ~ /^### Task [0-9]+/) {
+                s = line; sub(/^### Task /, "", s); sub(/[^0-9].*$/, "", s); task = s; step = 0
+            } else if (line ~ /^(##|###) /) {
+                task = 0; step = 0
+            } else if (task > 0 && line ~ /^- \[[ x]\] \*\*Step /) {
+                s = line; sub(/^- \[[ x]\] \*\*Step /, "", s); sub(/[ *(:].*$/, "", s); step = s
+            }
+        }
+        print NR, kind, task, step, line
+    }' "$1"
+}
+
+# task_summary <file>: "<count> <last task number>", "0 0" with no task.
+task_summary() {
+    scan "$1" | awk -F'\t' '
+        $2 == "prose" && $5 ~ /^### Task [0-9]+/ { n++; last = $3 }
+        END { print n + 0, last + 0 }'
+}
+
+# acceptance_steps <file>: <id>, tab, <who>, tab, <title> for each step of the last task.
+# The who is the first inline-code span in the parenthesis after "**Step <id>", "?" when
+# there is none; the title runs from the first "): " to the next "**", a wrapped line joined
+# with one space.
+acceptance_steps() {
+    scan "$1" | awk -F'\t' '
+    function trim(s) { sub(/^[ \t]+/, "", s); return s }
+    {
+        k[NR] = $2; tk[NR] = $3; st[NR] = $4
+        t = $0
+        for (q = 0; q < 4; q++) sub(/^[^\t]*\t/, "", t)
+        tx[NR] = t
+        if ($2 == "prose" && t ~ /^### Task [0-9]+/) m = $3
+    }
+    END {
+        for (i = 1; i <= NR; i++) {
+            if (k[i] != "prose" || tk[i] != m || tx[i] !~ /^- \[[ x]\] \*\*Step /) continue
+            acc = tx[i]; j = i
+            while (index(substr(acc, index(acc, "**Step") + 6), "**") == 0 && j < NR &&
+                   k[j + 1] == "prose" && tk[j + 1] == m && st[j + 1] == st[i] && tx[j + 1] !~ /^[ \t]*$/) {
+                j++; acc = acc " " trim(tx[j])
+            }
+            body = substr(acc, index(acc, "**Step ") + 7)
+            rest = substr(body, length(st[i]) + 1)
+            who = "?"
+            if (rest ~ /^ \(/) {
+                p = index(rest, "): ")
+                par = p ? substr(rest, 1, p) : rest
+                b1 = index(par, "`")
+                if (b1) { r2 = substr(par, b1 + 1); b2 = index(r2, "`"); if (b2) who = substr(r2, 1, b2 - 1) }
+                title = p ? substr(rest, p + 3) : ""
+            } else {
+                title = rest; sub(/^[: \t]+/, "", title)
+            }
+            e = index(title, "**"); if (e) title = substr(title, 1, e - 1)
+            print st[i] "\t" who "\t" title
+        }
+    }'
+}
+
+# step_text <file> <id>: the lines of the last task's step <id>, trailing blank lines
+# dropped. Returns 1 when there is no such step.
+step_text() {
+    scan "$1" | awk -F'\t' -v id="$2" '
+    {
+        t = $0
+        for (q = 0; q < 4; q++) sub(/^[^\t]*\t/, "", t)
+        tx[NR] = t; tk[NR] = $3; st[NR] = $4
+        if ($2 == "prose" && t ~ /^### Task [0-9]+/) m = $3
+    }
+    END {
+        for (i = 1; i <= NR; i++) if (tk[i] == m && st[i] == id) {
+            if (tx[i] == "" || tx[i] ~ /^[ \t]*$/) { held = held tx[i] "\n"; continue }
+            printf "%s", held; held = ""
+            print tx[i]; found = 1
+        }
+        exit found ? 0 : 1
+    }'
+}
+
+cmd_steps() {
+    [ $# -ge 1 ] && [ $# -le 2 ] || usage_error "steps takes a plan and optionally a who"
+    need_file "$1"
+    who=
+    if [ $# -eq 2 ]; then
+        case $2 in
+            reviewer | owner | skill-test) who=$2 ;;
+            after-merge) who='after merge' ;;
+            *) usage_error "unknown who: $2" ;;
+        esac
+    fi
+    file=$(abs_path "$1")
+    summary=$(task_summary "$file")
+    [ "$summary" != "0 0" ] || exit 1
+    printf 'tasks %s; acceptance task %s\n' "${summary% *}" "${summary#* }"
+    acceptance_steps "$file" > "$TMP/steps"
+    if [ -n "$who" ]; then
+        awk -F'\t' -v who="$who" '$2 == who' "$TMP/steps" > "$TMP/steps.w"
+        mv "$TMP/steps.w" "$TMP/steps"
+    fi
+    [ -s "$TMP/steps" ] || exit 1
+    cat "$TMP/steps"
+}
+
+cmd_step() {
+    [ $# -eq 2 ] || usage_error "step takes a plan and a step id"
+    need_file "$1"
+    step_text "$(abs_path "$1")" "$2"
+}
+
+# situation <file> <id> <out>: writes the first fenced block after the step's "Situation:"
+# label, without its fence lines, to <out>. Returns 1 when there is none.
+situation() {
+    scan "$1" | awk -F'\t' -v id="$2" -v out="$3" '
+    {
+        t = $0
+        for (q = 0; q < 4; q++) sub(/^[^\t]*\t/, "", t)
+        tx[NR] = t; k[NR] = $2; tk[NR] = $3; st[NR] = $4
+        if ($2 == "prose" && t ~ /^### Task [0-9]+/) m = $3
+    }
+    END {
+        for (i = 1; i <= NR; i++) {
+            if (tk[i] != m || st[i] != id) continue
+            if (!lab && k[i] == "prose" && tx[i] ~ /^(\*\*)?Situation:/) { lab = 1; continue }
+            if (lab && !inf && k[i] ~ /^open:/) { inf = 1; printf "" > out; continue }
+            if (inf && k[i] ~ /^code:/) { print tx[i] > out; continue }
+            if (inf && k[i] ~ /^close:/) { done = 1; break }
+        }
+        if (inf) close(out)
+        exit done ? 0 : 1
+    }'
+}
+
+cmd_scenarios() {
+    [ $# -eq 2 ] || usage_error "scenarios takes a plan and a folder"
+    need_file "$1"
+    file=$(abs_path "$1")
+    dir=$2
+    mkdir -p "$dir" || die "cannot make $dir"
+    acceptance_steps "$file" | awk -F'\t' '$2 == "skill-test"' > "$TMP/skill"
+    if [ ! -s "$TMP/skill" ]; then
+        printf 'relay-plan: no skill-test step in %s\n' "$1" >&2
+        exit 1
+    fi
+    rc=0
+    while IFS="$(printf '\t')" read -r id who title; do
+        if situation "$file" "$id" "$dir/step-$id.txt"; then
+            printf '%s\t%s\t%s\n' "$id" "$dir/step-$id.txt" "$title"
+        else
+            rm -f "$dir/step-$id.txt"
+            printf 'FAIL %s: no fenced situation\n' "$id"
+            rc=1
+        fi
+    done < "$TMP/skill"
+    exit "$rc"
+}
+
+# The awk helpers of the checks, read after scan's records (tab-separated, -F'\t'):
+# rtext() is the line itself, the last field and so possibly holding tabs.
+CHECK_LIB='
+function rtext(  t, q) { t = $0; for (q = 0; q < 4; q++) sub(/^[^\t]*\t/, "", t); return t }
+function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
+'
+
+# section <file> <heading regex>: the lines under the first prose "## " heading matching
+# the regex, to the next prose "## " (or "### ") heading, without blank lines at either end.
+section() {
+    scan "$1" | awk -F'\t' -v re="$2" "$CHECK_LIB"'
+    { if ($2 != "prose") { if (on) body[++n] = rtext(); next }
+      t = rtext()
+      if (on && t ~ /^(##|###) /) exit
+      if (!on && t ~ re) { on = 1; found = 1; next }
+      if (on) body[++n] = t }
+    END {
+        if (!found) exit 3
+        s = 1; while (s <= n && body[s] ~ /^[ \t]*$/) s++
+        while (n >= s && body[n] ~ /^[ \t]*$/) n--
+        for (i = s; i <= n; i++) print body[i]
+    }'
+}
+
+# header_has <file> <regex> <end regex>: 1 when a prose line before the first prose line
+# matching the end regex matches the regex, else 0.
+header_has() {
+    scan "$1" | awk -F'\t' -v re="$2" -v stop="$3" "$CHECK_LIB"'
+    $2 == "prose" { t = rtext(); if (t ~ stop) exit; if (t ~ re) f = 1 }
+    END { print f + 0 }'
+}
+
+# Each check prints its problems, one per line, and nothing when it passes.
+
+check_committed() {
+    if [ "$(git -C "$MAIN" branch --show-current)" = main ]; then
+        [ -n "$(git -C "$TOP" log -1 --format=%H main -- "$PLAN_REL")" ] ||
+            printf 'main has no commit of %s\n' "$PLAN_REL"
+    fi
+}
+
+check_card() {
+    [ "$(header_has "$SPEC" '[*][*]Cards?:[*][*]' '^## ')" = 1 ] || return 0
+    scan "$PLAN" | awk -F'\t' -v spec="$SPEC_REL" "$CHECK_LIB"'
+    $2 == "prose" {
+        t = rtext(); if (t ~ /^---[ \t]*$/ || t ~ /^## /) exit
+        if (t ~ /[*][*]Cards?:[*][*]/ || (index(t, "**Spec:**") && index(t, spec))) f = 1
+    }
+    END { if (!f) print "the spec names a card, and the plan'"'"'s header has no **Card:**, **Cards:** or **Spec:** line naming " spec }'
+}
+
+check_trailers() {
+    scan "$PLAN" | awk -F'\t' -v planrel="$PLAN_REL" "$CHECK_LIB"'
+    function commits(t,   w, n, i) {
+        t = trim(t); n = split(t, w, /[ \t]+/)
+        if (w[1] != "git") return 0
+        i = 2
+        while (i <= n) {
+            if (w[i] == "-C" || w[i] == "-c") i += 2
+            else if (w[i] ~ /^-/) i++
+            else break
+        }
+        return w[i] == "commit"
+    }
+    {
+        t = rtext()
+        if ($2 == "prose" && t ~ /^### Task [0-9]+/) { ord[++no] = $3 }
+        if ($2 !~ /^code:(bash|sh|shell)$/) next
+        k = $3
+        if (commits(t)) nc[k]++
+        i = index(t, "Plan-Task: ")
+        if (i) {
+            v = substr(t, i + 11); sub(/[ \t"\047\\].*$/, "", v)
+            if (v ~ /#[0-9]+$/) { nt[k]++; val[k] = v }
+        }
+    }
+    END {
+        for (j = 1; j <= no; j++) {
+            k = ord[j]
+            if (!nc[k]) continue
+            if (nt[k] == 0) { if (j < no) print "Task " k " commits without a Plan-Task trailer" }
+            else if (nt[k] > 1) print "Task " k " carries " nt[k] " Plan-Task trailers"
+            else if (val[k] != planrel "#" k) print "Task " k ": Plan-Task " val[k] " is not " planrel "#" k
+        }
+    }'
+}
+
+check_acceptance() {
+    summary=$(task_summary "$PLAN")
+    if [ "$summary" = "0 0" ]; then
+        printf 'the plan has no task\n'
+        return 0
+    fi
+    acceptance_steps "$PLAN" > "$TMP/acc"
+    if [ ! -s "$TMP/acc" ]; then
+        printf 'Task %s has no step\n' "${summary#* }"
+        return 0
+    fi
+    awk -F'\t' '
+        $2 == "?" { print "Step " $1 ": no who"; next }
+        $2 != "reviewer" && $2 != "owner" && $2 != "after merge" && $2 != "skill-test" {
+            print "Step " $1 ": \"" $2 "\" is not reviewer, owner, after merge or skill-test" }' "$TMP/acc"
+}
+
+check_skill_tests() {
+    acceptance_steps "$PLAN" | awk -F'\t' '$2 == "skill-test" { print $1 }' > "$TMP/skill"
+    while read -r id; do
+        scan "$PLAN" | awk -F'\t' -v id="$id" "$CHECK_LIB"'
+        { t = rtext(); tx[NR] = t; k[NR] = $2; tk[NR] = $3; st[NR] = $4
+          if ($2 == "prose" && t ~ /^### Task [0-9]+/) m = $3 }
+        END {
+            for (i = 1; i <= NR; i++) {
+                if (tk[i] != m || st[i] != id) continue
+                if (k[i] == "prose") {
+                    if (tx[i] ~ /^(\*\*)?Situation:/ && !lab) lab = 1
+                    if (tx[i] ~ /^(\*\*)?GREEN must:/) g = 1
+                    if (tx[i] ~ /^(\*\*)?RED is expected to:/) r = 1
+                } else if (lab && !fen && k[i] ~ /^open:/) { fen = 1; text = (k[i] == "open:text") }
+            }
+            if (!lab) print "Step " id ": no Situation: line"
+            else if (!text) print "Step " id ": no ```text fence after Situation:"
+            if (!g) print "Step " id ": no GREEN must: line"
+            if (!r) print "Step " id ": no RED is expected to: line"
+        }'
+    done < "$TMP/skill"
+}
+
+check_placeholders() {
+    scan "$PLAN" | awk -F'\t' "$CHECK_LIB"'
+    $2 == "prose" {
+        t = rtext(); u = t; gsub(/`[^`]*`/, "", u)
+        if (u ~ /TBD|TODO|implement later|fill in details|Similar to Task/) print "line " $1 ": " substr(t, 1, 80)
+    }'
+}
+
+check_coverage() {
+    section "$PLAN" '^## Spec coverage' > "$TMP/cov"
+    if [ $? -eq 3 ]; then
+        printf 'no ## Spec coverage section\n'
+        return 0
+    fi
+    scan "$SPEC" | awk -F'\t' -v cov="$TMP/cov" "$CHECK_LIB"'
+    BEGIN { while ((getline l < cov) > 0) if (l ~ /^\|/) { split(l, c, "|"); have[trim(c[2])] = 1 } }
+    $2 == "prose" { t = rtext(); if (t ~ /^## /) { h = t; sub(/^## /, "", h); sub(/[ \t]+$/, "", h)
+        if (!(h in have)) print "not in the Spec coverage table: " h } }'
+}
+
+check_contract() {
+    section "$PLAN" '^## Contract([ \t]|$)' > "$TMP/c.plan"
+    if [ $? -eq 3 ]; then
+        printf '%s: no ## Contract section\n' "$PLAN_REL"
+        return 0
+    fi
+    for sib in $SIBLINGS; do
+        sib_rel=$(rel_path "$sib")
+        section "$(abs_path "$sib")" '^## Contract([ \t]|$)' > "$TMP/c.sib"
+        if [ $? -eq 3 ]; then
+            printf '%s: no ## Contract section\n' "$sib_rel"
+            continue
+        fi
+        awk -v rel="$sib_rel" -v plan="$TMP/c.plan" '
+            BEGIN { while ((getline l < plan) > 0) p[++np] = l }
+            { n++; if (!d && (n > np || $0 != p[n])) { d = 1; print rel " differs, first at: " substr($0, 1, 80) } }
+            END { if (!d && n < np) print rel " differs, first at: (end of section)" }' "$TMP/c.sib"
+    done
+}
+
+check_builds_on() {
+    if [ "$(header_has "$PLAN" '[*][*]Builds on:[*][*]' '^(---[ \t]*$|## )')" = 0 ]; then
+        printf 'no **Builds on:** line in the header\n'
+        return 0
+    fi
+    scan "$PLAN" | awk -F'\t' -v base="$BASE_REL" "$CHECK_LIB"'
+    $2 == "prose" { t = rtext(); if (t ~ /^---[ \t]*$/ || t ~ /^## /) exit
+        if (index(t, "**Builds on:**") && index(t, base)) f = 1 }
+    END { if (!f) print "the header'"'"'s **Builds on:** does not name " base }'
+}
+
+# run_check <name> <function>: prints ok or the FAIL line and its detail (at most 5 lines
+# under it, the 5th "and <k> more"); sets CHECK_FAILED.
+run_check() {
+    "$2" > "$TMP/prob"
+    if [ ! -s "$TMP/prob" ]; then
+        printf 'ok %s\n' "$1"
+        return 0
+    fi
+    CHECK_FAILED=1
+    awk -v name="$1" '
+        { p[NR] = $0 }
+        END {
+            print "FAIL " name ": " p[1]
+            if (NR - 1 <= 5) { for (i = 2; i <= NR; i++) print "  " p[i] }
+            else { for (i = 2; i <= 5; i++) print "  " p[i]; print "  and " (NR - 5) " more" }
+        }' "$TMP/prob"
+}
+
+cmd_check() {
+    [ $# -ge 1 ] || usage_error "check takes a plan"
+    need_file "$1"
+    PLAN=$(abs_path "$1")
+    PLAN_REL=$(rel_path "$1")
+    shift
+    SPEC=
+    BASE=
+    SIBLINGS=
+    while [ $# -gt 0 ]; do
+        case $1 in
+            --spec | --sibling | --base)
+                [ $# -ge 2 ] || usage_error "$1 takes a file"
+                need_file "$2"
+                case $1 in
+                    --spec) SPEC=$(abs_path "$2"); SPEC_REL=$(rel_path "$2") ;;
+                    --base) BASE=$(abs_path "$2"); BASE_REL=$(rel_path "$2") ;;
+                    --sibling) SIBLINGS="$SIBLINGS $2" ;;
+                esac
+                shift 2
+                ;;
+            *) usage_error "unknown option: $1" ;;
+        esac
+    done
+    CHECK_FAILED=0
+    run_check committed check_committed
+    [ -z "$SPEC" ] || run_check card check_card
+    run_check trailers check_trailers
+    run_check acceptance check_acceptance
+    run_check skill-tests check_skill_tests
+    run_check placeholders check_placeholders
+    [ -z "$SPEC" ] || run_check coverage check_coverage
+    [ -z "$SIBLINGS" ] || run_check contract check_contract
+    [ -z "$BASE" ] || run_check builds-on check_builds_on
+    exit "$CHECK_FAILED"
+}
+
+# plan_paths <file> <P|C>: the inline-code items on the plan's "- Create:", "- Modify:" and
+# "- Test:" lines outside fences (P), or on its "- Create:" lines (C), without those starting
+# with ":" and with a ":<digits, commas, dashes>" suffix dropped.
+plan_paths() {
+    scan "$1" | awk -F'\t' -v want="$2" "$CHECK_LIB"'
+    $2 == "prose" {
+        t = rtext()
+        if (t !~ /^[ \t]*- (Create|Modify|Test):/) next
+        if (want == "C" && t !~ /^[ \t]*- Create:/) next
+        while ((i = index(t, "`")) > 0) {
+            t = substr(t, i + 1); j = index(t, "`"); if (!j) break
+            s = substr(t, 1, j - 1); t = substr(t, j + 1)
+            if (s == "" || s ~ /^:/) continue
+            sub(/:[0-9,-]+$/, "", s); print s
+        }
+    }' | sort -u
+}
+
+# overlap_one <other> <paths file> <created file>: prints the shared and numbered lines.
+overlap_one() {
+    other=$1
+    if [ -f "$(abs_path "$other")" ]; then
+        plan_paths "$(abs_path "$other")" P > "$TMP/o.paths"
+        plan_paths "$(abs_path "$other")" C > "$TMP/o.created"
+    else
+        git -C "$TOP" rev-parse -q --verify "refs/heads/$other" > /dev/null ||
+            die "neither a plan nor a branch: $other"
+        oplan=$(ls "$TOP"/docs/superpowers/plans/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-"$other".md 2> /dev/null | sort | head -n 1)
+        [ -n "$oplan" ] || die "no plan for branch $other"
+        {
+            plan_paths "$oplan" P
+            git -C "$TOP" diff --name-only "main...$other"
+        } | sort -u > "$TMP/o.paths"
+        {
+            plan_paths "$oplan" C
+            git -C "$TOP" diff --name-only --diff-filter=A "main...$other"
+        } | sort -u > "$TMP/o.created"
+    fi
+    comm -12 "$2" "$TMP/o.paths" | sed "s#\$# ($other)#; s#^#shared #"
+    for side in "$3" "$TMP/o.created"; do
+        sed -E -n 's#^(.*/)?([0-9]+)[_.][^/]*$#\1\2#p' "$side" | sort -u > "$TMP/keys.$(basename "$side")"
+    done
+    comm -12 "$TMP/keys.$(basename "$3")" "$TMP/keys.o.created" | sed "s#\$# ($other)#; s#^#numbered #"
+}
+
+cmd_overlap() {
+    [ $# -ge 2 ] || usage_error "overlap takes a plan and at least one other"
+    need_file "$1"
+    plan_paths "$(abs_path "$1")" P > "$TMP/paths"
+    plan_paths "$(abs_path "$1")" C > "$TMP/created"
+    shift
+    : > "$TMP/overlap.out"
+    for other in "$@"; do
+        overlap_one "$other" "$TMP/paths" "$TMP/created" >> "$TMP/overlap.out" || exit $?
+    done
+    cat "$TMP/overlap.out"
+    [ ! -s "$TMP/overlap.out" ]
+}
+
+[ $# -ge 1 ] || usage_error "no command"
+COMMAND=$1
+shift
+case $COMMAND in
+    run-dir | check | overlap | steps | step | scenarios | gate | gates) ;;
+    *) usage_error "unknown command: $COMMAND" ;;
+esac
+
+TOP=$(git rev-parse --show-toplevel 2> /dev/null) || die "not inside a git repository"
+common=$(git rev-parse --path-format=absolute --git-common-dir) || die "not inside a git repository"
+MAIN=$(dirname "$common")
+
+case $COMMAND in
+    run-dir) cmd_run_dir "$@" ;;
+    gate) cmd_gate "$@" ;;
+    gates) cmd_gates "$@" ;;
+    check) cmd_check "$@" ;;
+    overlap) cmd_overlap "$@" ;;
+    steps) cmd_steps "$@" ;;
+    step) cmd_step "$@" ;;
+    scenarios) cmd_scenarios "$@" ;;
+    *) die "$COMMAND is not built yet" ;;
+esac
