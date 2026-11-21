@@ -3,7 +3,7 @@
 # so no git config, hook or state of this machine is used. Nothing here touches the
 # repo this suite lives in.
 # Usage: sh tests/relay-plan/run-tests.sh   (RELAY_PLAN_BIN overrides the script under test)
-# Expect: "121 passed, 0 failed"
+# Expect: "125 passed, 0 failed"
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -464,6 +464,21 @@ rp "$MAIN" overlap "$C" b-branch
 assert_eq "overlap: a branch's plan counts" "shared ui/x.sh (b-branch)" "$OUT"
 rp "$MAIN" overlap "$M1" no-such-thing
 assert_eq "overlap: neither a plan nor a branch: exit 2" 2 "$RC"
+
+echo '--- gates: output that looks like an EXIT line'
+new_repo
+files_plan "$P" '- Modify: `src/main.sh`'
+commit_all plan
+git -C "$MAIN" switch -q -c demo-plan
+SHORT=$(git -C "$MAIN" rev-parse HEAD | cut -c1-7)
+rp "$MAIN" gate "$P" 'echo "EXIT 0"; echo real; exit 3'
+assert_eq "gate: its own output holds an EXIT line: the real code" 3 "$RC"
+rp "$MAIN" gate "$P" 'echo real; echo "EXIT 0"'
+rp "$MAIN" gates "$P" 'echo "EXIT 0"; echo real; exit 3'
+assert_eq "gates: an EXIT line in the output does not hide the real code" "FAIL echo \"EXIT 0\"; echo real; exit 3: exit 3 at $SHORT: real" "$OUT"
+assert_eq "gates: it fails: exit 1" 1 "$RC"
+rp "$MAIN" gates "$P" 'echo real; echo "EXIT 0"'
+assert_eq "gates: the last output line may itself look like an EXIT line" "ok echo real; echo \"EXIT 0\": exit 0 at $SHORT: EXIT 0" "$OUT"
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]

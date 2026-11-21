@@ -120,18 +120,26 @@ cmd_gates() {
             while ((getline l < named) > 0) want[++nw] = l
             fail = 0
         }
-        !inb && /^GATE [0-9a-f]+ / {
+        function flush() {
+            if (!inb || ex == "") return
+            if (!(cmd in seen)) { seen[cmd] = 1; order[++no] = cmd }
+            lsha[cmd] = sha; lexit[cmd] = ex; llast[cmd] = before
+            nb++
+        }
+        # A block runs from its GATE line (a full sha) to the next one or the end; its exit is
+        # its last EXIT line, and its last output line the last non-empty line before that.
+        /^GATE [0-9a-f]+ / && length($2) == 40 {
+            flush()
             sha = $2
             cmd = substr($0, 6 + length(sha) + 1)
-            inb = 1; last = ""; next
+            inb = 1; ex = ""; before = ""; prev = ""; next
         }
-        inb && /^EXIT [0-9]+$/ {
-            if (!(cmd in seen)) { seen[cmd] = 1; order[++no] = cmd }
-            lsha[cmd] = sha; lexit[cmd] = $2; llast[cmd] = last
-            inb = 0; nb++; next
+        inb {
+            if ($0 ~ /^EXIT [0-9]+$/) { ex = $2; before = prev }
+            if ($0 != "") prev = $0
         }
-        inb && $0 != "" { last = $0 }
         END {
+            flush()
             if (nw == 0 && nb == 0) { print "relay-plan: no gate in " logf > "/dev/stderr"; exit 1 }
             n = nw ? nw : no
             for (i = 1; i <= n; i++) {
