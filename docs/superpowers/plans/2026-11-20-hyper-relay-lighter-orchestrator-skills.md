@@ -872,7 +872,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
   "(`quartz.md` §4, moment N)"; `SKILL.md`'s new section "Plans and reports by path", cited as
   "(`SKILL.md`, Plans and reports by path)"; the stop's last line, cited as "(`SKILL.md`, The stops)".
 
-- [ ] **Step 1: Write the failing check.** A section `# --- 12. The card and the run folder are the record: no
+- [x] **Step 1: Write the failing check.** A section `# --- 12. The card and the run folder are the record: no
   private state, and the leg files are read once.` with `no_private_state`: it passes when
   `skills/orchestrating/SKILL.md` has a line holding the fixed string `never keep relay state in a memory file`, and
   `none -F 'at the start of every leg' skills/orchestrating`. Add it to `CHECKS`. Two broken cases:
@@ -881,12 +881,12 @@ Claude-Session: <the URL your dispatch prompt gives>"
   append `\nRead quartz.md at the start of every leg.\n` to `$CASE/skills/orchestrating/SKILL.md`;
   `expect_fail no_private_state`. `Expect:` becomes `"39 passed, 0 failed"`.
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `sh tests/orchestrating/run-tests.sh | tail -n 6`
 Expected: `FAIL no_private_state` above, and the last line `38 passed, 1 failed`.
 
-- [ ] **Step 3: The text.** In `skills/orchestrating/SKILL.md`, replace:
+- [x] **Step 3: The text.** In `skills/orchestrating/SKILL.md`, replace:
 
 ```text
 The three leg files, `parallel.md` and `quartz.md` are beside this SKILL.md. Read each leg file when the loop reaches
@@ -1123,7 +1123,7 @@ The forms, and where both go without Quartz, are in the same
 `quartz.md`, §4. Your human partner never has to ask for notes.
 ```
 
-- [ ] **Step 4: Check it.**
+- [x] **Step 4: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -1136,7 +1136,7 @@ The forms, and where both go without Quartz, are in the same
 | `grep -c -F 'Decisions go on the card as they happen' skills/brainstorming/SKILL.md` | `1` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `39 passed, 0 failed` |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/orchestrating/SKILL.md skills/orchestrating/quartz.md skills/brainstorming/SKILL.md tests/orchestrating/run-tests.sh
