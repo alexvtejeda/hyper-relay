@@ -116,6 +116,11 @@ Facts the design rests on. Checked 2026-11-20 on this machine, Claude Code 2.1.3
 - **Permissions:** the owner's `~/.claude/settings.json` runs in `auto` mode with no rule for the Quartz tools; the
   orchestrator's own `add_tasks` and `add_note` calls pass. A background agent's Quartz read passed; a background
   agent's Quartz *write* is untested, so §6 gives it a fallback, and the after-merge probe (§10) confirms it.
+- **`run-dir` and `steps` need only the plan file, not a branch** (checked 2026-11-20, at stop 3; Plan 2's A1). In
+  Plan 1 as committed at `5e2ccd7`, `run-dir <plan>` checks that the file exists and names the folder from the plan's
+  file name (P8), and `steps <plan>` reads the plan file alone (Task 2 Step 3, Task 3 Step 3). Only `gates` needs
+  the branch (`git rev-parse -q --verify refs/heads/<branch>`). So both work on a committed plan at stop 3, before
+  any branch exists.
 
 No fact here is flagged for the planner to re-check.
 
