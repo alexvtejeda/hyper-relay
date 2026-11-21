@@ -220,7 +220,7 @@ absent means 2. The generator accepts it and changes no generated file for it; a
 - Modify: `skills/writing-plans/plan-document-reviewer-prompt.md:6`, `:12-16`, `:49-53`
 - Test: `tests/orchestrating/run-tests.sh`
 
-- [ ] **Step 1: Write the failing check.** In `tests/orchestrating/run-tests.sh`, a section
+- [x] **Step 1: Write the failing check.** In `tests/orchestrating/run-tests.sh`, a section
   `# --- 8. Skill-test situations are whole and fenced, and no reviewer step reruns the gates.` with
   `skill_test_situations_fenced`: from the tree's top, it passes when `skills/writing-plans/SKILL.md` has a line
   holding the fixed string ```` ```text ```` and a line holding the fixed string ``No `reviewer` step reruns the full
@@ -229,12 +229,12 @@ absent means 2. The generator accepts it and changes no generated file for it; a
   `$CASE/skills/writing-plans/SKILL.md` (`sed -i '/```text/d'`); `expect_fail skill_test_situations_fenced`. The
   header comment names the new check, and its `Expect:` becomes `"30 passed, 0 failed"`.
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `sh tests/orchestrating/run-tests.sh | tail -n 4`
 Expected: `FAIL skill_test_situations_fenced` above, and the last line `29 passed, 1 failed`.
 
-- [ ] **Step 3: The text.** In `skills/writing-plans/SKILL.md`, insert after the line that begins
+- [x] **Step 3: The text.** In `skills/writing-plans/SKILL.md`, insert after the line that begins
   `- The plan ends with its acceptance task.` (line 102) this line:
 
 ```text
@@ -320,7 +320,7 @@ with:
 that path, not the text; the planner revises the plan and commits it again.
 ````
 
-- [ ] **Step 4: Check it.**
+- [x] **Step 4: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -331,7 +331,7 @@ that path, not the text; the planner revises the plan and commits it again.
 | `grep -c -F -e '[RUN_DIR]' -e 'reply with only three lines' skills/writing-plans/plan-document-reviewer-prompt.md` | `2` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `30 passed, 0 failed` |
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add skills/writing-plans/SKILL.md skills/writing-plans/plan-document-reviewer-prompt.md tests/orchestrating/run-tests.sh
