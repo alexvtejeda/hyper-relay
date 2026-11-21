@@ -1374,7 +1374,7 @@ Claude-Session: <the URL your dispatch prompt gives>"
 **Interfaces:**
 - Consumes: Task 4's moments and section names; Task 5's §7 check 1 (`dispatching.md`), which §2 below reuses.
 
-- [ ] **Step 1: Write the failing checks.** Three sections:
+- [x] **Step 1: Write the failing checks.** Three sections:
   - `# --- 14. The orchestrator routes by path.` with `relay_plan_routes_the_plan`: for each of the fixed strings
     `relay-plan run-dir`, `relay-plan check`, `relay-plan overlap`, `relay-plan steps`, `relay-plan step <`,
     `relay-plan scenarios` and `relay-plan gates`, some file under `skills/orchestrating` holds it
@@ -1392,13 +1392,13 @@ Claude-Session: <the URL your dispatch prompt gives>"
   delete every line holding `fix-rounds` from `$CASE/skills/agents/SKILL.md`; `expect_fail fix_cap`. `Expect:` becomes
   `"48 passed, 0 failed"`.
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `sh tests/orchestrating/run-tests.sh | tail -n 14`
 Expected: `FAIL relay_plan_routes_the_plan` (naming `relay-plan step <` and `relay-plan scenarios`),
 `FAIL no_gate_reruns` (naming `reviewing.md`) and `FAIL fix_cap`, and the last line `45 passed, 3 failed`.
 
-- [ ] **Step 3: `reviewing.md`.** Replace `skills/orchestrating/reviewing.md` with exactly this content:
+- [x] **Step 3: `reviewing.md`.** Replace `skills/orchestrating/reviewing.md` with exactly this content:
 
 ```text
 # The review leg, the click-through and the merge
@@ -1652,7 +1652,7 @@ committed task (`quartz.md` §3), tick every task with a `Plan-Task:` commit in 
 once more, as `done`. A plan stacked on this one, or waiting for it, goes on now (`parallel.md` §4).
 ```
 
-- [ ] **Step 4: The `agents` skill and `README.md`.** In `skills/agents/SKILL.md`, insert after the table row that
+- [x] **Step 4: The `agents` skill and `README.md`.** In `skills/agents/SKILL.md`, insert after the table row that
   begins ``| `execute` |`` (line 60):
 
 ```text
@@ -1704,7 +1704,7 @@ proposed cards go to its run folder), and the skills work on their own. But the 
 lets a long-running, multi-agent pipeline stay legible.
 ```
 
-- [ ] **Step 5: Check it.**
+- [x] **Step 5: Check it.**
 
 | Run | Expected |
 |---|---|
@@ -1717,7 +1717,7 @@ lets a long-running, multi-agent pipeline stay legible.
 | `grep -c -F 'Issues found on the way become proposed cards' README.md` | `1` |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `48 passed, 0 failed` |
 
-- [ ] **Step 6: The full gates, once.**
+- [x] **Step 6: The full gates, once.**
 
 | Run | Expected |
 |---|---|
@@ -1728,7 +1728,7 @@ lets a long-running, multi-agent pipeline stay legible.
 | `git diff --name-only main...HEAD` | exactly `README.md`, `skills/agents/SKILL.md`, `skills/brainstorming/SKILL.md`, `skills/executing-plans/SKILL.md`, `skills/orchestrating/SKILL.md`, `skills/orchestrating/dispatching.md`, `skills/orchestrating/parallel.md`, `skills/orchestrating/planning.md`, `skills/orchestrating/quartz.md`, `skills/orchestrating/reviewing.md`, `skills/requesting-code-review/SKILL.md`, `skills/requesting-code-review/code-reviewer.md`, `skills/writing-plans/SKILL.md`, `skills/writing-plans/plan-document-reviewer-prompt.md`, `templates/agents/executor.md`, `templates/agents/reviewer-browser.md`, `templates/agents/reviewer-commands.md`, `tests/orchestrating/run-tests.sh` |
 | `git status --short` | nothing (on a branch run, nothing but untracked files under `docs/superpowers/` that you did not create) |
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ```bash
 git add skills/orchestrating/reviewing.md skills/agents/SKILL.md README.md tests/orchestrating/run-tests.sh
