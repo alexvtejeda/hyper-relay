@@ -6,7 +6,7 @@
 # under skills/. It reads the working tree, not git's index, so an untracked new file
 # counts and it runs the same in a worktree. Each check also runs on a copy of the tree
 # broken on purpose, where it must fail.
-# Usage: sh tests/orchestrating/run-tests.sh      Expect: "39 passed, 0 failed"
+# Usage: sh tests/orchestrating/run-tests.sh      Expect: "41 passed, 0 failed"
 set -u
 LC_ALL=C
 export LC_ALL
@@ -237,13 +237,19 @@ no_private_state() (
     none -F 'at the start of every leg' skills/orchestrating
 )
 
+# --- 13. The orchestrator asks relay-plan instead of grepping the plan.
+no_plan_greps() (
+    cd "$1" || exit 2
+    none -E -e "'\^### Task'" -e '^- (Create|Modify|Test)' -e "grep -n -o 'Plan-Task:" skills/orchestrating
+)
+
 CHECKS='no_old_dispatching_pointer dispatching_pointers_name_orchestrating old_dispatching_gone
 no_subagent_driven code_review_not_per_task brainstorming_never_invokes_writing_plans orchestrating_folder
 no_machine_paths skill_names_resolve section_refs_resolve install_git_hook_only_in_quartz_md
 no_finishing_branch_in_orchestrating no_superpowers_skill_names skill_test_situations_fenced
 executor_gates_through_relay_plan
 agents_write_to_the_run_folder proposed_cards_filed_by_finders
-no_private_state'
+no_private_state no_plan_greps'
 
 # --- the repo's tree passes every check
 for check in $CHECKS; do
@@ -354,6 +360,10 @@ expect_fail no_private_state
 broken "quartz.md read at every leg again"
 printf '\nRead quartz.md at the start of every leg.\n' >> "$CASE/skills/orchestrating/SKILL.md"
 expect_fail no_private_state
+
+broken "the acceptance grep back in planning.md"
+printf '%s\n' "\`grep -n '^### Task' <plan> | tail -n 1\` names the last task." >> "$CASE/skills/orchestrating/planning.md"
+expect_fail no_plan_greps
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]

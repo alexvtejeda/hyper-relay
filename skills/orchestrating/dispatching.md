@@ -14,7 +14,8 @@ remembering, so this holds after a `/clear` or in a new session.
 
 This is the phase gate between plan and execution: stop for the owner's answer. First read the `execute:` line from
 the header of `main`'s facts file (`git show main:.hyper-relay/agents.md`, between its first two `---` lines), if the
-repo has one.
+repo has one. N below, the plan's task count, is in the first line `relay-plan steps <plan>` prints:
+`tasks <N>; acceptance task <M>`.
 
 **Branch is offered only for a plan that will run alone:** no other plan is in flight and none is approved to run
 beside it (`parallel.md` says what in flight means). Otherwise every plan runs in a worktree, and the question is
@@ -69,6 +70,12 @@ The branch is the plan's file name without its date and `.md`:
   Never enter the worktree: no `EnterWorktree` (so not `hyper-relay:using-git-worktrees`, which uses it), and no `cd`
   that outlives one command. Run commands there as `(cd <worktree> && …)` or `git -C <worktree> …`.
 
+Then, in either mode, create the plan's run folder: `relay-plan run-dir <plan>`, in the main checkout. It prints the
+folder's absolute path, `<main checkout>/.hyper-relay/runs/<branch>/`, which git ignores (it adds the line to the
+repo's local exclude file when needed); it never clears what an earlier leg left there. Every dispatch prompt from
+here on names it: each agent writes its full report there (`SKILL.md`, Plans and reports by path), and its
+`acceptance/` is the acceptance reviewer's evidence folder.
+
 ## 4. Link (when the plan or its spec names a Quartz card)
 
 - **A plan committed on `main`:** `quartz link-branch <plan path>`, run where the branch is checked out, with the
@@ -87,16 +94,21 @@ Dispatch ONE executor, in the background:
   follow it." (In OpenCode: the `general` subagent, told to load the `executing-plans` skill first.)
 
 The prompt gives what `hyper-relay:executing-plans` lists under "The dispatch prompt gives":
-- the plan's path (absolute when it is not committed on `main`), and which tasks are the executor's, e.g. "Tasks 1–8;
-  Task 9 is the orchestrator's";
+- the plan's path (absolute when it is not committed on `main`), and which tasks are the executor's: every task
+  before the acceptance task that the first line of `relay-plan steps <plan>` names, e.g. "Tasks 1–8; Task 9 is the
+  orchestrator's" for `tasks 9; acceptance task 9`;
 - the mode, `branch` or `worktree`;
 - the checkout's absolute path (the main checkout, or the worktree) and the branch;
+- the run folder (§3);
+- when the repo uses Quartz, the plan's card ids and its initiative; otherwise "Run no Quartz command and use no
+  Quartz tool.";
 - the Claude-Session URL for its commit trailers, when your harness gives you one;
 - for a stacked plan: that its branch was cut from its base's branch, `<base branch>`, which has not merged yet;
 - anything unusual: `main` moved since the plan was written, a plan read by absolute path, a step you know is stale.
 
-Then tell the owner it is running, and carry on with other work. Where the harness cannot run a subagent in the
-background, the dispatch waits for it; every rule below still holds.
+Then post the status note, with the executor's id (`quartz.md` §4, moment 3), tell the owner it is running, and carry
+on with other work. Where the harness cannot run a subagent in the background, the dispatch waits for it; every rule
+below still holds.
 
 ## 6. While a branch run is active: the hold-back rules
 
@@ -114,19 +126,24 @@ write specs and plans) by these rules:
 
 ## 7. Verify the hand-back
 
-Before relaying anything, where the branch is checked out (for a stacked plan, only once its base has merged and any
-catch-up round is done: `parallel.md` §3):
+The executor hands back a short summary; its full report is the run folder's `executor.md`, which you open only for
+what the summary does not settle. Before relaying anything, where the branch is checked out (for a stacked plan, only
+once its base has merged and any catch-up round is done: `parallel.md` §3):
 
-1. Rerun the gates the report names. Their counts must match the report's.
+1. **The gates, from `gates.log`:** `relay-plan gates <plan>`, then each gate's command as the summary names it,
+   each quoted as one argument. Every line must be `ok`, which means that gate's latest run passed at the branch's
+   tip, and its last output must match the counts the summary gives. You rerun no gate yourself: `relay-merge`
+   runs them again on the merged result. A `FAIL` line, or counts that do not match, is a failure for the owner.
 2. Check the commits: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>`. Each of the executor's
    tasks ends in a commit carrying its `Plan-Task:` trailer.
 3. Check the tree is clean: `GIT_OPTIONAL_LOCKS=0 git status --short` prints nothing but, on a branch run, your
    held-back docs (`??` under `docs/superpowers/`).
-4. Weigh every deviation the report lists, and every call the executor made where the plan left a choice open: accept
-   each, or tell the owner why not.
-5. Act on every `quartz:` line the report quotes.
+4. Weigh every deviation the summary lists, and every call the executor made where the plan left a choice open:
+   accept each, or tell the owner why not.
+5. Act on every `quartz:` line the summary quotes, and file any cards it says are in `cards.md` (`reviewing.md` §2).
 
 Then run `quartz review` there (the cards move to In review); if it fails, move the cards by hand through the Quartz
-MCP. Tell the owner only failures, gate results, deviations and the decisions you need: the board shows the rest.
+MCP. Post the status note (`quartz.md` §4, moment 4). Tell the owner only failures, gate results, deviations and the
+decisions you need: the board shows the rest.
 
 Then continue with `reviewing.md`.

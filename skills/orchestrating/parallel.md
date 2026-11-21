@@ -52,23 +52,15 @@ plan that starts now, and the same later for a stacked plan (§3) or a waiting o
 ## 2. The conflict check
 
 Before each dispatch that joins another plan in flight, or a plan approved to run beside it, compare the plan with
-each of them. Run it before the handoff question (`planning.md` §2), and again just before a waiting plan is
-dispatched.
+each of them: `relay-plan overlap <plan> <other>…`, where each `<other>` is a plan's path or an in-flight plan's
+branch. Run it before the handoff question (`planning.md` §2), and again just before a waiting plan is dispatched. It
+prints one line per overlap, and nothing when there is none:
 
-- **Shared files.** A plan's paths are its tasks' `- Create:`, `- Modify:` and `- Test:` paths, without any `:lines`
-  part:
-
-  ```sh
-  grep -E '^- (Create|Modify|Test): ' <plan> | grep -o '`[^`]*`' | tr -d '`' | grep -v '^:' | sed 's/:[0-9][0-9,-]*$//' | sort -u
-  ```
-
-  An in-flight plan's paths are its plan's, plus what its branch has changed so far:
-  `git diff --name-only main...<branch>`. A path in both lists is an overlap.
-- **Numbered names.** Two plans create files in the same folder whose names start with the same digits, such as
-  migrations (`000097_orders.up.sql` and `000097_coupons.up.sql`). Compare the folder and leading digits of each
-  plan's `- Create:` paths, and of the files the in-flight branch has added
-  (`git diff --name-only --diff-filter=A main...<branch>`), as `sed -E -n 's#^(.*/)?([0-9]+)[_.][^/]*$#\1\2#p'`
-  prints them: the digits must be followed by `_` or `.`, so a date (`2026-11-18-…`) is not a sequence number.
+- **`shared <path> (<other>)`:** both change the file. A plan's paths are its tasks' `- Create:`, `- Modify:` and
+  `- Test:` paths; an in-flight branch's are its plan's, plus what the branch has changed so far.
+- **`numbered <folder><digits> (<other>)`:** both create files in the same folder whose names start with the same
+  digits, followed by `_` or `.`, such as migrations (`000097_orders.up.sql` and `000097_coupons.up.sql`); a date
+  (`2026-11-18-…`) is not a sequence number.
 
 **What happens.** "Later" means dispatched later, or later in the spec's order for a spec's own plans.
 
