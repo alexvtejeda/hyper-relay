@@ -499,7 +499,7 @@ git commit -m "feat: relay-plan keeps a plan's run folder and its gate runs" -m 
 - Produces, in the suite: `fixture_repo` (a `new_repo` holding the fixtures; sets `P`, `BASE`, `OBASE`) and
   `variant <edit>` (rewrites `$MAIN/$P` as `fixtures/plan.md` with the edit, an awk or sed program, and commits it).
 
-- [ ] **Step 1: The fixture plan, and the failing tests.** Create `tests/relay-plan/fixtures/plan.md` with exactly
+- [x] **Step 1: The fixture plan, and the failing tests.** Create `tests/relay-plan/fixtures/plan.md` with exactly
   this content:
 
 `````markdown
