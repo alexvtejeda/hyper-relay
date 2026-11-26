@@ -25,7 +25,8 @@ relay guard (`tests/orchestrating/run-tests.sh`).
 
 **How this was checked:** written against `main` at `cd44cec`, by reading only (the spec, the files below, and the
 newest plans for format); nothing was built, run or generated. The spec flags no fact for re-check, so none was
-re-checked. A1 and A2 below are assumptions.
+re-checked. A1 and A2 below, assumptions in the first version, were researched at stop 3 and are now settled facts
+in the spec's `## How it works` (`39d7403`); the owner accepted D1 and D2 at stop 3 (2026-11-26).
 
 ---
 
@@ -87,8 +88,8 @@ re-checked. A1 and A2 below are assumptions.
 
 | # | The spec says | Decision |
 |---|---|---|
-| D1 | §1: the pane displays the output "(the `split-window -dI` form)"; §7 leaves "how `relay-plan` feeds the pane" and "how it learns the pane's id and kills it" to the builder | **Deviation, for the owner to check.** Not `-I`: `relay-plan` splits with a display-only command, `tmux split-window -d -h -l 40% -t "$TMUX_PANE" -P -F '#{pane_id}' '<pane command>'`, which prints the header from a file and follows the gate's output file with `tail -n +1 -f` (P5). The gate still runs in `relay-plan`'s own process, unchanged, and the pane only displays, as §1 requires; only the display's plumbing differs. Why: this split returns at once, so `relay-plan` has the pane's id, or the refusal and its reason, before the gate starts (an `-I` client stays up while its input is open, so both would come from a background process); nothing of `relay-plan`'s runs beside the gate, so there is no feeder process to stop; the pane's command ends when `relay-plan` is killed outright, where an `-I` pane would stay, marked dead; and the gate's command never passes through tmux's command line (the header goes through a file). The cost is A1. |
-| D2 | §5: the live check runs `'sleep 20; echo done'` and reports that the pane "shows the header and `done`, and closes when the gate ends" | The pane closes as soon as the gate ends, so a `done` printed last is never on screen long enough to see. The check runs `'sleep 8; echo done; sleep 12'` (the same 20 seconds) and captures the pane after `done` (Task 3 Step 4). |
+| D1 | §1: the pane displays the output "(the `split-window -dI` form)"; §7 leaves "how `relay-plan` feeds the pane" and "how it learns the pane's id and kills it" to the builder | **Deviation, accepted by the owner at stop 3 (2026-11-26).** Not `-I`: `relay-plan` splits with a display-only command, `tmux split-window -d -h -l 40% -t "$TMUX_PANE" -P -F '#{pane_id}' '<pane command>'`, which prints the header from a file and follows the gate's output file with `tail -n +1 -f` (P5). The gate still runs in `relay-plan`'s own process, unchanged, and the pane only displays, as §1 requires; only the display's plumbing differs. Why: this split returns at once, so `relay-plan` has the pane's id, or the refusal and its reason, before the gate starts (an `-I` client stays up while its input is open, so both would come from a background process); nothing of `relay-plan`'s runs beside the gate, so there is no feeder process to stop; the pane's command ends when `relay-plan` is killed outright, where an `-I` pane would stay, marked dead; and the gate's command never passes through tmux's command line (the header goes through a file). It rests on A1, now a settled fact. |
+| D2 | §5: the live check runs `'sleep 20; echo done'` and reports that the pane "shows the header and `done`, and closes when the gate ends" | **Accepted by the owner at stop 3 (2026-11-26).** The pane closes as soon as the gate ends, so a `done` printed last is never on screen long enough to see. The check runs `'sleep 8; echo done; sleep 12'` (the same 20 seconds) and captures the pane after `done` (Task 3 Step 4). |
 | P1 | §1: the header names "the branch" | The plan's branch, as `relay-plan` names it from the plan's file (the run folder's name), not `git branch --show-current`; they are the same in a relay run. |
 | P2 | §1: the fallback's `<reason>`; §7: its wording is the builder's | Checked in this order: `TMUX is not set` (unset or empty), `TMUX_PANE is not set` (unset or empty), `no tmux on PATH`, `split failed`, followed by `: <the first line tmux printed on stderr>` when it printed one. A split fails when tmux exits non-zero or prints no `%<digits>` id. |
 | P3 | §1: "about 40% of the width" | `-l 40%`. |
@@ -100,8 +101,8 @@ re-checked. A1 and A2 below are assumptions.
 | P9 | §4 S3: a Monitor and a background shell "are still running" | The situation gives the executor a tool that stops a background command or a Monitor by its id (`TaskStop`); the tool's name is the situation's: the skill says "stop", not which tool. |
 | P10 | §5: the relay guard at `0 failed` | No new guard check: the skill tests S1–S4 test the behaviour, and the new text keeps check 9's line. |
 | P11 | §3: "one line" of `dispatching.md` | A three-line paragraph at the top of §7, "Verify the hand-back", where an orchestrator turns when an executor's message arrives. |
-| A1 | **Assumption** (the spec is silent) | The tmux server sees `relay-plan`'s temporary files at the same paths (one machine, one user; a sandbox that hid them from the server would very likely hide the server's socket too, and the split would fall back). If it does not, the pane shows an error instead of the output, and the gate is unaffected. Task 3 Step 4 confirms it live. |
-| A2 | **Assumption** (the spec is silent) | A tmux pane id (`%<n>`) is not reused while its server runs, so a `kill-pane` after the owner closed that pane fails harmlessly and closes no other pane. |
+| A1 | **Settled fact** (spec, How it works, "The owner's tmux server sees the Bash tool's files and processes"; stop 3 research, `39d7403`) | The Bash tool's shell runs in the same mount, pid and user namespaces as the owner's tmux server, with Claude Code's sandbox off on this machine. So the pane reads `relay-plan`'s temporary files (a `mktemp -d` folder under `/tmp`) at the same paths, and the pane command's `kill -0 <relay-plan's pid>` (P5) sees `relay-plan`'s process: that check relies on the shared pid namespace. Task 3 Step 4 still confirms it live on the owner's tmux. |
+| A2 | **Settled fact** (spec, How it works, "A pane id is never reused while the server runs"; stop 3 research, `39d7403`) | tmux 3.4 gives each pane `next_window_pane_id++`, and a pane id (`%<n>`) is never reused while its server runs. So a `kill-pane` after the owner closed that pane closes no other pane: it exits 1 and prints `can't find pane: %<n>` on stderr, which `close_pane` discards with its stdout (Task 1 Step 3), so the line never reaches the executor's or the owner's output (Task 1 Step 1, "a closed pane: nothing on stderr"). |
 
 ## Spec coverage
 
@@ -838,9 +839,8 @@ commits, the tree), or message or resume the executor with SendMessage.
 
 - [ ] **Step 9 (`owner`): Read the new text and the calls.** Read
   `git -C /home/noob_master/hyper-relay diff main...hyper-relay-long-gates -- bin docs skills`, with stop 4's
-  skill-test results, D1 (the pane follows the gate's output file instead of `split-window -dI`), D2 (the live
-  check's command) and the assumptions A1 and A2 above all. PASS: the owner agrees with them as written. A change goes
-  to the executor as a finding.
+  skill-test results and the P-notes. D1, D2 (accepted at stop 3) and A1, A2 (settled facts) are decided. PASS: the
+  owner agrees with the text as written. A change goes to the executor as a finding.
 
 - [ ] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly.**
