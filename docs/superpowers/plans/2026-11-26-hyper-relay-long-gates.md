@@ -145,7 +145,7 @@ in the spec's `## How it works` (`39d7403`); the owner accepted D1 and D2 at sto
 - Produces, in the suite: the fake `tmux`, `NOTMUX`, `pane_env`, `pane_case`, `rpt`, `rpt_bg`, `bg_wait`, `wait_file`,
   `gone_within` (Task 3 Step 3 reads them).
 
-- [ ] **Step 1: Write the failing tests** in `tests/relay-plan/run-tests.sh`.
+- [x] **Step 1: Write the failing tests** in `tests/relay-plan/run-tests.sh`.
 
 The header gains, after its line 4: `# No case reaches a real tmux server: TMUX and TMUX_PANE are unset, TMUX_TMPDIR is a`
 and `# folder in the temporary root, and the --pane cases put a fake tmux first on PATH.` After
@@ -366,14 +366,14 @@ assert_eq "killed outright: no kill-pane" 0 "$(grep -c '^kill-pane' "$FAKE_TMUX_
 
 The header's `Expect:` becomes the new total: 174 when these checks are written as given.
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `sh tests/relay-plan/run-tests.sh | grep '^FAIL' | head -n 3`, then `sh tests/relay-plan/run-tests.sh | tail -n 1`
 Expected: `FAIL` lines, the first `pane: a passing gate prints the same` (today `gate --pane` is a usage error, exit
 2); the 125 existing checks still `ok`; the summary shows failures. Nothing hangs: an interrupted case whose
 `wait_file` times out moves on.
 
-- [ ] **Step 3: Implement `--pane` in `bin/relay-plan`**
+- [x] **Step 3: Implement `--pane` in `bin/relay-plan`**
 
 - Line 12 of the header comment, replace `#   relay-plan gate <plan> <command>               run a gate, log its block`
   with `#   relay-plan gate [--pane] <plan> <command>      run a gate, log its block (--pane: shown in tmux)`.
@@ -393,12 +393,12 @@ Expected: `FAIL` lines, the first `pane: a passing gate prints the same` (today 
   `(cd "$TOP" && sh -c …)` line, which does not change, and `close_pane` right after `code=$?`. Everything after is
   unchanged.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `sh tests/relay-plan/run-tests.sh | tail -n 1`, then `dash -n bin/relay-plan`
 Expected: `174 passed, 0 failed` (or the header's `Expect:` count); `dash -n` silent.
 
-- [ ] **Step 5: `docs/relay-plan.md`**
+- [x] **Step 5: `docs/relay-plan.md`**
 
 In Requirements, insert after the line ``- git 2.31 or later, and `awk`.``:
 
@@ -438,7 +438,7 @@ Several gates at once each get their own pane; a split the window has no room fo
 
 Verify: `grep -c -F -- '--pane' docs/relay-plan.md` prints `4`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add bin/relay-plan tests/relay-plan/run-tests.sh docs/relay-plan.md
