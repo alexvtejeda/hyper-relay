@@ -81,6 +81,17 @@ Checked on 2026-11-26 on this machine (Claude Code 2.1.332, tmux 3.4), unless a 
   sixth side-by-side split.
 - A pane running a command closes when the command exits, unless the `remain-on-exit` option is on (`man tmux`).
 - `wait-for <channel>` blocks until another client runs `wait-for -S <channel>` (checked); approach A does not need it.
+- **A pane id is never reused while the server runs** (stop 3 research, the plan's A2). tmux 3.4 gives each new pane
+  `next_window_pane_id++` (`window.c` lines 60 and 931 at the `3.4` tag, github.com/tmux/tmux), and the manual says
+  ids are "unique and are unchanged for the life of the session, window or pane". Check, in a throwaway server: panes
+  `%0 %1 %2`; after killing `%1` the next split was `%3`; after killing `%3`, `%4`; a new session's pane, `%5`.
+  `kill-pane -t %3` on the closed id exits 1 and prints `can't find pane: %3` on stderr.
+- **The owner's tmux server sees the Bash tool's files and processes** (stop 3 research, the plan's A1, and the pane
+  command's `kill -0 <relay-plan's pid>`). The Bash tool's shell runs in the same mount, pid and user namespaces as the
+  server: `readlink /proc/self/ns/{mnt,pid,user}` matched `/proc/<server pid>/ns/…`, with the server's pid from
+  `tmux display-message -p '#{pid}'`. Check: `tmux run-shell` on the owner's server copied a file from a `mktemp -d`
+  folder (under `/tmp`; `TMPDIR` is unset), and its `kill -0` found the calling Bash shell's pid alive. Claude Code's
+  sandbox is off on this machine (no `sandbox` key in its settings files); with it on, none of this was checked.
 
 **`relay-plan` today** (`bin/relay-plan`, `cmd_gate` and `cmd_gates`):
 - `gate <plan> <command>` runs `sh -c <command>` from the checkout's top with stdin from `/dev/null`, stdout and
