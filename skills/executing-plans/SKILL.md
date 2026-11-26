@@ -57,9 +57,23 @@ setup, its full gates, its constraints and its acceptance steps.
 4. **When the code is not what the plan expects** (an expected line differs, a file moved): adapt as little as
    possible, and record it as a deviation with the reason. A step that fails twice the same way: stop and report.
 5. **Full gates, once,** after your last task: the ones the plan's Execution notes name, and your agent's own
-   ("Full gates"). Run each through `relay-plan gate <plan> '<command>'`, from the checkout's top, the command quoted
+   ("Full gates"). Each runs through `relay-plan gate <plan> '<command>'`, from the checkout's top, the command quoted
    as one argument: it runs the command, appends its output to the run folder's `gates.log`, prints the last lines
    and exits with the command's code. From then on, name each gate by that exact command.
+
+   Run them all in **one** shell command, in the background, each with `--pane` right after `gate`, joined with `;`
+   (never `&&`, so that every gate runs when one fails):
+
+   ```bash
+   cd <checkout> && { relay-plan gate --pane <plan> '<command 1>'; relay-plan gate --pane <plan> '<command 2>'; }
+   ```
+
+   `--pane` shows each gate's output in a tmux pane beside the owner's session while it runs, and changes nothing
+   else; without tmux, the gate runs in place. Then end your turn, with no Monitor, polling loop or `sleep` to watch
+   it: the command's completion wakes you. Once woken, read the results with
+   `relay-plan gates <plan> '<command 1>' '<command 2>'`, naming every command you ran. Where your harness cannot run
+   a command in the background and wake you when it ends, run the gates in the foreground instead, one call each, as
+   `relay-plan gate <plan> '<command>'`.
 6. **Acceptance:** follow your agent's acceptance steps for your mode, under "In a worktree" or "On a branch", when
    it has them. The plan's acceptance task is not yours: do not copy it into your report.
 7. **Report, then stop.** Write your full report to `executor.md` in the run folder, as a new file (replace one an
@@ -73,10 +87,12 @@ setup, its full gates, its constraints and its acceptance steps.
    - anything left for the owner: a task that is theirs, a step you stopped at;
    - the cards you filed (Proposed cards, below).
 
-   Then hand back only a short summary, at most about 15 lines: tasks n/N; one line per gate, its command and its
-   counts, and the path of `gates.log`; each deviation and each open call, one line each; every `quartz:` line,
-   verbatim; what you left running or left for the owner; the cards you filed; the path of `executor.md`. The
-   orchestrator verifies every line of it, and reads `executor.md` only for what the summary does not settle.
+   Before you hand back, stop every background command and Monitor you started that is still running. What your
+   acceptance steps leave up for the owner, such as a `wt` stack, stays up, and your report lists it. Then hand back
+   only a short summary, at most about 15 lines: tasks n/N; one line per gate, its command and its counts, and the
+   path of `gates.log`; each deviation and each open call, one line each; every `quartz:` line, verbatim; what you
+   left running or left for the owner; the cards you filed; the path of `executor.md`. The orchestrator verifies
+   every line of it, and reads `executor.md` only for what the summary does not settle.
 
 ## Never, in either mode
 
@@ -88,6 +104,9 @@ setup, its full gates, its constraints and its acceptance steps.
 - Touch anything outside your checkout: `~/.claude/`, `~/.config/opencode/`, other repos, other worktrees. The one
   exception is your run folder, from any checkout: `executor.md` and `cards.md`, and `gates.log` through
   `relay-plan gate`. A task marked as the owner's or the orchestrator's is not yours, even when it gives commands.
+- Wait by watching: a Monitor, a polling loop (`until`, `while`) or a keep-alive `sleep`, for anything. What would
+  outlast your shell's foreground time limit (10 minutes in Claude Code) runs in the background; then end your turn,
+  and its completion wakes you.
 - Wait with a self-matching `pgrep`, or `pkill -f` a pattern that appears in your own command line. Stop a server
   you started by its PID.
 
@@ -101,8 +120,9 @@ folder. In your checkout and on your branch (process step 1):
 
 1. Fix root causes. Commit each fix staging named files only, with the attribution lines your instructions give, in
    one final paragraph, and no `Plan-Task:` trailer.
-2. Rerun only the tests that pin the fix, not the full gates: each through `relay-plan gate <plan> '<command>'`, as
-   in process step 5.
+2. Rerun only the tests that pin the fix, not the full gates, as process step 5 runs gates: all of them in one
+   background command, each as `relay-plan gate --pane <plan> '<command>'`, joined with `;`; end your turn; once
+   woken, `relay-plan gates <plan>` naming each command you reran.
 3. Append a `## Fix round <k>` section to `executor.md`: each fix with its commit, each test with its counts, any
    deviation. Then hand back the short summary (process step 7), naming the tests by their commands.
 

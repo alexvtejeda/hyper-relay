@@ -126,6 +126,10 @@ write specs and plans) by these rules:
 
 ## 7. Verify the hand-back
 
+A notice that the executor is **waiting on its own background work** and has not reported yet is not its hand-back:
+it is waiting for commands it started, such as its gates, and wakes itself when they end. Carry on, or wait: run no
+hand-back check, send the executor no message and post no status note.
+
 The executor hands back a short summary; its full report is the run folder's `executor.md`, which you open only for
 what the summary does not settle. Before relaying anything, where the branch is checked out (for a stacked plan, only
 once its base has merged and any catch-up round is done: `parallel.md` §3):
