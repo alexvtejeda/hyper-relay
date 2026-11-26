@@ -3,7 +3,9 @@
 # so no git config, hook or state of this machine is used. Nothing here touches the
 # repo this suite lives in.
 # Usage: sh tests/relay-plan/run-tests.sh   (RELAY_PLAN_BIN overrides the script under test)
-# Expect: "125 passed, 0 failed"
+# No case reaches a real tmux server: TMUX and TMUX_PANE are unset, TMUX_TMPDIR is a
+# folder in the temporary root, and the --pane cases put a fake tmux first on PATH.
+# Expect: "174 passed, 0 failed"
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -15,6 +17,10 @@ PASSED=0
 FAILED=0
 
 unset GIT_DIR GIT_WORK_TREE
+unset TMUX TMUX_PANE
+TMUX_TMPDIR="$TMP_ROOT/tmux"
+mkdir -p "$TMUX_TMPDIR"
+export TMUX_TMPDIR
 HOME="$TMP_ROOT/home"
 GIT_CONFIG_NOSYSTEM=1
 GIT_AUTHOR_NAME=t
@@ -24,6 +30,55 @@ GIT_COMMITTER_EMAIL=t@example.invalid
 GIT_CEILING_DIRECTORIES="$TMP_ROOT"
 export HOME GIT_CONFIG_NOSYSTEM GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL GIT_CEILING_DIRECTORIES
 mkdir -p "$HOME"
+
+# The fake tmux: logs each call, runs a split's last argument as the pane's command.
+mkdir -p "$TMP_ROOT/fakebin"
+cat > "$TMP_ROOT/fakebin/tmux" <<'FAKE'
+#!/bin/sh
+echo "$*" >> "$FAKE_TMUX_LOG"
+case $1 in
+    split-window)
+        for a in "$@"; do printf '%s\n' "$a"; done > "$FAKE_TMUX_DIR/split.args"
+        if [ -n "${FAKE_SPLIT_ERR:-}" ]; then
+            echo "$FAKE_SPLIT_ERR" >&2
+            exit 1
+        fi
+        if [ -n "${FAKE_PANE_GONE:-}" ]; then
+            echo %7
+            exit 0
+        fi
+        for last in "$@"; do :; done
+        sh -c "$last" < /dev/null > "$FAKE_TMUX_DIR/pane.out" 2>&1 &
+        echo $! > "$FAKE_TMUX_DIR/pane.pid"
+        n=0
+        while [ ! -s "$FAKE_TMUX_DIR/pane.out" ] && [ "$n" -lt 20 ]; do
+            sleep 0.1
+            n=$((n + 1))
+        done
+        echo %7
+        exit 0
+        ;;
+    kill-pane)
+        if [ -n "${FAKE_PANE_GONE:-}" ]; then
+            echo "can't find pane: %7" >&2
+            exit 1
+        fi
+        exit 0
+        ;;
+    *)
+        echo "fake tmux: unexpected $*" >&2
+        exit 1
+        ;;
+esac
+FAKE
+chmod +x "$TMP_ROOT/fakebin/tmux"
+
+# NOTMUX: the tools relay-plan needs, and no tmux.
+NOTMUX="$TMP_ROOT/notmux"
+mkdir -p "$NOTMUX"
+for tool in dash sh git awk sed tail cat mkdir dirname basename mktemp rm; do
+    ln -s "$(command -v "$tool")" "$NOTMUX/$tool"
+done
 
 ok() { PASSED=$((PASSED + 1)); printf 'ok   %s\n' "$1"; }
 bad() { FAILED=$((FAILED + 1)); printf 'FAIL %s\n       %s\n' "$1" "$2"; }
@@ -91,6 +146,96 @@ rp() {
 }
 
 exists() { if [ -e "$1" ]; then echo yes; else echo no; fi; }
+
+# pane_env: the fake tmux's folder and log, and the environment rpt gives relay-plan.
+pane_env() {
+    FAKE_TMUX_DIR="$CASE/tmux"
+    mkdir -p "$FAKE_TMUX_DIR" "$CASE/tmp"
+    FAKE_TMUX_LOG="$FAKE_TMUX_DIR/log"
+    : > "$FAKE_TMUX_LOG"
+    export FAKE_TMUX_DIR FAKE_TMUX_LOG
+    unset FAKE_SPLIT_ERR FAKE_PANE_GONE
+    T_PATH="$TMP_ROOT/fakebin:$PATH"
+    T_TMUX="$TMP_ROOT/tmux/fake,1,0"
+    T_PANE=%3
+}
+
+# pane_case: a repo on the branch demo-plan holding the plan, and pane_env. Sets TIP and LOG.
+pane_case() {
+    new_repo
+    files_plan "$P" '- Modify: `src/main.sh`'
+    commit_all plan
+    git -C "$MAIN" switch -q -c demo-plan
+    TIP=$(git -C "$MAIN" rev-parse HEAD)
+    LOG="$MAIN/.hyper-relay/runs/demo-plan/gates.log"
+    pane_env
+}
+
+# rpt <dir> <arg>...: as rp, with the pane environment (a value of unset leaves it out).
+rpt() {
+    dir=$1
+    shift
+    (
+        cd "$dir" || exit 2
+        PATH=$T_PATH
+        TMPDIR="$CASE/tmp"
+        export PATH TMPDIR
+        if [ "$T_TMUX" = unset ]; then unset TMUX; else TMUX=$T_TMUX; export TMUX; fi
+        if [ "$T_PANE" = unset ]; then unset TMUX_PANE; else TMUX_PANE=$T_PANE; export TMUX_PANE; fi
+        exec dash "$RP" "$@" < /dev/null > "$TMP_ROOT/out" 2> "$TMP_ROOT/err"
+    )
+    RC=$?
+    OUT=$(cat "$TMP_ROOT/out")
+    ERR=$(cat "$TMP_ROOT/err")
+}
+
+# rpt_bg <dir> <arg>...: as rpt, in the background; BG is relay-plan's pid.
+rpt_bg() {
+    dir=$1
+    shift
+    (
+        cd "$dir" || exit 2
+        PATH=$T_PATH
+        TMPDIR="$CASE/tmp"
+        export PATH TMPDIR
+        if [ "$T_TMUX" = unset ]; then unset TMUX; else TMUX=$T_TMUX; export TMUX; fi
+        if [ "$T_PANE" = unset ]; then unset TMUX_PANE; else TMUX_PANE=$T_PANE; export TMUX_PANE; fi
+        exec dash "$RP" "$@" < /dev/null > "$CASE/bg.out" 2> "$CASE/bg.err"
+    ) &
+    BG=$!
+}
+
+# bg_wait: waits for BG; sets RC, OUT and ERR.
+bg_wait() {
+    wait "$BG"
+    RC=$?
+    OUT=$(cat "$CASE/bg.out")
+    ERR=$(cat "$CASE/bg.err")
+}
+
+# wait_file <path>: 0 once the file is not empty (5 s at most), else 1.
+wait_file() {
+    n=0
+    while [ ! -s "$1" ]; do
+        [ "$n" -ge 50 ] && return 1
+        sleep 0.1
+        n=$((n + 1))
+    done
+    return 0
+}
+
+# gone_within <seconds> <pid>: GONE is gone once the pid is, else running.
+gone_within() {
+    n=0
+    max=$(($1 * 10))
+    GONE=running
+    while [ "$n" -lt "$max" ]; do
+        if ! kill -0 "$2" 2> /dev/null; then GONE=gone; return 0; fi
+        sleep 0.1
+        n=$((n + 1))
+    done
+    return 0
+}
 
 P=docs/superpowers/plans/2026-01-02-demo-plan.md
 
@@ -479,6 +624,172 @@ assert_eq "gates: an EXIT line in the output does not hide the real code" "FAIL 
 assert_eq "gates: it fails: exit 1" 1 "$RC"
 rp "$MAIN" gates "$P" 'echo real; echo "EXIT 0"'
 assert_eq "gates: the last output line may itself look like an EXIT line" "ok echo real; echo \"EXIT 0\": exit 0 at $SHORT: EXIT 0" "$OUT"
+
+echo '--- gate --pane'
+pane_case
+rp "$MAIN" gate "$P" 'echo one; echo two'
+IN_OUT=$OUT
+IN_RC=$RC
+rpt "$MAIN" gate --pane "$P" 'echo one; echo two'
+assert_eq "pane: a passing gate prints the same" "$IN_OUT" "$OUT"
+assert_eq "pane: a passing gate exits the same" "$IN_RC" "$RC"
+assert_eq "pane: nothing on stderr" "" "$ERR"
+assert_eq "pane: a passing gate's block is the same" "$(sed -n 1,4p "$LOG")" "$(sed -n 5,8p "$LOG")"
+assert_eq "pane: the split's arguments" "split-window
+-d
+-h
+-l
+40%
+-t
+%3
+-P
+-F
+#{pane_id}" "$(head -n 10 "$FAKE_TMUX_DIR/split.args")"
+assert_eq "pane: its first line names the branch and the command" "gate · demo-plan · echo one; echo two" \
+    "$(head -n 1 "$FAKE_TMUX_DIR/pane.out")"
+assert_eq "pane: killed after the gate" "kill-pane -t %7" "$(tail -n 1 "$FAKE_TMUX_LOG")"
+assert_eq "pane: killed once" 1 "$(grep -c '^kill-pane ' "$FAKE_TMUX_LOG")"
+
+pane_case
+rp "$MAIN" gate "$P" 'echo bad >&2; exit 3'
+IN_OUT=$OUT
+rpt "$MAIN" gate --pane "$P" 'echo bad >&2; exit 3'
+assert_eq "pane: a failing gate prints the same" "$IN_OUT" "$OUT"
+assert_eq "pane: a failing gate exits the same" 3 "$RC"
+assert_eq "pane: a failing gate's block is the same" "$(sed -n 1,3p "$LOG")" "$(sed -n 4,6p "$LOG")"
+assert_eq "pane: a failing gate's pane is killed too" "kill-pane -t %7" "$(tail -n 1 "$FAKE_TMUX_LOG")"
+
+pane_case
+PANE_PROBE=caller
+export PANE_PROBE
+rpt "$MAIN/docs" gate --pane "$P" 'echo gate >> "$FAKE_TMUX_LOG"; pwd; echo "$PANE_PROBE"'
+unset PANE_PROBE
+assert_eq "pane: the gate keeps its directory and environment" "$MAIN
+caller
+EXIT 0" "$OUT"
+assert_eq "pane: the split, then the gate, then the kill" "split-window
+gate
+kill-pane" "$(cut -d ' ' -f 1 "$FAKE_TMUX_LOG")"
+
+pane_case
+rpt "$MAIN" gate --pane "$P" 'echo shown; sleep 2'
+assert_eq "pane: the output follows the first line" "gate · demo-plan · echo shown; sleep 2
+shown" "$(head -n 2 "$FAKE_TMUX_DIR/pane.out")"
+
+pane_case
+CMD=$(cat <<'EOF'
+echo "#{pane_id} \$HOME it's"
+EOF
+)
+rp "$MAIN" gate "$P" "$CMD"
+IN_OUT=$OUT
+rpt "$MAIN" gate --pane "$P" "$CMD"
+assert_eq "pane: quotes, \$ and #{}: as in place" "$IN_OUT" "$OUT"
+assert_eq "pane: quotes, \$ and #{}: the output" "#{pane_id} \$HOME it's
+EXIT 0" "$OUT"
+assert_eq "pane: quotes, \$ and #{}: the same block" "$(sed -n 1,3p "$LOG")" "$(sed -n 4,6p "$LOG")"
+assert_eq "pane: quotes, \$ and #{}: the first line shows the command verbatim" "gate · demo-plan · $CMD" \
+    "$(head -n 1 "$FAKE_TMUX_DIR/pane.out")"
+assert_not_contains "pane: quotes, \$ and #{}: the command never reaches tmux" "it's" "$(cat "$FAKE_TMUX_DIR/split.args")"
+
+echo '--- gate --pane: no pane, the same gate'
+pane_case
+T_TMUX=unset
+rpt "$MAIN" gate --pane "$P" 'echo one; echo two'
+assert_eq "no TMUX: the one line" "relay-plan: no pane (TMUX is not set); running in place" "$ERR"
+assert_eq "no TMUX: runs in place" "one
+two
+EXIT 0" "$OUT"
+assert_eq "no TMUX: tmux untouched" "" "$(cat "$FAKE_TMUX_LOG")"
+pane_case
+T_TMUX=
+rpt "$MAIN" gate --pane "$P" 'echo one; echo two'
+assert_eq "an empty TMUX: the one line" "relay-plan: no pane (TMUX is not set); running in place" "$ERR"
+pane_case
+T_PANE=unset
+rpt "$MAIN" gate --pane "$P" 'echo one; echo two'
+assert_eq "no TMUX_PANE: the one line" "relay-plan: no pane (TMUX_PANE is not set); running in place" "$ERR"
+assert_eq "no TMUX_PANE: runs in place" "one
+two
+EXIT 0" "$OUT"
+assert_eq "no TMUX_PANE: tmux untouched" "" "$(cat "$FAKE_TMUX_LOG")"
+pane_case
+T_PATH=$NOTMUX
+rpt "$MAIN" gate --pane "$P" 'echo one; echo two'
+assert_eq "no tmux on PATH: the one line" "relay-plan: no pane (no tmux on PATH); running in place" "$ERR"
+assert_eq "no tmux on PATH: runs in place" "one
+two
+EXIT 0" "$OUT"
+pane_case
+FAKE_SPLIT_ERR='no space for new pane'
+export FAKE_SPLIT_ERR
+rpt "$MAIN" gate --pane "$P" 'echo one; echo two'
+assert_eq "a refused split: the one line" "relay-plan: no pane (split failed: no space for new pane); running in place" "$ERR"
+assert_eq "a refused split: runs in place" "one
+two
+EXIT 0" "$OUT"
+assert_eq "a refused split: its block" "GATE $TIP echo one; echo two
+one
+two
+EXIT 0" "$(cat "$LOG")"
+assert_eq "a refused split: nothing to kill" 0 "$(grep -c '^kill-pane' "$FAKE_TMUX_LOG")"
+
+echo '--- gate --pane: the owner closes the pane'
+pane_case
+FAKE_PANE_GONE=1
+export FAKE_PANE_GONE
+rp "$MAIN" gate "$P" 'echo bad >&2; exit 3'
+IN_OUT=$OUT
+rpt "$MAIN" gate --pane "$P" 'echo bad >&2; exit 3'
+assert_eq "a closed pane: the same output" "$IN_OUT" "$OUT"
+assert_eq "a closed pane: the same exit" 3 "$RC"
+assert_eq "a closed pane: the same block" "$(sed -n 1,3p "$LOG")" "$(sed -n 4,6p "$LOG")"
+assert_eq "a closed pane: nothing on stderr" "" "$ERR"
+assert_eq "a closed pane: the kill was tried" "kill-pane -t %7" "$(tail -n 1 "$FAKE_TMUX_LOG")"
+
+echo '--- gate --pane: usage'
+pane_case
+rpt "$MAIN" gate "$P" --pane true
+assert_eq "--pane after the plan: exit 2" 2 "$RC"
+rpt "$MAIN" gate --pane "$P"
+assert_eq "--pane without a command: exit 2" 2 "$RC"
+rpt "$MAIN" gate --pane docs/nope.md true
+assert_eq "--pane with a missing plan: exit 2" 2 "$RC"
+assert_eq "usage errors: tmux untouched" "" "$(cat "$FAKE_TMUX_LOG")"
+assert_eq "usage errors: no block" no "$(exists "$LOG")"
+
+echo '--- gate --pane in a worktree'
+new_repo
+files_plan docs/superpowers/plans/2026-01-03-wt-plan.md '- Modify: `x`'
+commit_all plan
+git -C "$MAIN" worktree add -q "$CASE/wt" -b wt-plan
+pane_env
+rpt "$CASE/wt" gate --pane docs/superpowers/plans/2026-01-03-wt-plan.md pwd
+assert_eq "pane in a worktree: runs at the worktree's top" "$CASE/wt
+EXIT 0" "$OUT"
+assert_eq "pane in a worktree: the first line names the plan's branch" "gate · wt-plan · pwd" \
+    "$(head -n 1 "$FAKE_TMUX_DIR/pane.out")"
+assert_eq "pane in a worktree: the block, in the main checkout's run folder" \
+    "GATE $(git -C "$CASE/wt" rev-parse HEAD) pwd" "$(head -n 1 "$MAIN/.hyper-relay/runs/wt-plan/gates.log")"
+
+echo '--- gate --pane: interrupted'
+pane_case
+rpt_bg "$MAIN" gate --pane "$P" "echo \$\$ > '$CASE/gate.pid'; exec sleep 30"
+wait_file "$CASE/gate.pid"
+kill -TERM "$BG" "$(cat "$CASE/gate.pid")"
+bg_wait
+assert_eq "terminated: its pane is killed, once" 1 "$(grep -c '^kill-pane -t %7$' "$FAKE_TMUX_LOG")"
+
+pane_case
+rpt_bg "$MAIN" gate --pane "$P" "echo \$\$ > '$CASE/gate.pid'; exec sleep 30"
+wait_file "$CASE/gate.pid"
+wait_file "$FAKE_TMUX_DIR/pane.pid"
+kill -KILL "$BG"
+kill "$(cat "$CASE/gate.pid")"
+bg_wait
+gone_within 5 "$(cat "$FAKE_TMUX_DIR/pane.pid")"
+assert_eq "killed outright: the pane's command ends by itself" gone "$GONE"
+assert_eq "killed outright: no kill-pane" 0 "$(grep -c '^kill-pane' "$FAKE_TMUX_LOG")"
 
 printf '\n%s passed, %s failed\n' "$PASSED" "$FAILED"
 [ "$FAILED" -eq 0 ]

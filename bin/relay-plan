@@ -9,7 +9,7 @@
 #   relay-plan steps <plan> [reviewer|owner|after-merge|skill-test]
 #   relay-plan step <plan> <id>                    one acceptance step's text
 #   relay-plan scenarios <plan> <dir>              the skill-test situations, as files
-#   relay-plan gate <plan> <command>               run a gate, log its block
+#   relay-plan gate [--pane] <plan> <command>      run a gate, log its block (--pane: shown in tmux)
 #   relay-plan gates <plan> [<command>...]         each gate's latest block, judged
 #
 # Exit: 0 all ok; 1 a check failed or nothing was found; 2 a usage error or a missing file.
@@ -20,9 +20,10 @@ export LC_ALL
 
 USAGE="usage: relay-plan run-dir|check|overlap|steps|step|scenarios|gate|gates <plan> ... (docs/relay-plan.md)"
 RUN_DIR_NAME=.hyper-relay/runs/
+PANE=
 
 TMP=$(mktemp -d) || exit 2
-trap 'rm -rf "$TMP"' EXIT INT TERM
+trap 'close_pane; rm -rf "$TMP"' EXIT INT TERM
 
 die() { printf 'relay-plan: %s\n' "$*" >&2; exit 2; }
 usage_error() { printf 'relay-plan: %s\n%s\n' "$*" "$USAGE" >&2; exit 2; }
@@ -80,8 +81,55 @@ cmd_run_dir() {
     ensure_run_dir "$(branch_of "$1")"
 }
 
+# open_pane <branch> <command>: splits a display-only tmux pane that shows the header and follows
+# the gate's output file. Sets PANE; or says on stderr why not, and leaves PANE empty. Never exits.
+open_pane() {
+    pane_reason=
+    if [ -z "${TMUX:-}" ]; then
+        pane_reason="TMUX is not set"
+    elif [ -z "${TMUX_PANE:-}" ]; then
+        pane_reason="TMUX_PANE is not set"
+    elif ! command -v tmux > /dev/null 2>&1; then
+        pane_reason="no tmux on PATH"
+    fi
+    if [ -z "$pane_reason" ]; then
+        printf 'gate · %s · %s\n' "$1" "$2" > "$TMP/pane.head"
+        : > "$TMP/gate.out"
+        pane_cmd="sh -c 'cat \"\$1\"; tail -n +1 -f \"\$2\" & t=\$!; while kill -0 \"\$3\" 2> /dev/null; do sleep 1; done; kill \"\$t\"' relay-plan-pane '$TMP/pane.head' '$TMP/gate.out' $$"
+        pane_id=$(tmux split-window -d -h -l 40% -t "$TMUX_PANE" -P -F '#{pane_id}' "$pane_cmd" 2> "$TMP/pane.err")
+        case $pane_id in
+            %[0-9]*) case $pane_id in *[!%0-9]*) pane_id= ;; esac ;;
+            *) pane_id= ;;
+        esac
+        if [ -z "$pane_id" ]; then
+            pane_reason="split failed"
+            pane_err=$(head -n 1 "$TMP/pane.err")
+            [ -n "$pane_err" ] && pane_reason="$pane_reason: $pane_err"
+        fi
+    fi
+    if [ -n "$pane_reason" ]; then
+        printf 'relay-plan: no pane (%s); running in place\n' "$pane_reason" >&2
+        return 0
+    fi
+    PANE=$pane_id
+}
+
+# close_pane: kills the open pane, if any; a pane the owner closed is no error.
+close_pane() {
+    if [ -n "$PANE" ]; then
+        tmux kill-pane -t "$PANE" > /dev/null 2>&1
+        PANE=
+    fi
+    return 0
+}
+
 cmd_gate() {
-    [ $# -eq 2 ] || usage_error "gate takes a plan and a command"
+    with_pane=
+    if [ "${1:-}" = --pane ]; then
+        with_pane=1
+        shift
+    fi
+    [ $# -eq 2 ] || usage_error "gate takes [--pane], a plan and a command"
     need_file "$1"
     command_text=$2
     case $command_text in
@@ -90,8 +138,10 @@ cmd_gate() {
     esac
     dir=$(ensure_run_dir "$(branch_of "$1")") || exit $?
     sha=$(git -C "$TOP" rev-parse HEAD) || die "no HEAD in $TOP"
+    [ -n "$with_pane" ] && open_pane "$(branch_of "$1")" "$command_text"
     (cd "$TOP" && sh -c "$command_text" < /dev/null > "$TMP/gate.out" 2>&1)
     code=$?
+    close_pane
     if [ -s "$TMP/gate.out" ] && [ -n "$(tail -c 1 "$TMP/gate.out")" ]; then
         printf '\n' >> "$TMP/gate.out"
     fi
