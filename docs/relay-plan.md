@@ -17,6 +17,7 @@ ln -sfn /path/to/hyper-relay/bin/relay-plan ~/.local/bin/relay-plan
 
 - A POSIX shell: `relay-plan` is written for dash and runs as `#!/bin/sh`.
 - git 2.31 or later, and `awk`.
+- tmux, for `gate --pane` only: without it, the gate runs in place.
 
 ## Plans, branches and run folders
 
@@ -101,7 +102,7 @@ Writes each `skill-test` step's situation, the text of the first fenced block af
 fence lines, to `<dir>/step-<id>.txt`, and prints its id, that file and its title, separated by tabs. A `skill-test`
 step with no fenced situation prints `FAIL <id>: no fenced situation`, and the exit is 1.
 
-### `relay-plan gate <plan> <command>`
+### `relay-plan gate [--pane] <plan> <command>`
 
 Runs `<command>` with `sh -c` from the top of the current checkout (the main checkout or a worktree), and appends a
 block to the run folder's `gates.log`:
@@ -114,6 +115,24 @@ EXIT <code>
 
 It prints the output's last 5 lines, then `EXIT <code>`, and exits with the command's code. The log is only ever
 appended to. A command is known by its exact text, so give `gates` the same text; a command must be one line.
+
+With `--pane`, right after `gate` and nowhere else, the gate runs exactly as without it: in `relay-plan`'s own
+process, with the same environment, directory and stdin, the same block, the same printed lines and the same exit
+code. While it runs, its output also shows in a tmux pane split beside the pane `$TMUX_PANE` names (for an agent, the
+pane its Claude Code session runs in), about 40% of its width, without taking focus. The pane's first line is
+`gate · <branch> · <command>`; the output follows as it comes. `relay-plan` closes the pane as soon as the gate's
+command ends, pass or fail, or is stopped by an interrupt; if `relay-plan` itself is killed outright, the pane's own
+command ends within about a second, and the pane closes (or stays, marked dead, where tmux's `remain-on-exit` is on).
+Closing the pane yourself only hides the output: the gate runs on, and its block and exit code do not change.
+
+When `TMUX` or `TMUX_PANE` is unset or empty, no `tmux` is on `PATH`, or the split fails (the window has no room, or
+no tmux server answers), the gate runs in place, as without `--pane`, after one line on stderr:
+
+```text
+relay-plan: no pane (<reason>); running in place
+```
+
+Several gates at once each get their own pane; a split the window has no room for falls back the same way.
 
 ### `relay-plan gates <plan> [<command>…]`
 
