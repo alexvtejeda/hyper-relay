@@ -573,7 +573,7 @@ Each step is marked with who runs it:
 beside their Claude pane for about 20 seconds, and asks them to leave it alone until it closes. This run follows the
 installed relay (0.2.7), not the text it writes. In a command inside a table cell, `\|` is a plain `|`.
 
-- [ ] **Step 1 (`reviewer`): Only the planned files (spec §5).**
+- [x] **Step 1 (`reviewer`): Only the planned files (spec §5).**
 
 | Run | PASS |
 |---|---|
@@ -582,7 +582,7 @@ installed relay (0.2.7), not the text it writes. In a command inside a table cel
 | `git diff main...HEAD -- skills \| grep -c -E '^\+.*(/home/\|/tmp/\|/Users/)'` | `0` |
 | `git ls-files -s bin/relay-plan` | mode `100755` |
 
-- [ ] **Step 2 (`reviewer`): The code and the text against the spec (spec §1–§3, §5; D1, P1–P11).** Read
+- [x] **Step 2 (`reviewer`): The code and the text against the spec (spec §1–§3, §5; D1, P1–P11).** Read
   `git diff main...HEAD -- bin/relay-plan skills docs/relay-plan.md`. PASS: Task 1 Step 5's and Task 2 Steps 1–5's
   text is there word for word; and each point below is where the table puts it, with nothing that contradicts the
   spec (`docs/superpowers/specs/2026-11-26-hyper-relay-long-gates-design.md`) beyond D1, D2 and P1–P11. A
@@ -603,7 +603,7 @@ installed relay (0.2.7), not the text it writes. In a command inside a table cel
 | §3 the notice is not a hand-back | `dispatching.md` §7, its first paragraph |
 | §5 the docs: what the pane shows, where, its fallbacks, closing it only hides the output | `docs/relay-plan.md`, the `gate` section |
 
-- [ ] **Step 3 (`reviewer`): The suite reaches no real tmux (spec §5).**
+- [x] **Step 3 (`reviewer`): The suite reaches no real tmux (spec §5).**
 
 | Run | PASS |
 |---|---|
@@ -612,7 +612,7 @@ installed relay (0.2.7), not the text it writes. In a command inside a table cel
 | read the fake `tmux` the suite writes | it runs no other `tmux`: no `exec tmux`, no `command tmux`, no path to one |
 | read how `NOTMUX` is built | it links no `tmux` |
 
-- [ ] **Step 4 (`reviewer`): Live, in the owner's tmux (spec §5; D2, A1).** The owner has been told. One command per
+- [x] **Step 4 (`reviewer`): Live, in the owner's tmux (spec §5; D2, A1).** The owner has been told. One command per
   Bash call, in order, from the reviewer's own session; the waits are part of the check. Save each output under its
   name in the evidence folder. If a pane this step made is still there after the background command completes, that
   is a FAIL: kill only that pane (`tmux kill-pane -t <its id>`) and say so.
@@ -644,7 +644,7 @@ installed relay (0.2.7), not the text it writes. In a command inside a table cel
 The report says, in one line each: the pane appeared beside the session without taking focus; it showed the header and
 `done`; it closed when the gate ended; the two blocks match; the fallback ran in place with its one line.
 
-- [ ] **Step 5 (`skill-test`): S1, the full gates in one background call (spec §4 S1; §2).**
+- [x] **Step 5 (`skill-test`): S1, the full gates in one background call (spec §4 S1; §2).**
 
 Situation:
 
@@ -692,7 +692,7 @@ verbatim, joined with `;` (not `&&`); then end its turn with no Monitor, `sleep`
 RED is expected to: run each gate in its own foreground call, without `--pane`; on the 15-minute suite, hit the
 10-minute limit or put it in the background, then wait for it with a Monitor, a `sleep` or a polling loop.
 
-- [ ] **Step 6 (`skill-test`): S2, a fix round's tests in one background call (spec §4 S2; §2).**
+- [x] **Step 6 (`skill-test`): S2, a fix round's tests in one background call (spec §4 S2; §2).**
 
 Situation:
 
@@ -743,7 +743,7 @@ no full gate; end its turn with no Monitor, `sleep` or polling loop; and, once w
 RED is expected to: run the two tests in the foreground, one call each; on the 12-minute one, hit the 10-minute limit
 or put it in the background, then wait for it with a Monitor, a `sleep` or a polling loop.
 
-- [ ] **Step 7 (`skill-test`): S3, nothing of its own left running at hand-back (spec §4 S3; §2; P9).**
+- [x] **Step 7 (`skill-test`): S3, nothing of its own left running at hand-back (spec §4 S3; §2; P9).**
 
 Situation:
 
@@ -792,7 +792,7 @@ running for the owner.
 
 RED is expected to: hand back with `m7` and `b3` still running.
 
-- [ ] **Step 8 (`skill-test`): S4, the waiting notice is not a hand-back (spec §4 S4; §3; P11).**
+- [x] **Step 8 (`skill-test`): S4, the waiting notice is not a hand-back (spec §4 S4; §3; P11).**
 
 Situation:
 
@@ -837,12 +837,12 @@ or wait for the executor's report; at most one line to the owner that the execut
 RED is expected to: take the notice as the executor's hand-back and run the hand-back check (`relay-plan gates`, the
 commits, the tree), or message or resume the executor with SendMessage.
 
-- [ ] **Step 9 (`owner`): Read the new text and the calls.** Read
+- [x] **Step 9 (`owner`): Read the new text and the calls.** Read
   `git -C /home/noob_master/hyper-relay diff main...hyper-relay-long-gates -- bin docs skills`, with stop 4's
   skill-test results and the P-notes. D1, D2 (accepted at stop 3) and A1, A2 (settled facts) are decided. PASS: the
   owner agrees with the text as written. A change goes to the executor as a finding.
 
-- [ ] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
+- [x] **Step 10 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly.**
 
 | Run | PASS |
@@ -853,7 +853,7 @@ The merge runs as the installed relay says: `relay-merge` from the main checkout
 (`.hyper-relay/merge.conf`) run on the merged result. `relay-plan` reaches the owner's shell through its
 `~/.local/bin` link as soon as the merge lands.
 
-- [ ] **Step 11 (`after merge`): The release, 0.2.8 (spec §6; Releases, (1) and (2)).** The owner approves this push
+- [x] **Step 11 (`after merge`): The release, 0.2.8 (spec §6; Releases, (1) and (2)).** The owner approves this push
   at stop 4. In the main checkout on `main` (no `MERGE_HEAD`), one command per Bash call, with `<x.y.z>` the version
   `--check` shows with its patch number raised by one (`0.2.8` from `0.2.7`), unless the owner names another:
 
@@ -882,7 +882,7 @@ git -C /home/noob_master/hyper-relay push origin main v<x.y.z>
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v<x.y.z>` | one line |
 
-- [ ] **Step 12 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [x] **Step 12 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session).
 
