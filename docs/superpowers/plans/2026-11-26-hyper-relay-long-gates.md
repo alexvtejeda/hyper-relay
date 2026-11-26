@@ -455,7 +455,7 @@ git commit -m "feat: relay-plan gate --pane shows a gate's output in a tmux pane
 **Interfaces:**
 - Consumes: Task 1's `relay-plan gate --pane <plan> <command>`.
 
-- [ ] **Step 1: Process step 5.** In `skills/executing-plans/SKILL.md`, replace
+- [x] **Step 1: Process step 5.** In `skills/executing-plans/SKILL.md`, replace
 
 ```markdown
 5. **Full gates, once,** after your last task: the ones the plan's Execution notes name, and your agent's own
@@ -487,7 +487,7 @@ with
    `relay-plan gate <plan> '<command>'`.
 ````
 
-- [ ] **Step 2: Never wait by watching.** In the same file, insert before the line
+- [x] **Step 2: Never wait by watching.** In the same file, insert before the line
   ``- Wait with a self-matching `pgrep`, or `pkill -f` a pattern that appears in your own command line. Stop a server``:
 
 ```markdown
@@ -496,7 +496,7 @@ with
   and its completion wakes you.
 ```
 
-- [ ] **Step 3: Nothing of yours left running at hand-back.** In the same file, replace
+- [x] **Step 3: Nothing of yours left running at hand-back.** In the same file, replace
 
 ```markdown
    Then hand back only a short summary, at most about 15 lines: tasks n/N; one line per gate, its command and its
@@ -516,7 +516,7 @@ with
    every line of it, and reads `executor.md` only for what the summary does not settle.
 ```
 
-- [ ] **Step 4: Fix rounds.** In the same file, replace
+- [x] **Step 4: Fix rounds.** In the same file, replace
 
 ```markdown
 2. Rerun only the tests that pin the fix, not the full gates: each through `relay-plan gate <plan> '<command>'`, as
@@ -531,7 +531,7 @@ with
    woken, `relay-plan gates <plan>` naming each command you reran.
 ```
 
-- [ ] **Step 5: The notice is not a hand-back.** In `skills/orchestrating/dispatching.md`, insert after the line
+- [x] **Step 5: The notice is not a hand-back.** In `skills/orchestrating/dispatching.md`, insert after the line
   `## 7. Verify the hand-back` and its blank line, before the line that begins
   ``The executor hands back a short summary; its full report is the run folder's `executor.md` ``:
 
@@ -542,7 +542,7 @@ hand-back check, send the executor no message and post no status note.
 
 ```
 
-- [ ] **Step 6: Verify the text and the guard**
+- [x] **Step 6: Verify the text and the guard**
 
 Run: `grep -c -F 'relay-plan gate --pane <plan>' skills/executing-plans/SKILL.md`, then
 `grep -c -F 'relay-plan gate <plan>' skills/executing-plans/SKILL.md`, then
@@ -550,7 +550,7 @@ Run: `grep -c -F 'relay-plan gate --pane <plan>' skills/executing-plans/SKILL.md
 `sh tests/orchestrating/run-tests.sh | tail -n 1`
 Expected: `2`; `2`; `1`; `<n> passed, 0 failed`, with `<n>` the guard header's `Expect:` count (unchanged).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add skills/executing-plans/SKILL.md skills/orchestrating/dispatching.md
