@@ -32,6 +32,9 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
   git repos with fixture plans.
 - `tests/skill-size/` keeps every `skills/*/SKILL.md` under 20,000 bytes, where Claude Code's compaction cuts a skill;
   `brainstorming` is its one exception, until card `cf93197f` trims it.
+- `tests/skill-layout/` keeps a `CREATION-LOG.md` or a `test-*.md` out of every skill's folder, where an agent could
+  take one for its own instructions. They live under `tests/<skill>/`, as systematic-debugging's pressure scenarios
+  do in `tests/systematic-debugging/pressure-scenarios/`.
 - `tests/claude-code/`, `tests/explicit-skill-requests/`, `tests/skill-triggering/`:
   upstream's live suites. They run real `claude -p` sessions with `--plugin-dir`, which spends usage and loads the
   directory in place: run them from a worktree, never from a checkout that holds a `.mcp.json`. `docs/testing.md` is
@@ -107,4 +110,5 @@ to install it. `AGENTS.md` is a link to this file, so OpenCode reads the same ru
 | benchmark | `sh tests/benchmark/run-tests.sh` | `0 failed` |
 | Relay skills | `sh tests/orchestrating/run-tests.sh` | `0 failed` |
 | Skill size | `sh tests/skill-size/run-tests.sh` | `0 failed` |
+| Skill layout | `sh tests/skill-layout/run-tests.sh` | `0 failed` |
 | Shell syntax | `dash -n` for a `#!/bin/sh` script, `bash -n` for a bash one | silent |
