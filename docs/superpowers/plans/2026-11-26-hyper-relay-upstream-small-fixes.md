@@ -165,7 +165,7 @@ or generated. The spec flags no fact for re-check, so none was re-checked.
 - Modify: `skills/writing-skills/SKILL.md:20,93-322,459-531,556`
 - Modify: `CLAUDE.md` (after line 32; after line 106), `.hyper-relay/merge.conf` (before line 61)
 
-- [ ] **Step 1: Write the failing suite, `tests/skill-size/run-tests.sh`**
+- [x] **Step 1: Write the failing suite, `tests/skill-size/run-tests.sh`**
 
 Header comment: it keeps every `skills/*/SKILL.md` under 20,000 bytes, because after a compaction Claude Code
 re-attaches each invoked skill cut at about 20,000 characters, and bytes are stricter than characters;
@@ -202,14 +202,14 @@ Fixtures: `case_tree` makes a fresh empty tree `$CASE` (with `skills/`) under th
 | 11 | `skills/a/SKILL.md` 20,000, `skills/b/SKILL.md` 21,000, `skills/c/SKILL.md` 100 bytes | every offender named | output holds `skills/a/SKILL.md is 20000 bytes` and `skills/b/SKILL.md is 21000 bytes`, and no `skills/c/` |
 | 12 | `skills/notes/README.md` only | no SKILL.md fails | exit 1, and output holds `no skills/*/SKILL.md under` |
 
-- [ ] **Step 2: Run it to see the repo fail**
+- [x] **Step 2: Run it to see the repo fail**
 
 Run: `sh tests/skill-size/run-tests.sh`, then `dash -n tests/skill-size/run-tests.sh`
 Expected: `FAIL the repo's skills`, its output holding `skills/writing-skills/SKILL.md is 22624 bytes (limit: under
 20000)` and `skills/brainstorming/SKILL.md is 24202 bytes: excepted until card cf93197f trims it`; last line
 `11 passed, 1 failed`. `dash -n` silent.
 
-- [ ] **Step 3: Move the five docs**
+- [x] **Step 3: Move the five docs**
 
 ```bash
 mkdir skills/writing-skills/references
@@ -222,7 +222,7 @@ git mv skills/writing-skills/examples/CLAUDE_MD_TESTING.md skills/writing-skills
 
 If an empty `skills/writing-skills/examples/` folder is left, remove it (`rmdir`).
 
-- [ ] **Step 4: Its two names, in `skills/writing-skills/references/testing-skills-with-subagents.md`**
+- [x] **Step 4: Its two names, in `skills/writing-skills/references/testing-skills-with-subagents.md`**
 
 Replace
 
@@ -248,7 +248,7 @@ with
 **Why this works:** See persuasion-principles.md (in this directory) for research on how authority, scarcity, and commitment principles increase compliance pressure.
 ```
 
-- [ ] **Step 5: The three reference files**
+- [x] **Step 5: The three reference files**
 
 Each is four header lines, then a range of `git show HEAD:skills/writing-skills/SKILL.md`, unchanged but for the one
 line named below; each ends with that range's last line and its newline.
@@ -296,7 +296,7 @@ Part of hyper-relay:writing-skills. Read it when the baseline failure is a disci
 
 ```
 
-- [ ] **Step 6: `skills/writing-skills/SKILL.md`: three pointers and two names**
+- [x] **Step 6: `skills/writing-skills/SKILL.md`: three pointers and two names**
 
 Lines 93–322 (from `## SKILL.md Structure` through the closing fence of the `render-graphs.js` example, the line
 before the blank line above `## Code Examples`) become exactly these 19 lines:
@@ -365,7 +365,7 @@ Nothing else in `SKILL.md` changes. The new file has 378 lines: the old lines 1�
 pointer block at 93–111, the old lines 323–458 at 112–247, the second block at 248–254, and the old lines 532–655 at
 255–378 (old line 556 at 279).
 
-- [ ] **Step 7: Verify the move**
+- [x] **Step 7: Verify the move**
 
 | Run | Expected |
 |---|---|
@@ -379,7 +379,7 @@ pointer block at 93–111, the old lines 323–458 at 112–247, the second bloc
 | `ls skills/writing-skills/references` | exactly `CLAUDE_MD_TESTING.md`, `anthropic-best-practices.md`, `bulletproofing.md`, `discovery.md`, `flowcharts.md`, `graphviz-conventions.dot`, `persuasion-principles.md`, `testing-skills-with-subagents.md` |
 | `ls skills/writing-skills` | exactly `SKILL.md`, `references`, `render-graphs.js` |
 
-- [ ] **Step 8: Register the suite**
+- [x] **Step 8: Register the suite**
 
 In `CLAUDE.md`, insert after the line `  git repos with fixture plans.` (line 32):
 
@@ -404,14 +404,14 @@ tests/skill-size/               test   sh tests/skill-size/run-tests.sh
 
 ```
 
-- [ ] **Step 9: Run the suite and the guard**
+- [x] **Step 9: Run the suite and the guard**
 
 Run: `sh tests/skill-size/run-tests.sh`, then `wc -c < skills/writing-skills/SKILL.md`, then
 `sh tests/orchestrating/run-tests.sh | tail -n 1`
 Expected: `12 passed, 0 failed`, with the brainstorming line under `ok   the repo's skills`; a number under 20000
 (about 13,000–14,000); `48 passed, 0 failed`.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add tests/skill-size/run-tests.sh skills/writing-skills/SKILL.md skills/writing-skills/references/discovery.md skills/writing-skills/references/flowcharts.md skills/writing-skills/references/bulletproofing.md skills/writing-skills/references/testing-skills-with-subagents.md CLAUDE.md .hyper-relay/merge.conf
