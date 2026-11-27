@@ -167,7 +167,7 @@ generated. The spec flags no fact for re-check, so none was re-checked.
   the summary line and exit 1 when there are none; `relay-plan check` accepting the kind; the refusal line
   `Step <id>: "<who>" is not reviewer, code-review, owner, after merge or skill-test`. Tasks 4 and 6 name them.
 
-- [ ] **Step 1: Write the fixture and the failing tests**
+- [x] **Step 1: Write the fixture and the failing tests**
 
 Create `tests/relay-plan/fixtures/code-review.md`, written in full because its kinds, titles and wrap are what the
 tests check:
@@ -268,7 +268,7 @@ assert_eq "code review with a space: an unknown who: exit 2" 2 "$RC"
 
 - The header's `# Expect: "174 passed, 0 failed"` becomes `# Expect: "186 passed, 0 failed"` (12 new assertions).
 
-- [ ] **Step 2: Run them to verify they fail**
+- [x] **Step 2: Run them to verify they fail**
 
 Run: `sh tests/relay-plan/run-tests.sh | grep '^FAIL'`, then `sh tests/relay-plan/run-tests.sh | tail -n 1`
 Expected: exactly six `FAIL` lines: `check: acceptance: the line`, `code-review: steps code-review lists them`,
@@ -276,7 +276,7 @@ Expected: exactly six `FAIL` lines: `check: acceptance: the line`, `code-review:
 the kind`, `code-review: check: exit 0` and `code review with a space: the line` (today's message lacks
 `code-review`); last line `180 passed, 6 failed`.
 
-- [ ] **Step 3: Implement the kind in `bin/relay-plan`**
+- [x] **Step 3: Implement the kind in `bin/relay-plan`**
 
 - Line 9 of the header comment becomes `#   relay-plan steps <plan> [reviewer|code-review|owner|after-merge|skill-test]`.
 - `cmd_steps` (line 322): `code-review` joins `reviewer`, `owner` and `skill-test` in the case that sets `who=$2`.
@@ -285,12 +285,12 @@ the kind`, `code-review: check: exit 0` and `code review with a space: the line`
 
 Nothing else changes: `acceptance_steps`, `step_text` and `scenarios` already read any kind in backticks.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `sh tests/relay-plan/run-tests.sh | tail -n 1`, then `dash -n bin/relay-plan`, then `git ls-files -s bin/relay-plan`
 Expected: `186 passed, 0 failed`; `dash -n` silent; mode `100755`.
 
-- [ ] **Step 5: `docs/relay-plan.md`**
+- [x] **Step 5: `docs/relay-plan.md`**
 
 Replace
 
@@ -327,7 +327,7 @@ Replace ``### `relay-plan steps <plan> [reviewer|owner|after-merge|skill-test]` 
 
 Verify: `grep -c -F 'code-review' docs/relay-plan.md` prints `3`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add bin/relay-plan tests/relay-plan/run-tests.sh tests/relay-plan/fixtures/code-review.md docs/relay-plan.md
