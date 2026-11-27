@@ -712,7 +712,7 @@ git commit -m "fix: systematic-debugging's secret example and hyphen, and four r
   lines 123–136; Option 4, lines 146–148; Step 6, lines 173–190; Quick Reference, Common Mistakes and Red Flags,
   lines 201–250)
 
-- [ ] **Step 1: Fix 4, the path is captured in Step 2 (`0b47219`).** Insert after line 46,
+- [x] **Step 1: Fix 4, the path is captured in Step 2 (`0b47219`).** Insert after line 46,
   `GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)` (the first of its two occurrences,
   inside Step 2's code block):
 
@@ -722,7 +722,7 @@ git commit -m "fix: systematic-debugging's secret example and hyphen, and four r
 WORKTREE_PATH=$(git rev-parse --show-toplevel)
 ```
 
-- [ ] **Step 2: Fix 1, Step 2's table.** Replace
+- [x] **Step 2: Fix 1, Step 2's table.** Replace
 
 ```markdown
 | `GIT_DIR == GIT_COMMON` (normal repo) | Standard 4 options | No worktree to clean up |
@@ -738,7 +738,7 @@ with
 | `GIT_DIR != GIT_COMMON`, detached HEAD | Reduced 2 options (no merge) | No cleanup (externally managed) |
 ```
 
-- [ ] **Step 3: Fix 1, the menus (7.0.2).** Replace
+- [x] **Step 3: Fix 1, the menus (7.0.2).** Replace
   `**Normal repo and named-branch worktree — present exactly these 4 options:**` with
   `**Normal repo and named-branch worktree — present exactly these 3 options:**`. Replace
 
@@ -777,7 +777,7 @@ discard the work" below). Wait for their answer; the integration decision
 is theirs.
 ```
 
-- [ ] **Step 4: Fix 2, the PR step on any forge (7.0.2; `24ae4c8`, `4e3707f`, `bcfe798`, `0b47219`).** Replace
+- [x] **Step 4: Fix 2, the PR step on any forge (7.0.2; `24ae4c8`, `4e3707f`, `bcfe798`, `0b47219`).** Replace
 
 ````markdown
 ```bash
