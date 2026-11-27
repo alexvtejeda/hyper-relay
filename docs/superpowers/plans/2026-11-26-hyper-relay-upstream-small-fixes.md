@@ -523,7 +523,7 @@ git commit -m "feat: pressure scenarios leave systematic-debugging, and a test t
 - Modify: `skills/systematic-debugging/find-polluter.sh:21-23`
 - Modify: `CLAUDE.md` (after Task 2's bullet and row), `.hyper-relay/merge.conf` (before the "# Relay skills" line)
 
-- [ ] **Step 1: Write the failing suite, `tests/systematic-debugging/run-tests.sh`**
+- [x] **Step 1: Write the failing suite, `tests/systematic-debugging/run-tests.sh`**
 
 Header comment: it runs systematic-debugging's `find-polluter.sh` by its path (its bash shebang) on a toy project with
 a stub `npm`; then `# Usage: sh tests/systematic-debugging/run-tests.sh      Expect: "9 passed, 0 failed"`.
@@ -555,13 +555,13 @@ code), never aborting on either. Assertions follow `tests/add-card-line/run-test
 | 8 | the same run | no match: the clean path | `OUT` holds `No polluter found` |
 | 9 | the same run | no match: exits 0 | `RC` is `0` |
 
-- [ ] **Step 2: Run it to see it fail**
+- [x] **Step 2: Run it to see it fail**
 
 Run: `sh tests/systematic-debugging/run-tests.sh`, then `dash -n tests/systematic-debugging/run-tests.sh`
 Expected: cases 2–7 FAIL (the documented pattern matches nothing; `Found 1` where 2 or 0 is due); last line
 `3 passed, 6 failed`. `dash -n` silent.
 
-- [ ] **Step 3: Upstream's fix (`6015d37`, `c8921b5`).** In `skills/systematic-debugging/find-polluter.sh`, replace
+- [x] **Step 3: Upstream's fix (`6015d37`, `c8921b5`).** In `skills/systematic-debugging/find-polluter.sh`, replace
 
 ```bash
 # Get list of test files
@@ -586,7 +586,7 @@ else
 fi
 ```
 
-- [ ] **Step 4: Verify it is upstream's file**
+- [x] **Step 4: Verify it is upstream's file**
 
 Run: `git hash-object skills/systematic-debugging/find-polluter.sh`, then
 `git rev-parse v7.0.2:skills/systematic-debugging/find-polluter.sh`, then
@@ -594,12 +594,12 @@ Run: `git hash-object skills/systematic-debugging/find-polluter.sh`, then
 `bash -n skills/systematic-debugging/find-polluter.sh`
 Expected: `985f5d08ccf8a3f2d40739cfcaf4413bb24bf1cb` twice; mode `100755`; silent.
 
-- [ ] **Step 5: Run the suite**
+- [x] **Step 5: Run the suite**
 
 Run: `sh tests/systematic-debugging/run-tests.sh | tail -n 1`
 Expected: `9 passed, 0 failed`
 
-- [ ] **Step 6: Register the suite**
+- [x] **Step 6: Register the suite**
 
 In `CLAUDE.md`, insert after the `tests/skill-layout/` bullet that Task 2 Step 4 added (after its third line):
 
@@ -624,7 +624,7 @@ tests/systematic-debugging/     test   sh tests/systematic-debugging/run-tests.s
 
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add tests/systematic-debugging/run-tests.sh skills/systematic-debugging/find-polluter.sh CLAUDE.md .hyper-relay/merge.conf
