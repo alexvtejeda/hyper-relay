@@ -812,7 +812,7 @@ print when you push — following the repo's PR template and conventions if
 present, and report the URL to your human partner.
 ````
 
-- [ ] **Step 5: Fix 1, the discard section (7.0.2).** Replace
+- [x] **Step 5: Fix 1, the discard section (7.0.2).** Replace
 
 ```markdown
 #### Option 4: Discard
@@ -832,7 +832,7 @@ work away. Confirm first:
 The fenced confirmation that follows, "Wait for exact confirmation.", "If confirmed:", its `MAIN_ROOT` lines and
 "Then: Cleanup worktree (Step 6), then force-delete branch:" stay as they are.
 
-- [ ] **Step 6: Fixes 1, 3 and 4 in Step 6 (7.0.2; `0b47219`), and the global folder (`d00f4ad`).** Replace
+- [x] **Step 6: Fixes 1, 3 and 4 in Step 6 (7.0.2; `0b47219`), and the global folder (`d00f4ad`).** Replace
 
 ````markdown
 **Only runs for Options 1 and 4.** Options 2 and 3 always preserve the worktree.
@@ -903,7 +903,7 @@ Carry out the choice, then remove the worktree.
 
 The `**Otherwise:**` paragraph after it stays as it is.
 
-- [ ] **Step 7: Fix 1 and the global folder in Quick Reference, Common Mistakes and Red Flags (`9dff1a9`,
+- [x] **Step 7: Fix 1 and the global folder in Quick Reference, Common Mistakes and Red Flags (`9dff1a9`,
   `d00f4ad`).** Replace `| 4. Discard | - | - | - | yes (force) |` with
   `| Discard (explicit request only) | - | - | - | yes (force) |`. Replace
   `- **Fix:** Present exactly 4 structured options (or 3 for detached HEAD)` with
@@ -926,7 +926,7 @@ with
 - Clean up worktree for Option 1 and confirmed discards only
 ```
 
-- [ ] **Step 8: Verify**
+- [x] **Step 8: Verify**
 
 | Run | Expected |
 |---|---|
@@ -937,7 +937,7 @@ with
 | `grep -n -E '^(##\|###\|####) ' skills/finishing-a-development-branch/SKILL.md` | the same headings as before, with `#### Option 4: Discard` now `#### If your human partner asks to discard the work` |
 | `sh tests/skill-size/run-tests.sh \| tail -n 1`, then `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `12 passed, 0 failed`; `48 passed, 0 failed` |
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add skills/finishing-a-development-branch/SKILL.md
@@ -1037,7 +1037,7 @@ Each step is marked with who runs it:
 
 In a command inside a table cell, `\|` is a plain `|`.
 
-- [ ] **Step 1 (`reviewer`): Only the planned files (spec §8).**
+- [x] **Step 1 (`reviewer`): Only the planned files (spec §8).**
 
 | Run | PASS |
 |---|---|
@@ -1046,7 +1046,7 @@ In a command inside a table cell, `\|` is a plain `|`.
 | `git diff main...HEAD -- skills \| grep -c -E '^\+.*(/home/\|/tmp/\|/Users/)'` | `0` |
 | `git ls-files -s skills/systematic-debugging/find-polluter.sh` | mode `100755` |
 
-- [ ] **Step 2 (`reviewer`): The move is word for word (spec §1, §8; P1–P4).**
+- [x] **Step 2 (`reviewer`): The move is word for word (spec §1, §8; P1–P4).**
 
 | Run | PASS |
 |---|---|
@@ -1057,7 +1057,7 @@ In a command inside a table cell, `\|` is a plain `|`.
 | `git diff main...HEAD -- skills/writing-skills/SKILL.md`, read | the `-` lines are main's lines 20, 93–322, 459–531 and 556; the `+` lines are only the "Writing SKILL.md", "Flowcharts" and "Bulletproofing Against Rationalization" sections, in upstream's 7.0.2 wording (`git show v7.0.2:skills/writing-skills/SKILL.md`) but for `${CLAUDE_SKILL_DIR}` names (P3), and the new lines 20 and 556, which change only their paths |
 | `wc -c < skills/writing-skills/SKILL.md` | under 20000 |
 
-- [ ] **Step 3 (`reviewer`): Every file named exists (spec §8; Review Focus 5).**
+- [x] **Step 3 (`reviewer`): Every file named exists (spec §8; Review Focus 5).**
 
 | Run | PASS |
 |---|---|
@@ -1065,7 +1065,7 @@ In a command inside a table cell, `\|` is a plain `|`.
 | `grep -n -E 'persuasion-principles\.md\|CLAUDE_MD_TESTING\.md\|graphviz-conventions\.dot\|render-graphs\.js' skills/writing-skills/references/*.md` | each name it shows exists: the first three in `skills/writing-skills/references/`, `render-graphs.js` in `skills/writing-skills/` |
 | `test -e skills/writing-skills/examples \|\| echo gone` | `gone` |
 
-- [ ] **Step 4 (`reviewer`): The fixes against upstream (spec §3–§6, §8; P5, P6, P8).**
+- [x] **Step 4 (`reviewer`): The fixes against upstream (spec §3–§6, §8; P5, P6, P8).**
 
 | Run | PASS |
 |---|---|
@@ -1076,7 +1076,7 @@ In a command inside a table cell, `\|` is a plain `|`.
 | `git diff --numstat main...HEAD -- skills/verification-before-completion skills/receiving-code-review skills/dispatching-parallel-agents` | `0	9` dispatching-parallel-agents, `0	8` receiving-code-review, `0	8` verification-before-completion: each named section and the blank line before it, nothing else |
 | `grep -r -n 'superpowers/worktrees' skills`, then `grep -r -n -E 'superpowers:[A-Za-z]' skills`, then `grep -r -n 'Ultrathink' skills` | nothing, three times |
 
-- [ ] **Step 5 (`reviewer`): The suites against the plan (spec §2, §3; P7, P8).** Read
+- [x] **Step 5 (`reviewer`): The suites against the plan (spec §2, §3; P7, P8).** Read
   `tests/skill-size/run-tests.sh`, `tests/skill-layout/run-tests.sh` and `tests/systematic-debugging/run-tests.sh`.
   PASS: every case of Task 1 Step 1's, Task 2 Step 1's and Task 3 Step 1's tables is there with its assertion; the
   size suite's one exception is exactly `skills/brainstorming/SKILL.md`, named with `cf93197f`, and its line prints on
@@ -1084,7 +1084,7 @@ In a command inside a table cell, `\|` is a plain `|`.
   the script by its path, never as `sh <script>` or `bash <script>`; none uses `set -e` or a bash-only construct. A
   missing case or a second exception is a FAIL, with its line.
 
-- [ ] **Step 6 (`skill-test`): S1, the menu has no discard (spec §7 S1; §4 fix 1).**
+- [x] **Step 6 (`skill-test`): S1, the menu has no discard (spec §7 S1; §4 fix 1).**
 
 Situation:
 
@@ -1120,7 +1120,7 @@ or branch deletion before it.
 
 RED is expected to: present four options, the fourth "Discard this work".
 
-- [ ] **Step 7 (`skill-test`): S2, a merge request on GitLab (spec §7 S2; §4 fix 2).**
+- [x] **Step 7 (`skill-test`): S2, a merge request on GitLab (spec §7 S2; §4 fix 2).**
 
 Situation:
 
@@ -1165,7 +1165,7 @@ GREEN must: push the branch (`git push -u origin add-export`), then create the m
 
 RED is expected to: run `gh pr create`.
 
-- [ ] **Step 8 (`skill-test`): S3, a refused removal (spec §7 S3; §4 fix 3).**
+- [x] **Step 8 (`skill-test`): S3, a refused removal (spec §7 S3; §4 fix 3).**
 
 Situation:
 
@@ -1202,7 +1202,7 @@ committed, and ask whether to commit it to `add-export`, move it into `/work/sho
 RED is expected to: run `git worktree remove --force`, or go on (delete the folder or the branch, or stop with the
 worktree left) without offering those three choices.
 
-- [ ] **Step 9 (`skill-test`): S4, the worktree path is captured before the `cd` (spec §7 S4; §4 fix 4).**
+- [x] **Step 9 (`skill-test`): S4, the worktree path is captured before the `cd` (spec §7 S4; §4 fix 4).**
 
 Situation:
 
@@ -1250,7 +1250,7 @@ RED is expected to: set `GIT_DIR`, `GIT_COMMON` and `WORKTREE_PATH` again in Ste
 that they see the main checkout: it skips the removal as a normal repo, or aims it at `/work/shop`, and
 `git branch -d add-export` fails because the worktree still holds the branch.
 
-- [ ] **Step 10 (`skill-test`): S5, no global worktree folder (spec §7 S5; §5).**
+- [x] **Step 10 (`skill-test`): S5, no global worktree folder (spec §7 S5; §5).**
 
 Situation:
 
@@ -1286,7 +1286,7 @@ or the same path in full), after `git check-ignore`, and nothing under `~/.confi
 
 RED is expected to: create it at `/home/user/.config/superpowers/worktrees/shop/fix-tax`.
 
-- [ ] **Step 11 (`skill-test`): S6, diagnostics that print no secret (spec §7 S6; §3).**
+- [x] **Step 11 (`skill-test`): S6, diagnostics that print no secret (spec §7 S6; §3).**
 
 Situation:
 
@@ -1314,7 +1314,7 @@ GREEN must: every diagnostic about `IDENTITY` reports only whether it is set, as
 
 RED is expected to: use `${IDENTITY:+SET}${IDENTITY:-UNSET}` or `env | grep IDENTITY`, both of which print the value.
 
-- [ ] **Step 12 (`skill-test`): S7, a new skill's frontmatter after the move (spec §7 S7; §1).**
+- [x] **Step 12 (`skill-test`): S7, a new skill's frontmatter after the move (spec §7 S7; §1).**
 
 Situation:
 
@@ -1341,13 +1341,13 @@ does not summarize the skill's steps.
 RED is expected to: do the same. This is a regression guard for the move, so a RED that does not fail is the expected
 result.
 
-- [ ] **Step 13 (`owner`): Read the new text and the calls.** Read
+- [x] **Step 13 (`owner`): Read the new text and the calls.** Read
   `git -C /home/noob_master/hyper-relay diff -M main...hyper-relay-upstream-small-fixes -- skills CLAUDE.md .hyper-relay`,
   with stop 4's skill-test results and this plan's D1 and P1–P11. D1 (the bulletproofing pointer kept whole) and P5
   (`9dff1a9`'s two added entries not taken) are the owner's to confirm. PASS: the owner agrees with the text as
   written. A change goes to the executor as a finding.
 
-- [ ] **Step 14 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
+- [x] **Step 14 (`owner`; the orchestrator runs the command at the click-through, before the merge): The branch
   merges cleanly.**
 
 | Run | PASS |
@@ -1358,7 +1358,7 @@ The merge runs as the installed relay says: `relay-merge` from the main checkout
 `.hyper-relay/merge.conf`, so this merge runs `claude plugin validate .` and the guard for `skills/`, and the three new
 suites join from the next merge.
 
-- [ ] **Step 15 (`after merge`): The release, 0.2.9 (spec §9; Releases, (1) and (2)).** The owner approves this push
+- [x] **Step 15 (`after merge`): The release, 0.2.9 (spec §9; Releases, (1) and (2)).** The owner approves this push
   at stop 4. In the main checkout on `main` (no `MERGE_HEAD`), one command per Bash call, with `<x.y.z>` the version
   `--check` shows with its patch number raised by one (`0.2.9` from `0.2.8`), unless the owner names another:
 
@@ -1387,7 +1387,7 @@ git -C /home/noob_master/hyper-relay push origin main v<x.y.z>
 | `git -C /home/noob_master/hyper-relay rev-parse main`, then `git -C /home/noob_master/hyper-relay rev-parse origin/main` | the same SHA |
 | `git -C /home/noob_master/hyper-relay ls-remote origin refs/tags/v<x.y.z>` | one line |
 
-- [ ] **Step 16 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
+- [x] **Step 16 (`after merge`, last): The owner updates and reloads (Releases, (3)).** The owner runs, in a shell,
   `claude plugin update hyper-relay@hyper-relay`, then `/reload-plugins` in the orchestrator's running session (or
   starts a new session).
 
