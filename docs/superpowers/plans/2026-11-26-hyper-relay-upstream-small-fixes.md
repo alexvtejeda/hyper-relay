@@ -949,7 +949,7 @@ git commit -m "fix: finishing offers no discard, opens a PR on any forge, asks o
 **Files:**
 - Modify: `skills/using-git-worktrees/SKILL.md:76-83,97-98,102-106,166,192,212`
 
-- [ ] **Step 1: Directory Selection (`d00f4ad`).** Replace
+- [x] **Step 1: Directory Selection (`d00f4ad`).** Replace
 
 ````markdown
 3. **Check for an existing global directory:**
@@ -968,7 +968,7 @@ with
 3. **If there is no other guidance available**, default to `.worktrees/` at the project root.
 ```
 
-- [ ] **Step 2: Safety Verification.** Replace
+- [x] **Step 2: Safety Verification.** Replace
 
 ```markdown
 **Why critical:** Prevents accidentally committing worktree contents to repository.
@@ -982,7 +982,7 @@ with
 **Why critical:** Prevents accidentally committing worktree contents to repository.
 ```
 
-- [ ] **Step 3: Create the Worktree.** Replace
+- [x] **Step 3: Create the Worktree.** Replace
 
 ```bash
 project=$(basename "$(git rev-parse --show-toplevel)")
@@ -999,14 +999,14 @@ with
 path="$LOCATION/$BRANCH_NAME"
 ```
 
-- [ ] **Step 4: Quick Reference, Common Mistakes and Red Flags.** Delete the line
+- [x] **Step 4: Quick Reference, Common Mistakes and Red Flags.** Delete the line
   `| Global path exists | Use it (backward compat) |`. Replace
   `- **Fix:** Follow priority: existing > global legacy > instruction file > default` with
   `- **Fix:** Follow priority: explicit instructions > existing project-local directory > default`. Replace
   `- Follow directory priority: existing > global legacy > instruction file > default` with
   `- Follow directory priority: explicit instructions > existing project-local directory > default`.
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 | Run | Expected |
 |---|---|
@@ -1016,7 +1016,7 @@ path="$LOCATION/$BRANCH_NAME"
 | `grep -r -n 'superpowers/worktrees' skills` | nothing |
 | `sh tests/orchestrating/run-tests.sh \| tail -n 1` | `48 passed, 0 failed` |
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add skills/using-git-worktrees/SKILL.md
