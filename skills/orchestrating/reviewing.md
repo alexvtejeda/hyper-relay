@@ -21,7 +21,8 @@ gives:
   no Quartz tool."
 
 Then post the status note (`quartz.md` §4, moment 5). When the plan has no `reviewer` steps, skip the dispatch, say
-so at stop 4, and post moment 6's status now, as `acceptance done, no reviewer steps`.
+so at stop 4, and post moment 6's status now, as `acceptance done, no reviewer steps`. The plan's `code-review` steps
+are never the acceptance reviewer's: the code reviewer runs them (§3).
 
 **Without a generated reviewer** (`SKILL.md`, Fallbacks), dispatch a general-purpose agent (in OpenCode, the
 `general` subagent) with the same prompt and this standing brief:
@@ -47,7 +48,7 @@ so at stop 4, and post moment 6's status now, as `acceptance done, no reviewer s
 
 ## 2. The fix loop
 
-Sort each FAIL and each BLOCKING finding:
+Sort each FAIL and each BLOCKING finding, and each real FAIL of a `code-review` step (§3):
 
 | Kind | Goes to |
 |---|---|
@@ -73,11 +74,12 @@ already In review. Then the reviewer, resumed or fresh, reruns only the steps th
 `## Rerun after fix round <k>` section to `report.md`.
 
 **The fix-round cap.** Read `fix-rounds:` from the header of `main`'s facts file, as `dispatching.md` §1 reads
-`execute:`; without it, the cap is 2. A finding (an acceptance FAIL, a Critical, a GREEN that failed) that still fails
-after that many rounds gets no further round. File a card for it: `add_tasks` with the label `proposed`, kind `bug`,
-the plan's initiative, and a body naming the plan, the step or finding, its evidence paths and "fix cap reached after
-<n> rounds" (without Quartz, a section in `cards.md`). Then carry on with the rest of the loop; stop 4 opens with it
-(§4). A gap in the spec or the plan is not capped: it goes to the owner at once.
+`execute:`; without it, the cap is 2. A finding (an acceptance FAIL, a Critical, a `code-review` step's FAIL, a GREEN
+that failed) that still fails after that many rounds gets no further round. File a card for it yourself (the code
+reviewer files none for a FAIL): `add_tasks` with the label `proposed`, kind `bug`, the plan's initiative, and a body
+naming the plan, the step or finding, its evidence paths and "fix cap reached after <n> rounds" (without Quartz, a
+section in `cards.md`). Then carry on with the rest of the loop; stop 4 opens with it (§4). A gap in the spec or the
+plan is not capped: it goes to the owner at once.
 
 **Proposed cards.** The agent that finds an issue files it: the acceptance reviewer its PRE-EXISTING and POLISH
 findings, the code reviewer its Important and Minor ones (§3), the executor an issue it noticed outside its plan.
@@ -103,11 +105,18 @@ plan's initiative ("none" without Quartz). It writes its review to the run folde
 Important and Minor findings as proposed cards (§2), and hands back a short summary. It runs once per branch, after
 acceptance and its fixes, so it reads the final diff.
 
-**A Critical** finding: check each one against the code first (`hyper-relay:receiving-code-review`), from its lines
-in `code-review.md`. A wrong one is dropped, with the reason, in the stop-4 report. A real one is a fix round (§2),
-and counts toward the cap. Then resume the code reviewer to check only the fix commits (when it cannot be resumed,
-read that diff yourself), and have the acceptance reviewer rerun the steps the fix touches (all its steps, when that
-is unclear).
+**The plan's `code-review` steps** run within that one review: its prompt's `{PLAN_STEPS}` names each id that
+`relay-plan steps <plan> code-review` lists, each with the command that prints it, `relay-plan step <plan> <id>`, or
+"none" when it lists none. **Verify its summary:** every listed step has its verdict, PASS or FAIL, in
+`code-review.md`; a step without one goes back to the code reviewer.
+
+**A Critical** finding, or a `code-review` step's FAIL: check each one against the code first
+(`hyper-relay:receiving-code-review`), from its lines in `code-review.md`. A wrong one is dropped, with the reason, in
+the stop-4 report. A real Critical is a fix round (§2), and counts toward the cap; a real FAIL is sorted as §2 sorts
+an acceptance FAIL. After the fix, resume the code reviewer to check only the fix commits and rerun the steps that
+failed, appending to `code-review.md` (when it cannot be resumed, read that diff yourself, and have a fresh code
+reviewer rerun only those steps), and have the acceptance reviewer rerun the `reviewer` steps the fix touches (all of
+them, when that is unclear).
 
 **The skill tests** run when the plan's acceptance task has `skill-test` steps (`relay-plan steps <plan> skill-test`
 lists them; `hyper-relay:writing-plans` requires them in a plan that creates or changes a file in a skill's folder),
@@ -152,12 +161,13 @@ folder:
    so, and it blocks nothing.
 
 Post the status note when you dispatch the code review and the skill-test runs (moment 7), and when the code review,
-its Critical fixes and the skill tests are done (moment 8):
+its Critical and `code-review` fixes and the skill tests are done (moment 8):
 
-`code review done, C Critical (x fixed, y dropped), I Important, m Minor; skill tests G/S GREEN`
+`code review done, C Critical (x fixed, y dropped), I Important, m Minor; plan steps P/Q PASS; skill tests G/S GREEN`
 
-The skill tests' part counts the S scenarios and the G whose GREEN passed; a plan without skill tests leaves out
-"; skill tests G/S GREEN".
+The plan steps' part counts the Q `code-review` steps and the P that passed; a plan without them leaves out
+"; plan steps P/Q PASS". The skill tests' part counts the S scenarios and the G whose GREEN passed; a plan without
+skill tests leaves out "; skill tests G/S GREEN".
 
 ## 4. Stop 4, the click-through and the merge
 
@@ -178,10 +188,10 @@ this order (`SKILL.md`, The stops):
 
 Then the report, short, one line per item:
 
-- the acceptance verdicts;
+- the acceptance verdicts, and beside them the `code-review` steps' verdicts from `code-review.md`;
 - the skill-test verdicts, the judge's line for each scenario, naming each RED that did not fail;
 - each fix round, and what it changed;
-- the Critical findings fixed, and those dropped with why;
+- the Critical findings and `code-review` FAILs fixed, and those dropped with why;
 - the proposed cards filed during the run, as their number (the owner prunes them on the board); without Quartz,
   each card in `cards.md` instead, one line each (title, file, why), for the owner to keep or drop;
 - each deviation recorded on the way, such as an overlap the owner chose to run at once (`parallel.md` §2);

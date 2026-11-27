@@ -38,7 +38,7 @@ cleared conversation is a new session:
 | 1. Design | The approaches, then the design played back part by part (`brainstorming`) | the spec |
 | 2. Spec | The written spec (`brainstorming`); skipped when the owner approved a short design in brainstorming's first message, which covers stops 1 and 2 | the planner leg: approval is the go-ahead, no second ask |
 | 3. Plan ready | Its questions first: the decisions the owner must make, the assumptions the planner made where the spec was silent, the plan-review offer, the handoff question. Then the hand-back check's result and the planner's deviations (`planning.md` §3) | execution, a plan review, plan changes, or "research it" |
-| 4. Ready to merge | Its questions first: each finding that reached the fix-round cap (merge with its card open, hold the branch, or one more round), the steps that are the owner's, where to click through. Then gate, acceptance and skill-test results, fixes made, Critical findings fixed or dropped, and the number of proposed cards filed (`reviewing.md` §4) | the click-through and the merge |
+| 4. Ready to merge | Its questions first: each finding that reached the fix-round cap (merge with its card open, hold the branch, or one more round), the steps that are the owner's, where to click through. Then gate, acceptance, `code-review` step and skill-test results, fixes made, Critical findings and `code-review` FAILs fixed or dropped, and the number of proposed cards filed (`reviewing.md` §4) | the click-through and the merge |
 
 A stop that asks anything opens with its questions, numbered, before any report: every question, and every decision
 the owner must make. The report follows, short: one line per item, and nothing the board shows. No question comes
