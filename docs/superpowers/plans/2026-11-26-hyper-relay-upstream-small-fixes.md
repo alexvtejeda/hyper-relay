@@ -428,7 +428,7 @@ git commit -m "feat: writing-skills under the compaction cut, and a test that ke
   `tests/systematic-debugging/pressure-scenarios/<same name>`
 - Modify: `CLAUDE.md` (after Task 1's bullet and row), `.hyper-relay/merge.conf` (before the "# Relay skills" line)
 
-- [ ] **Step 1: Write the failing suite, `tests/skill-layout/run-tests.sh`**
+- [x] **Step 1: Write the failing suite, `tests/skill-layout/run-tests.sh`**
 
 Header comment: it keeps a `CREATION-LOG.md` or a `test-*.md` out of every skill's folder, because agents read and
 grep those folders during normal work, and a pressure scenario opens with lines like "You must choose and act" that an
@@ -456,14 +456,14 @@ removes that `skills/`); `touch_file <top> <path>` creates an empty file at `<to
 | 9 | `skills/a/test-one.md` and `skills/b/CREATION-LOG.md` | every file named | output holds both paths |
 | 10 | a tree with no `skills/` | a missing skills/ fails | exit 1 |
 
-- [ ] **Step 2: Run it to see the repo fail**
+- [x] **Step 2: Run it to see the repo fail**
 
 Run: `sh tests/skill-layout/run-tests.sh`, then `dash -n tests/skill-layout/run-tests.sh`
 Expected: `FAIL the repo's skills`, its output naming exactly `skills/systematic-debugging/CREATION-LOG.md`,
 `skills/systematic-debugging/test-academic.md` and `skills/systematic-debugging/test-pressure-1.md` to `-3.md`; last
 line `9 passed, 1 failed`. `dash -n` silent.
 
-- [ ] **Step 3: Move the five files, unchanged**
+- [x] **Step 3: Move the five files, unchanged**
 
 ```bash
 mkdir -p tests/systematic-debugging/pressure-scenarios
@@ -476,7 +476,7 @@ git mv skills/systematic-debugging/test-pressure-3.md tests/systematic-debugging
 
 `CREATION-LOG.md`'s stale `skills/meta/testing-skills-with-subagents` path (its line 57) stays as it is.
 
-- [ ] **Step 4: Register the suite**
+- [x] **Step 4: Register the suite**
 
 In `CLAUDE.md`, insert after the `tests/skill-size/` bullet that Task 1 Step 8 added (after its second line):
 
@@ -502,14 +502,14 @@ tests/skill-layout/             test   sh tests/skill-layout/run-tests.sh
 
 ```
 
-- [ ] **Step 5: Run the suites**
+- [x] **Step 5: Run the suites**
 
 Run: `sh tests/skill-layout/run-tests.sh | tail -n 1`, then `git diff --cached -M --name-status`, then
 `sh tests/orchestrating/run-tests.sh | tail -n 1`
 Expected: `10 passed, 0 failed`; five `R100` lines, from `skills/systematic-debugging/` to
 `tests/systematic-debugging/pressure-scenarios/`; `48 passed, 0 failed`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tests/skill-layout/run-tests.sh CLAUDE.md .hyper-relay/merge.conf
