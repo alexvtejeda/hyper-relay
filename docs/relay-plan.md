@@ -49,8 +49,9 @@ One line per item. Under a `FAIL` line, at most 5 lines of detail, each indented
 Nothing inside a fenced code block counts as a task, a step, a heading, a path or a placeholder, so a plan that quotes
 another plan or a skill's text in a fence is read right. A task is a `### Task <N>` heading, and runs to the next `## `
 or `### ` heading. The last task is the acceptance task. Its steps are written
-``- [ ] **Step <id> (`<who>` …): <title>**``, where `<who>` is `reviewer`, `owner`, `after merge` or `skill-test`, and
-the title may wrap onto the next line.
+``- [ ] **Step <id> (`<who>` …): <title>**``, where `<who>` is `reviewer`, `code-review`, `owner`, `after merge` or
+`skill-test`, and the title may wrap onto the next line. A `code-review` step is a check that only reads the branch,
+run by the code reviewer within the branch's code review; a `reviewer` step is the acceptance reviewer's.
 
 ## Commands
 
@@ -67,7 +68,7 @@ The checks of a newly written plan, in this order, one line each: `ok <check>`, 
 | `committed` | always | `main` has a commit of the plan; when the main checkout is on another branch (a branch run), the file exists |
 | `card` | with `--spec` | the spec's header names no card, or the plan's header has a `**Card:**` or `**Cards:**` line, or a `**Spec:**` line naming the spec |
 | `trailers` | always | each task that commits carries `Plan-Task: <plan path>#<N>` once, with its own number |
-| `acceptance` | always | each step of the acceptance task names who runs it |
+| `acceptance` | always | each step of the acceptance task names who runs it, one of the five `<who>` above |
 | `skill-tests` | always | each `skill-test` step has a `Situation:` line, then a fence opened as ```` ```text ````, and a `GREEN must:` and a `RED is expected to:` line |
 | `placeholders` | always | no `TBD`, `TODO`, `implement later`, `fill in details` or `Similar to Task` outside fences and inline code |
 | `coverage` | with `--spec` | every `## ` heading of the spec is the first cell of a row in the plan's `## Spec coverage` table |
@@ -86,7 +87,7 @@ its `- Create:`, `- Modify:` and `- Test:` lines, without a `:<lines>` part. A b
 one folder whose names start with the same digits followed by `_` or `.`, such as migrations (a date is not a
 number here). No output, and exit 0: no overlap.
 
-### `relay-plan steps <plan> [reviewer|owner|after-merge|skill-test]`
+### `relay-plan steps <plan> [reviewer|code-review|owner|after-merge|skill-test]`
 
 The acceptance task's steps, all or one who's. The first line is `tasks <N>; acceptance task <M>`: the plan's number of
 tasks, and the acceptance task's number (the tasks before it are the executor's). Then one line per step: its id, who
