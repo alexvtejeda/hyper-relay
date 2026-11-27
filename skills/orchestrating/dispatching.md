@@ -18,9 +18,12 @@ repo has one. N below, the plan's task count, is in the first line `relay-plan s
 `tasks <N>; acceptance task <M>`.
 
 **Branch is offered only for a plan that will run alone:** no other plan is in flight and none is approved to run
-beside it (`parallel.md` says what in flight means). Otherwise every plan runs in a worktree, and the question is
-`parallel.md` §1's: a line per plan, then a line per overlap its conflict check found. The forms below are for a plan
-that runs alone.
+beside it (`parallel.md` says what in flight means). A chain, a plan and the plan stacked on it, counts as one plan
+here: its plans run one after another in one checkout (`parallel.md` §3). Otherwise every plan runs in a worktree,
+and the question is `parallel.md` §1's: a line per plan, then a line per overlap its conflict check found. The forms
+below are for a plan, or a chain, that runs alone; a chain's first sentence names its plans: "Plans ready:
+`<base path>` (N tasks), then `<stacked path>` (M tasks), stacked on it, in the same checkout once the first plan's
+reviews are done."
 
 - **`execute: branch`:** "Plan ready at `<path>` (N tasks). Running it on a **branch** (this repo's default). OK, or
   worktree?"
@@ -44,8 +47,10 @@ starts; do not ask again.
 
 - **Branch:** the main checkout is on `main`; `git rev-parse -q --verify MERGE_HEAD` prints nothing; and
   `git status --porcelain --untracked-files=no` prints nothing (untracked files are fine).
-- **Worktree:** the new worktree is cut from `main`, or from its base's branch for a stacked plan (`parallel.md` §3).
-  The main checkout may be on a branch run.
+- **Worktree:** the new worktree is cut from `main`, or from its base's branch for a second plan on the same base
+  (`parallel.md` §3). The main checkout may be on a branch run.
+- **A stacked plan** is cut in its base's checkout instead, after the checks `parallel.md` §3 gives; the last
+  precondition below holds for it too.
 - **The plan is committed on `main`:** `git log -1 --format=%h main -- <plan path>` prints a commit. A plan that is
   not (it is gitignored, or it was written during a branch run and held back) goes to the executor by its absolute
   path, and §4 never runs `quartz link-branch` for it: Quartz would link the main checkout's current branch,
@@ -58,12 +63,15 @@ If a precondition fails, tell the owner which one, and stop.
 The branch is the plan's file name without its date and `.md`:
 `2026-11-17-hyper-relay-c-executing-plans.md` → `hyper-relay-c-executing-plans`.
 
+A stacked plan has no setup here: `parallel.md` §3 cuts its branch in its base's checkout and makes its run folder.
+
+
 - **Branch:** in the main checkout, `git switch -c <branch>`.
 - **Worktree:** in the main checkout, `mkdir -p .worktrees`; then `git check-ignore -q .worktrees` must succeed.
   If it fails, `.worktrees/` is not ignored yet: add a `.worktrees/` line to `.gitignore` and commit just that file
   (`git add .gitignore`, then `git commit -m "chore: ignore .worktrees/" -- .gitignore`); during a branch run, add
   the line to the file `git rev-parse --git-path info/exclude` prints instead, which is not tracked. Then cut the
-  worktree from `<base>`, which is `main`, or the base's branch for a stacked plan (`parallel.md` §3):
+  worktree from `<base>`, which is `main`, or the base's branch for a second plan on the same base (`parallel.md` §3):
   `git worktree add .worktrees/<branch> -b <branch> <base>`; in a repo with a `.wt.conf`,
   `wt new <branch> --from <base>`, which makes the same worktree and runs the repo's worktree setup.
 
@@ -103,7 +111,8 @@ The prompt gives what `hyper-relay:executing-plans` lists under "The dispatch pr
 - when the repo uses Quartz, the plan's card ids and its initiative; otherwise "Run no Quartz command and use no
   Quartz tool.";
 - the Claude-Session URL for its commit trailers, when your harness gives you one;
-- for a stacked plan: that its branch was cut from its base's branch, `<base branch>`, which has not merged yet;
+- for a stacked plan: that its branch was cut from its base's branch, `<base branch>`, which has not merged yet, and,
+  for a chain, that it runs in the base's checkout (`parallel.md` §3);
 - anything unusual: `main` moved since the plan was written, a plan read by absolute path, a step you know is stale.
 
 Then post the status note, with the executor's id (`quartz.md` §4, moment 3), tell the owner it is running, and carry
@@ -112,15 +121,16 @@ below still holds.
 
 ## 6. While a branch run is active: the hold-back rules
 
-Until the branch merges, you share the main checkout's working tree with the executor. Keep working (brainstorm,
-write specs and plans) by these rules:
+Until the branch merges (for a chain, until its last branch merges), you share the main checkout's working tree with
+the executor. Keep working (brainstorm, write specs and plans) by these rules:
 
 - **Create new files only.** Do not edit a tracked file: the edit would land in the executor's working tree, and it
   can block the later `git switch main`. An edit waits for the merge.
 - **Write specs and plans; do not commit them.** `quartz link-doc <path>` puts one on its cards meanwhile.
   `hyper-relay:brainstorming` and `hyper-relay:writing-plans` keep to this themselves.
-- **No git writes:** no `switch`, `checkout`, `stash`, `reset`, `add`, `commit` or `merge`. Run read-only git as
-  `GIT_OPTIONAL_LOCKS=0 git …`, so a `git status` never holds `index.lock` while the executor commits.
+- **No git writes:** no `switch`, `checkout`, `stash`, `reset`, `add`, `commit` or `merge`, except a chain's own
+  switches (`parallel.md` §3), made while no executor works there. Run read-only git as `GIT_OPTIONAL_LOCKS=0 git …`,
+  so a `git status` never holds `index.lock` while the executor commits.
 - **A second plan runs only in a worktree** (§1).
 - **Code you read meanwhile may be the branch's half-finished work.** Read `main`'s with `git show main:<path>`.
 
@@ -131,15 +141,17 @@ it is waiting for commands it started, such as its gates, and wakes itself when 
 hand-back check, send the executor no message and post no status note.
 
 The executor hands back a short summary; its full report is the run folder's `executor.md`, which you open only for
-what the summary does not settle. Before relaying anything, where the branch is checked out (for a stacked plan, only
-once its base has merged and any catch-up round is done: `parallel.md` §3):
+what the summary does not settle. Before relaying anything, where the branch is checked out (for a chain's stacked
+plan, at once, in the base's checkout; for a second plan on the same base, only once its base has merged and any
+catch-up round is done: `parallel.md` §3):
 
 1. **The gates, from `gates.log`:** `relay-plan gates <plan>`, then each gate's command as the summary names it,
    each quoted as one argument. Every line must be `ok`, which means that gate's latest run passed at the branch's
    tip, and its last output must match the counts the summary gives. You rerun no gate yourself: `relay-merge`
    runs them again on the merged result. A `FAIL` line, or counts that do not match, is a failure for the owner.
-2. Check the commits: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>`. Each of the executor's
-   tasks ends in a commit carrying its `Plan-Task:` trailer.
+2. Check the commits: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>`, or
+   `<base branch>..<branch>` for a stacked branch whose base has not merged. Each of the executor's tasks ends in a
+   commit carrying its `Plan-Task:` trailer.
 3. Check the tree is clean: `GIT_OPTIONAL_LOCKS=0 git status --short` prints nothing but, on a branch run, your
    held-back docs (`??` under `docs/superpowers/`).
 4. Weigh every deviation the summary lists, and every call the executor made where the plan left a choice open:

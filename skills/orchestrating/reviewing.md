@@ -93,15 +93,14 @@ When the fix loop ends (every FAIL fixed, capped, or made a card by the owner), 
 NEEDS-HUMAN, after F fix rounds, with `; step <id> capped, card <card id>` for each capped step. A note that fails is
 reported once, in one line (`quartz.md` §2).
 
-When the fix loop ends and a plan is stacked on this one, cut and dispatch it now (`parallel.md` §3).
-
 ## 3. The code review, last
 
 When every acceptance FAIL is fixed, capped, or turned into a card by the owner (NEEDS-HUMAN steps may remain), run
 one code review of the whole branch, as `hyper-relay:requesting-code-review` says: a general-purpose agent on Sonnet
 (`SKILL.md`, Fallbacks), given that skill's `code-reviewer.md` (`../requesting-code-review/code-reviewer.md` from
-this file) with the range `$(git merge-base main <branch>)..<branch>`, the plan, the spec, the run folder and the
-plan's initiative ("none" without Quartz). It writes its review to the run folder's `code-review.md`, files its
+this file) with the range `$(git merge-base main <branch>)..<branch>` (for a stacked branch whose base has not
+merged, `<base branch>..<branch>`), the plan, the spec, the run folder and the plan's initiative ("none" without
+Quartz). It writes its review to the run folder's `code-review.md`, files its
 Important and Minor findings as proposed cards (§2), and hands back a short summary. It runs once per branch, after
 acceptance and its fixes, so it reads the final diff.
 
@@ -124,11 +123,12 @@ at the same time as the code review. They are `hyper-relay:writing-skills`' RED/
 the steps yourself: `relay-plan` hands their situations to the runs, and a judge reads the rest. `<run>` is the run
 folder:
 
-1. Put the skills from `main` and from the branch in `<run>/skill-tests/red/` and `<run>/skill-tests/green/`:
-   `mkdir -p <run>/skill-tests/red <run>/skill-tests/green`, then
-   `git cat-file -e main:<skills> 2>/dev/null && git archive main <skills> | tar -x -C <run>/skill-tests/red` and
+1. Put the skills from `<red>` and from the branch in `<run>/skill-tests/red/` and `<run>/skill-tests/green/`, where
+   `<red>` is `main`, or the base's branch for a stacked branch whose base has not merged, so that RED differs from
+   GREEN only by this plan's work: `mkdir -p <run>/skill-tests/red <run>/skill-tests/green`, then
+   `git cat-file -e <red>:<skills> 2>/dev/null && git archive <red> <skills> | tar -x -C <run>/skill-tests/red` and
    `git archive <branch> <skills> | tar -x -C <run>/skill-tests/green`. `<skills>` is the folder that holds the
-   repo's skill folders (`skills` in a plugin, `.claude/skills` in a project). When `main` has no such folder, the
+   repo's skill folders (`skills` in a plugin, `.claude/skills` in a project). When `<red>` has no such folder, the
    `cat-file` check fails, nothing is copied and `red/` stays empty: RED then reads no skill at all, as it should
    for a new skill.
 2. `relay-plan scenarios <plan> <run>/skill-tests` writes each step's situation to `step-<id>.txt` there, and prints
@@ -149,7 +149,7 @@ folder:
    > You judge a test of written skills. The acceptance task of the plan `<plan>` has the `skill-test` steps `<ids>`;
    > `relay-plan step <plan> <id>` prints one, with what GREEN must do and what RED is expected to do. In
    > `<run>/skill-tests/`, `step-<id>-green.md` answers that step's situation from the branch's skills, and
-   > `step-<id>-red.md` from `main`'s. For each step, judge whether the GREEN answer does what GREEN must, and whether
+   > `step-<id>-red.md` from `<red>`'s. For each step, judge whether the GREEN answer does what GREEN must, and whether
    > the RED answer fails as RED is expected to: a RED that already does what GREEN must does not fail. Write
    > `verdicts.md` in that folder: for each step, its verdict and the lines of each answer that decide it, quoted.
    > Change no other file. Reply with one line per step, and nothing else:
@@ -168,6 +168,11 @@ its Critical and `code-review` fixes and the skill tests are done (moment 8):
 The plan steps' part counts the Q `code-review` steps and the P that passed; a plan without them leaves out
 "; plan steps P/Q PASS". The skill tests' part counts the S scenarios and the G whose GREEN passed; a plan without
 skill tests leaves out "; skill tests G/S GREEN".
+
+When the review legs are done and a plan is stacked on this one, this plan does not go to stop 4: moment 8's `next:`
+is `cut <S> in this checkout`, and you cut the stacked plan now, in this plan's checkout, and dispatch it
+(`parallel.md` §3). A second plan on the same base is cut in a worktree of its own at the same moment.
+
 
 ## 4. Stop 4, the click-through and the merge
 
@@ -200,6 +205,17 @@ Then the report, short, one line per item:
 - last, the line that says this is a good moment to clear (`SKILL.md`, The stops).
 
 Stop 4 promises a Quartz tick only where `quartz.md` §3 says one will come.
+
+**A chain** (`parallel.md` §3) has one stop 4, once its last link's review legs are done. It is one message for every
+plan in the chain, in chain order: its questions for each plan (each capped finding, the NEEDS-HUMAN and `owner`
+steps), and where to click through: the last link's `wt` stack in the shared checkout after a worktree run, the normal
+stack after a branch run; then the report, a block per plan. Its merge is one call with every branch, base first,
+`relay-merge <B> <S>`, after `(cd <checkout> && wt down)` when the last link's stack is up, or `git switch main` after
+a branch run. When `<B>` lands and `<S>` fails, `<B>` stays landed and `<S>` goes through the table's handling for its
+exit code; when `<B>` fails, nothing has landed, and `<S>` waits with it. A retry names the same branches: one that
+has landed is "already in main", and its branch is deleted with the rest. A change to `<B>` after the cut, asked for
+at this stop or needed after its merge failed, is `parallel.md` §3's fix to the base.
+
 
 When the owner answers, add a decision note for each thing they decide, and post the status note again (moment 9).
 "One more round" for a capped finding is a fix round (§2), then a short stop 4 again. Without Quartz, the cards the
@@ -256,4 +272,5 @@ Post the status note (moment 10), naming the `after merge` steps left. Then, in 
 owner: `relay-plan steps <plan> after-merge` lists them, and `relay-plan step <plan> <id>` gives each one's text as
 you reach it. When they are done, tick the acceptance task by hand if no commit ticked it; where nothing ticks a
 committed task (`quartz.md` §3), tick every task with a `Plan-Task:` commit in the same edit. Post the status note
-once more, as `done`. A plan stacked on this one, or waiting for it, goes on now (`parallel.md` §4).
+once more, as `done`. A second plan stacked on this one in a worktree of its own (`parallel.md` §3), or a plan
+waiting for it, goes on now (`parallel.md` §4).
