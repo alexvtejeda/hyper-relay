@@ -5,7 +5,7 @@
 # Usage: sh tests/relay-plan/run-tests.sh   (RELAY_PLAN_BIN overrides the script under test)
 # No case reaches a real tmux server: TMUX and TMUX_PANE are unset, TMUX_TMPDIR is a
 # folder in the temporary root, and the --pane cases put a fake tmux first on PATH.
-# Expect: "174 passed, 0 failed"
+# Expect: "186 passed, 0 failed"
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -285,6 +285,19 @@ variant() {
     commit_all variant
 }
 
+# review_repo [<sed program>]: a new repo holding the code-review fixture as $CRP, edited by the sed program when given.
+review_repo() {
+    new_repo
+    CRP=docs/superpowers/plans/2026-01-04-review-plan.md
+    mkdir -p "$MAIN/docs/superpowers/plans" "$MAIN/docs/superpowers/specs"
+    if [ $# -eq 0 ]; then
+        cp "$HERE/fixtures/code-review.md" "$MAIN/$CRP"
+    else
+        sed "$1" "$HERE/fixtures/code-review.md" > "$MAIN/$CRP"
+    fi
+    commit_all review
+}
+
 echo '--- usage'
 new_repo
 rp "$MAIN"
@@ -547,7 +560,7 @@ fails_alone "trailers: two" "FAIL trailers: Task 1 carries 2 Plan-Task trailers"
 
 fixture_repo
 variant 's/(`owner`;/(`the owner`;/'
-fails_alone "acceptance" 'FAIL acceptance: Step 4: "the owner" is not reviewer, owner, after merge or skill-test'
+fails_alone "acceptance" 'FAIL acceptance: Step 4: "the owner" is not reviewer, code-review, owner, after merge or skill-test'
 fixture_repo
 variant '/^\*\*Situation:\*\*$/,/^GREEN must: commit/ s/^```text$/```/'
 fails_alone "skill-tests: a fence without text" 'FAIL skill-tests: Step 3: no ```text fence after Situation:'
@@ -568,6 +581,45 @@ fails_alone "contract" "FAIL contract: $SIB differs, first at: Both plans share 
 fixture_repo
 fails_alone "builds-on" "FAIL builds-on: the header's **Builds on:** does not name $OBASE" \
     --spec "$S" --sibling "$SIB" --base "$OBASE"
+
+echo '--- code-review steps'
+review_repo
+rp "$MAIN" steps "$CRP"
+assert_eq "code-review: listed with the other steps, as written" \
+  "$(printf 'tasks 2; acceptance task 2\n1\tcode-review\tOnly the planned files.\n2\treviewer\tThe banner shows on the stack.\n3\tcode-review\tThe copy reads as the spec says.\n4\towner\tThe click-through.\n5\tafter merge\tThe release.')" "$OUT"
+rp "$MAIN" steps "$CRP" code-review
+assert_eq "code-review: steps code-review lists them" \
+  "$(printf 'tasks 2; acceptance task 2\n1\tcode-review\tOnly the planned files.\n3\tcode-review\tThe copy reads as the spec says.')" "$OUT"
+assert_eq "code-review: steps code-review: exit 0" 0 "$RC"
+rp "$MAIN" steps "$CRP" reviewer
+assert_eq "code-review: never a reviewer step" \
+  "$(printf 'tasks 2; acceptance task 2\n2\treviewer\tThe banner shows on the stack.')" "$OUT"
+CRSTEP1='- [ ] **Step 1 (`code-review`): Only the planned files.**
+
+| Run | PASS |
+|---|---|
+| `git diff --name-only main...HEAD` | exactly `web/page.html` |'
+rp "$MAIN" step "$CRP" 1
+assert_eq "code-review: step prints one" "$CRSTEP1" "$OUT"
+rp "$MAIN" check "$CRP"
+assert_eq "code-review: check accepts the kind" "ok committed
+ok trailers
+ok acceptance
+ok skill-tests
+ok placeholders" "$OUT"
+assert_eq "code-review: check: exit 0" 0 "$RC"
+review_repo 's/(`reviewer`)/(`code-review`)/'
+rp "$MAIN" steps "$CRP" reviewer
+assert_eq "no reviewer step: the summary only" "tasks 2; acceptance task 2" "$OUT"
+assert_eq "no reviewer step: exit 1" 1 "$RC"
+review_repo 's/(`code-review`, a reading)/(`code review`, a reading)/'
+rp "$MAIN" check "$CRP"
+assert_eq "code review with a space: check: exit 1" 1 "$RC"
+assert_eq "code review with a space: the line" \
+  'FAIL acceptance: Step 3: "code review" is not reviewer, code-review, owner, after merge or skill-test' \
+  "$(printf '%s\n' "$OUT" | grep '^FAIL ')"
+rp "$MAIN" steps "$CRP" 'code review'
+assert_eq "code review with a space: an unknown who: exit 2" 2 "$RC"
 
 echo '--- overlap'
 fixture_repo

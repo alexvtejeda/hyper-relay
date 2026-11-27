@@ -99,8 +99,9 @@ A plan carries no `quartz link-branch` step and no `quartz review` step: the orc
 ## Spec coverage and the acceptance task
 
 - After the header, a **Spec coverage** table maps each `## ` section of the spec to the task numbers that implement it. With sibling plans, each plan has a **Contract** section, identical in each.
-- The plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the orchestrator: live sessions, reinstalls, edits outside the repo), or **`skill-test`** (below), with its command or action and the result that counts as PASS.
-- No `reviewer` step reruns the full gates. They run once on the branch, as the executor's last task, which saves their output to the run folder's `gates.log`; the orchestrator's hand-back check reads that log, and `relay-merge` runs them again on the merged result. A `reviewer` step runs what only an independent check can: a live run in a scratch repo, a check of which files the branch changed, a reading of the new text against the spec.
+- The plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by the acceptance reviewer: a check that needs something running), **`code-review`** (before the merge, by the code reviewer, within the branch's one code review: a check that only reads), **`owner`** (at the click-through), **`after merge`** (the owner and the orchestrator: live sessions, reinstalls, edits outside the repo), or **`skill-test`** (below), with its command or action and the result that counts as PASS.
+- No `reviewer` step reruns the full gates. They run once on the branch, as the executor's last task, which saves their output to the run folder's `gates.log`; the orchestrator's hand-back check reads that log, and `relay-merge` runs them again on the merged result. A `reviewer` step runs only what needs something running: a stack, a browser, a scratch repo, a live session.
+- A `code-review` step only reads what the branch already holds: its diff and files, the plan and the spec, the run folder's `executor.md` and `gates.log`, with read-only commands at most (`git diff`, `git show`, `grep`, `wc`, `relay-plan gates`). It starts nothing and reruns no gate. Which files the branch changed, that existing tests keep their assertions, that copy comes from the tools, that the new text says what the spec says, that a test failed before its fix and passed after (from `executor.md` and `gates.log`): each is a `code-review` check, never a `reviewer` one. A plan whose checks all only read needs no acceptance reviewer.
 
 ## Skill tests
 
@@ -108,7 +109,7 @@ A plan that creates or changes a file in a skill's folder (its `SKILL.md`, or a 
 
 - **`Situation:`** everything a fresh agent needs, in full, since it sees only the skills and this text: who it is (the orchestrator, an executor, a planner), the repo's state, what has just happened, what each command or tool it would use would show, and what it is asked to answer. Write it whole, in a ```` ```text ```` fence of its own under the `Situation:` line. `relay-plan scenarios` copies the fence alone into a file for the test run, so a placeholder for text written elsewhere in the plan reaches the run unfilled: repeat shared context in each situation instead.
 - **`GREEN must:`** what an agent reading the branch's skills must do, concretely enough to judge from its answer (the commands it would run and its next message).
-- **`RED is expected to:`** what an agent reading `main`'s skills (or none, for a new skill) is expected to do instead.
+- **`RED is expected to:`** what an agent reading `main`'s skills (for a stacked plan, the skills as its base leaves them; none, for a new skill) is expected to do instead.
 
 The orchestrator runs each scenario on both, after acceptance and beside the code review, and a judge reads both answers against the step's `GREEN must:` and `RED is expected to:` (`hyper-relay:orchestrating`'s `reviewing.md`).
 

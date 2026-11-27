@@ -25,6 +25,20 @@ Agent tool (general-purpose, model: sonnet):
 
     {SPEC}
 
+    ## The Plan's Code-Review Steps
+
+    {PLAN_STEPS}
+
+    Unless the line above says "none", it lists checks from the plan's
+    acceptance task that are yours to run, within this review and nowhere
+    else. Each only reads the branch, the plan, the spec or the run folder's
+    files. Run each listed step exactly as the plan writes it (the command
+    beside it prints the step), and give it a verdict, PASS or FAIL, with the
+    command you ran or the reading you made and the lines that decide it,
+    quoted, under Plan Steps in your review. Any FAIL makes your verdict
+    "Ready to merge: No". A FAIL is never a card, and what a listed step
+    checks is settled by its verdict: do not report it again as an issue.
+
     ## Git Range to Review
 
     **Base:** {BASE_SHA}
@@ -51,8 +65,10 @@ Agent tool (general-purpose, model: sonnet):
 
     Then reply with only a short summary: Ready to merge (Yes / No / With fixes); the
     number of Critical, Important and Minor issues; each Critical issue in one line,
-    with its file and line; the cards you filed (their ids, or that they are in
-    `cards.md`); and the path of `code-review.md`.
+    with its file and line; when steps were listed, `Plan steps: P/Q PASS` (P of the
+    Q listed steps passed) and each FAIL in one line, by its step number; the cards
+    you filed (their ids, or that they are in `cards.md`); and the path of
+    `code-review.md`.
 
     When the run folder is "none" (a review outside the relay), file no cards, write
     no file, and reply with the whole review instead.
@@ -111,6 +127,11 @@ Agent tool (general-purpose, model: sonnet):
 
     ## Output Format
 
+    ### Plan Steps
+    [Only when steps were listed. For each: Step <id>: PASS or FAIL, the
+    command you ran or the reading you made, and the lines that decide it,
+    quoted.]
+
     ### Strengths
     [What's well done? Be specific.]
 
@@ -161,14 +182,15 @@ Agent tool (general-purpose, model: sonnet):
 - `{DESCRIPTION}` — brief summary of what was built
 - `{PLAN_OR_REQUIREMENTS}` — the plan's path, or what it should do
 - `{SPEC}` — the spec's path (for ad hoc work without one: "none")
-- `{BASE_SHA}` — starting commit: for a branch, `git merge-base main <branch>`
+- `{PLAN_STEPS}` — the plan's `code-review` steps: each step's id with the command that prints it (`relay-plan step <plan> <id>`), or "none" (ad hoc work, and a plan without them)
+- `{BASE_SHA}` — starting commit: for a branch, `git merge-base main <branch>`; for a branch stacked on another plan's branch that has not merged, that branch's tip
 - `{HEAD_SHA}` — ending commit: the branch's head
 - `{RUN_DIR}` — the plan's run folder, which `hyper-relay:orchestrating` names (for ad hoc work: "none")
 - `{INITIATIVE}` — the plan's initiative, for the cards the reviewer files ("none" when the repo does not use Quartz)
 
-**Reviewer returns:** a short summary: the verdict, the counts, each Critical issue, the cards it filed and the path
-of `code-review.md`, which holds the full review (Strengths, Issues (Critical / Important / Minor), Recommendations,
-Assessment). With no run folder, the whole review.
+**Reviewer returns:** a short summary: the verdict, the counts, each Critical issue, the plan steps' count and each
+FAIL, the cards it filed and the path of `code-review.md`, which holds the full review (Plan Steps, Strengths, Issues
+(Critical / Important / Minor), Recommendations, Assessment). With no run folder, the whole review.
 
 ## Example Output
 

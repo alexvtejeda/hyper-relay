@@ -38,7 +38,7 @@ cleared conversation is a new session:
 | 1. Design | The approaches, then the design played back part by part (`brainstorming`) | the spec |
 | 2. Spec | The written spec (`brainstorming`); skipped when the owner approved a short design in brainstorming's first message, which covers stops 1 and 2 | the planner leg: approval is the go-ahead, no second ask |
 | 3. Plan ready | Its questions first: the decisions the owner must make, the assumptions the planner made where the spec was silent, the plan-review offer, the handoff question. Then the hand-back check's result and the planner's deviations (`planning.md` §3) | execution, a plan review, plan changes, or "research it" |
-| 4. Ready to merge | Its questions first: each finding that reached the fix-round cap (merge with its card open, hold the branch, or one more round), the steps that are the owner's, where to click through. Then gate, acceptance and skill-test results, fixes made, Critical findings fixed or dropped, and the number of proposed cards filed (`reviewing.md` §4) | the click-through and the merge |
+| 4. Ready to merge | Its questions first: each finding that reached the fix-round cap (merge with its card open, hold the branch, or one more round), the steps that are the owner's, where to click through. Then gate, acceptance, `code-review` step and skill-test results, fixes made, Critical findings and `code-review` FAILs fixed or dropped, and the number of proposed cards filed (`reviewing.md` §4) | the click-through and the merge |
 
 A stop that asks anything opens with its questions, numbered, before any report: every question, and every decision
 the owner must make. The report follows, short: one line per item, and nothing the board shows. No question comes
@@ -75,7 +75,7 @@ Without a status line that has `next:` for a plan, the files and git decide:
 | A spec that no plan's `**Spec:**` line names | **Offer** the planner leg: name the spec and ask whether to plan it; the owner's yes is the approval. When the owner asked to pick up that spec, the request is the yes. Never brainstorm it again. |
 | A plan with no branch of its name, and no `Plan-Task:` commits for it on `main` | Stop 3 (the owner has not approved it yet) or the handoff, by what the owner says |
 | A plan's branch with some of its tasks committed, and no executor report in this session | **Ask the owner** whether its executor is still running elsewhere. Two executors on one branch collide. |
-| A stacked plan's branch (its plan's header has `**Builds on:**`) with all its executor tasks committed, whose base has not merged | It waits for its base (`parallel.md` §3): no review leg until the base merges |
+| A stacked plan's branch (its plan's header has `**Builds on:**`) with all its executor tasks committed, whose base has not merged | By its review status (below), with `<base branch>..<branch>` for `main..<branch>`; a second plan on the same base, in a worktree of its own, waits for its base to merge (`parallel.md` §3) |
 | A plan's branch with all its executor tasks committed | By its review status (below) |
 | The branch merged, with an `after merge` step of the plan's acceptance task left (that task is not ticked) | `reviewing.md` §5 |
 
@@ -86,12 +86,13 @@ written before `next:` existed, counted only when it names this plan's path, or 
 |---|---|
 | None, and no fix commits on the branch | `dispatching.md` §7 (verify), then `reviewing.md` §1 |
 | "acceptance done" | `reviewing.md` §3 |
-| "code review done" | Stop 4 (`reviewing.md` §4) |
+| "code review done" | Stop 4 (`reviewing.md` §4). For a chain's base (another plan's `**Builds on:**` names it): the cut while the stacked plan has no branch, and once it has one, the chain's one stop 4 after the stacked plan's reviews (`parallel.md` §3) |
 | None, but fix commits (no Quartz and no `status` file) | **Ask the owner** which review legs ran, naming the fix commits. Rerun nothing on your own. |
 
 A fix commit is a commit on `main..<branch>` with no `Plan-Task:` trailer, after the branch's last `Plan-Task:`
 commit: `git log --format='%h %s%n%(trailers:key=Plan-Task)' main..<branch>` lists the branch's commits, newest
-first, and the fix commits are those above the newest one with a trailer.
+first, and the fix commits are those above the newest one with a trailer. For a stacked branch whose base has not
+merged, read `<base branch>..<branch>` for `main..<branch>`, here and below.
 
 The branch name comes from the plan's file name (`dispatching.md` §3). To read the state:
 `git grep -l -F '<spec file name>' -- docs/superpowers/plans` finds the spec's plans; `git branch --list <branch>`

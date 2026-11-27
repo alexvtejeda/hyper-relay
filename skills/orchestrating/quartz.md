@@ -180,7 +180,7 @@ Post it at each of these moments, where the leg file says:
 | 5 | The acceptance reviewer is dispatched, and each fix round (`reviewing.md` §1 and §2) | `acceptance`; `fix round <k> of <cap>: <step ids or findings>` | `the fix loop`; `verify the fix` |
 | 6 | The fix loop ends (`reviewing.md` §2) | `acceptance done, N/M PASS, K NEEDS-HUMAN, F fix rounds` | `the code review and the skill tests` |
 | 7 | The code review and the skill tests are dispatched (`reviewing.md` §3) | `code review and skill tests` | `stop 4` |
-| 8 | They are done (`reviewing.md` §3) | `code review done, C Critical (x fixed, y dropped), I Important, m Minor; skill tests G/S GREEN` | `stop 4` |
+| 8 | They are done (`reviewing.md` §3) | `code review done, C Critical (x fixed, y dropped), I Important, m Minor; plan steps P/Q PASS; skill tests G/S GREEN` | `stop 4`; for a chain's base, `cut <S> in this checkout`, and once `<S>` is cut, `the chain's stop 4, after <S>'s reviews` (`parallel.md` §3) |
 | 9 | Stop 4 is sent, and the owner answers it (`reviewing.md` §4) | `at stop 4`; then `merge approved`, `held` or `one more round` | `the owner's answer`; then `the merge`, `the owner` or `verify the fix` |
 | 10 | The branch has merged, and the acceptance task is ticked (`reviewing.md` §5) | `merged in <short sha>`; then `done` | `after merge steps <ids>`; then `nothing` |
 

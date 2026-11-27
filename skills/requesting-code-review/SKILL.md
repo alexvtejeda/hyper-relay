@@ -24,6 +24,7 @@ Dispatch a code reviewer subagent to catch issues before they merge. The reviewe
 **1. Get git SHAs:**
 ```bash
 BASE_SHA=$(git merge-base main <branch>)
+# a branch stacked on another plan's branch that has not merged: BASE_SHA=$(git rev-parse <base branch>)
 HEAD_SHA=$(git rev-parse <branch>)
 ```
 
@@ -35,6 +36,7 @@ A general-purpose agent, with `model: sonnet` in Claude Code (in OpenCode, the `
 - `{DESCRIPTION}` - Brief summary of what you built
 - `{PLAN_OR_REQUIREMENTS}` - The plan's path, or what it should do
 - `{SPEC}` - The spec's path
+- `{PLAN_STEPS}` - The plan's `code-review` steps, each id with the command that prints it (`relay-plan step <plan> <id>`), or "none" (ad hoc, or a plan without them)
 - `{BASE_SHA}` - Starting commit
 - `{HEAD_SHA}` - Ending commit
 - `{RUN_DIR}` - The plan's run folder, where the review goes ("none" outside the relay)
@@ -44,6 +46,7 @@ A general-purpose agent, with `model: sonnet` in Claude Code (in OpenCode, the `
 
 In the relay, the reviewer writes its full review to the run folder's `code-review.md` and hands back a short summary.
 - **Critical:** fixed before the merge. In the relay, the executor fixes it, after the orchestrator checks it against the code with `hyper-relay:receiving-code-review`.
+- **A plan step's FAIL:** fixed before the merge, as a Critical is, once the orchestrator has checked it against the code. Never a card.
 - **Important and Minor:** in the relay, the reviewer files each as a proposed card, labelled `proposed`, which the owner prunes on the board; outside it, noted in the review. They do not block the merge.
 - Push back if the reviewer is wrong (with reasoning).
 
@@ -59,6 +62,7 @@ HEAD_SHA=$(git rev-parse index-repair)
   DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
   PLAN_OR_REQUIREMENTS: docs/superpowers/plans/2026-11-18-index-repair.md
   SPEC: docs/superpowers/specs/2026-11-18-index-repair-design.md
+  PLAN_STEPS: none
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
   RUN_DIR: <main checkout>/.hyper-relay/runs/index-repair/

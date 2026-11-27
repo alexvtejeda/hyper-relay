@@ -6,7 +6,7 @@
 #   relay-plan run-dir <plan>                      the plan's run folder, made
 #   relay-plan check <plan> [--spec <spec>] [--sibling <plan>]... [--base <plan>]
 #   relay-plan overlap <plan> <other>...           paths shared with other plans
-#   relay-plan steps <plan> [reviewer|owner|after-merge|skill-test]
+#   relay-plan steps <plan> [reviewer|code-review|owner|after-merge|skill-test]
 #   relay-plan step <plan> <id>                    one acceptance step's text
 #   relay-plan scenarios <plan> <dir>              the skill-test situations, as files
 #   relay-plan gate [--pane] <plan> <command>      run a gate, log its block (--pane: shown in tmux)
@@ -319,7 +319,7 @@ cmd_steps() {
     who=
     if [ $# -eq 2 ]; then
         case $2 in
-            reviewer | owner | skill-test) who=$2 ;;
+            reviewer | code-review | owner | skill-test) who=$2 ;;
             after-merge) who='after merge' ;;
             *) usage_error "unknown who: $2" ;;
         esac
@@ -490,8 +490,8 @@ check_acceptance() {
     fi
     awk -F'\t' '
         $2 == "?" { print "Step " $1 ": no who"; next }
-        $2 != "reviewer" && $2 != "owner" && $2 != "after merge" && $2 != "skill-test" {
-            print "Step " $1 ": \"" $2 "\" is not reviewer, owner, after merge or skill-test" }' "$TMP/acc"
+        $2 != "reviewer" && $2 != "code-review" && $2 != "owner" && $2 != "after merge" && $2 != "skill-test" {
+            print "Step " $1 ": \"" $2 "\" is not reviewer, code-review, owner, after merge or skill-test" }' "$TMP/acc"
 }
 
 check_skill_tests() {
