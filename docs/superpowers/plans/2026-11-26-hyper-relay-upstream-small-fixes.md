@@ -639,7 +639,7 @@ git commit -m "fix: find-polluter.sh matches ./ paths and top-level tests, and c
 - Modify: `skills/receiving-code-review/SKILL.md:206-213`
 - Modify: `skills/dispatching-parallel-agents/SKILL.md:174-182`
 
-- [ ] **Step 1: systematic-debugging, upstream's lines (7.0.0, 6.0.0).** In `skills/systematic-debugging/SKILL.md`,
+- [x] **Step 1: systematic-debugging, upstream's lines (7.0.0, 6.0.0).** In `skills/systematic-debugging/SKILL.md`,
   replace (three leading spaces kept)
 
 ```bash
@@ -676,7 +676,7 @@ with
 - "Ultra-think this" - Question fundamentals, not just symptoms
 ```
 
-- [ ] **Step 2: The four recap cuts.** Delete from the blank line before the named heading to the end of the file, so
+- [x] **Step 2: The four recap cuts.** Delete from the blank line before the named heading to the end of the file, so
   that the file ends with the line given and its newline; nothing else in the file changes.
 
 | File | Delete | The file then ends with |
@@ -686,7 +686,7 @@ with
 | `skills/receiving-code-review/SKILL.md` | `## The Bottom Line` (lines 206–213) | ``When replying to inline review comments on GitHub, reply in the comment thread (`gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`), not as a top-level PR comment.`` |
 | `skills/dispatching-parallel-agents/SKILL.md` | `## Real-World Impact` (lines 174–182) | `4. **Spot check** - Agents can make systematic errors` |
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 | Run | Expected |
 |---|---|
@@ -698,7 +698,7 @@ with
 
 (In a command inside a table cell, `\|` is a plain `|`.)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add skills/systematic-debugging/SKILL.md skills/verification-before-completion/SKILL.md skills/receiving-code-review/SKILL.md skills/dispatching-parallel-agents/SKILL.md
