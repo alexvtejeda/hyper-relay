@@ -340,7 +340,7 @@ git commit -m "feat: relay-plan knows the code-review step kind" -m "Plan-Task: 
 - Modify: `skills/writing-plans/SKILL.md:102-103,111`
 - Modify: `skills/writing-plans/plan-document-reviewer-prompt.md:30`
 
-- [ ] **Step 1: The kinds, in `skills/writing-plans/SKILL.md`.** Replace
+- [x] **Step 1: The kinds, in `skills/writing-plans/SKILL.md`.** Replace
 
 ```markdown
 - The plan ends with its acceptance task. Each of its steps names who runs it: **`reviewer`** (before the merge, by the acceptance reviewer), **`owner`** (at the click-through), or **`after merge`** (the owner and the orchestrator: live sessions, reinstalls, edits outside the repo), or **`skill-test`** (below), with its command or action and the result that counts as PASS.
@@ -367,7 +367,7 @@ with
 - **`RED is expected to:`** what an agent reading `main`'s skills (for a stacked plan, the skills as its base leaves them; none, for a new skill) is expected to do instead.
 ```
 
-- [ ] **Step 2: The plan reviewer checks the sort.** In `skills/writing-plans/plan-document-reviewer-prompt.md`,
+- [x] **Step 2: The plan reviewer checks the sort.** In `skills/writing-plans/plan-document-reviewer-prompt.md`,
   replace
 
 ```markdown
@@ -380,7 +380,7 @@ with
     | The acceptance task | It is the last task. Each of its steps says who runs it (`reviewer`, `code-review`, `owner`, `after merge` or `skill-test`), with its command or action and the result that counts as PASS; a `skill-test` step gives a situation, what GREEN must do and what RED is expected to do. Each check sits in its kind: a `reviewer` step needs something running (a stack, a browser, a scratch repo, a live session), and a `code-review` step only reads the branch (its diff and files, the plan, the spec, the run folder's `executor.md` and `gates.log`); a reading check under `reviewer`, or a live one under `code-review`, is a finding. |
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 | Run | Expected |
 |---|---|
@@ -394,7 +394,7 @@ with
 
 (In a command inside a table cell, `\|` is a plain `|`.)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add skills/writing-plans/SKILL.md skills/writing-plans/plan-document-reviewer-prompt.md
